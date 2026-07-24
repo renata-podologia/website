@@ -3,14 +3,17 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
-    <title>Levita Podologia – Dra. Renata Kemp</title>
-    <meta name="description" content="Clínica de podologia com atendimento humanizado em Guarulhos. Especialistas em pé diabético, unha encravada e mais. Agende sua visita domiciliar com a Dra. Renata Kemp." />
+    <title>Levita Podologia – Podóloga Renata Kemp</title>
+    <meta name="description" content="Clínica de podologia com atendimento humanizado em Guarulhos. Especialistas em pé diabético, unha encravada e mais. Agende sua visita com a Podóloga Renata Kemp." />
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
         /* ============================================
@@ -83,6 +86,9 @@
             --cinza-claro: #F7F8FA;
             --texto: #1e2b2f;
             --sombra: 0 10px 30px rgba(0, 0, 0, 0.06);
+            --verde: #28a745;
+            --vermelho: #dc3545;
+            --amarelo: #ffc107;
         }
 
         /* ============================================
@@ -124,6 +130,11 @@
             transform: translateY(-3px);
             box-shadow: 0 12px 28px rgba(47, 93, 98, 0.35);
         }
+        .btn-primario:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
         .btn-secundario {
             background: transparent;
             color: var(--petroleo);
@@ -133,6 +144,33 @@
             background: var(--petroleo);
             color: #fff;
             transform: translateY(-3px);
+        }
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.8rem;
+            min-width: auto;
+            border-radius: 30px;
+        }
+        .btn-success {
+            background: var(--verde);
+            color: #fff;
+        }
+        .btn-success:hover {
+            background: #1e7e34;
+        }
+        .btn-danger {
+            background: var(--vermelho);
+            color: #fff;
+        }
+        .btn-danger:hover {
+            background: #bd2130;
+        }
+        .btn-warning {
+            background: var(--amarelo);
+            color: #212529;
+        }
+        .btn-warning:hover {
+            background: #e0a800;
         }
 
         /* ============================================
@@ -217,6 +255,36 @@
         .menu-mobile:active {
             transform: scale(0.9);
         }
+        .nav-agendar {
+            background: var(--dourado);
+            color: #fff !important;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .nav-agendar:hover {
+            background: #b8921f;
+            transform: translateY(-2px);
+        }
+        .nav-agendar::after {
+            display: none !important;
+        }
+        .nav-admin {
+            background: var(--petroleo);
+            color: #fff !important;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .nav-admin:hover {
+            background: var(--petroleo-escuro);
+            transform: translateY(-2px);
+        }
+        .nav-admin::after {
+            display: none !important;
+        }
 
         /* ============================================
            HERO
@@ -266,7 +334,7 @@
         }
 
         /* ============================================
-           BANNER DOMICÍLIO
+           BANNER
            ============================================ */
         .banner-home {
             background: var(--petroleo);
@@ -293,12 +361,714 @@
             color: var(--dourado);
             font-weight: 700;
         }
-        .banner-home .btn-whatsapp {
-            margin-top: 20px;
+
+        /* ============================================
+           SISTEMA DE AGENDAMENTO
+           ============================================ */
+        .agendamento-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--branco);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: var(--sombra);
+            border: 1px solid rgba(168, 195, 160, 0.1);
+        }
+
+        .agendamento-wrapper .passo-indicador {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+
+        .agendamento-wrapper .passo-indicador .passo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            border-radius: 30px;
+            background: var(--cinza-claro);
+            color: #8a9ea3;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .agendamento-wrapper .passo-indicador .passo.ativo {
+            background: var(--petroleo);
+            color: #fff;
+        }
+
+        .agendamento-wrapper .passo-indicador .passo .numero {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            font-weight: 700;
+            font-size: 0.75rem;
+        }
+
+        .agendamento-wrapper .passo-indicador .passo.ativo .numero {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .passo-conteudo {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .passo-conteudo.ativo {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: var(--petroleo);
+            margin-bottom: 6px;
+            font-size: 0.95rem;
+        }
+
+        .form-group label .obrigatorio {
+            color: #dc3545;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e8edee;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.3s ease;
+            background: #fafbfb;
+            color: #1e2b2f;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--petroleo);
+            background: #fff;
+        }
+
+        .form-group input:disabled {
+            background: #e8edee;
+            cursor: not-allowed;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 16px;
+            justify-content: space-between;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        .form-actions .btn {
+            min-width: 120px;
+        }
+
+        .btn-voltar {
+            background: var(--cinza-claro);
+            color: var(--texto);
+        }
+
+        .btn-voltar:hover {
+            background: #e8edee;
+        }
+
+        /* TIPO DE ATENDIMENTO */
+        .tipo-atendimento-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 8px;
+        }
+
+        .tipo-btn {
+            padding: 20px;
+            border: 2px solid #e8edee;
+            border-radius: 16px;
+            background: #fafbfb;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-align: center;
+            color: var(--texto);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tipo-btn i {
+            font-size: 2rem;
+            color: var(--petroleo);
+            opacity: 0.6;
+        }
+
+        .tipo-btn:hover:not(.selecionado) {
+            border-color: var(--petroleo);
+            background: var(--bege);
+        }
+
+        .tipo-btn.selecionado {
+            border-color: var(--dourado);
+            background: var(--dourado);
+            color: #fff;
+        }
+
+        .tipo-btn.selecionado i {
+            color: #fff;
+            opacity: 1;
+        }
+
+        /* Busca CEP */
+        .cep-busca-group {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .cep-busca-group .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .cep-busca-group .btn {
+            height: 48px;
+            min-width: 100px;
+            flex-shrink: 0;
+        }
+
+        .endereco-completo {
+            margin-top: 12px;
+            padding: 16px;
+            background: var(--bege);
+            border-radius: 12px;
+            border-left: 4px solid var(--dourado);
+            display: none;
+        }
+
+        .endereco-completo.visivel {
+            display: block;
+        }
+
+        .endereco-completo p {
+            margin: 4px 0;
+            font-size: 0.95rem;
+        }
+
+        .endereco-completo .label {
+            font-weight: 600;
+            color: var(--petroleo);
+        }
+
+        /* Horários disponíveis */
+        .horarios-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .horario-btn {
+            padding: 10px 12px;
+            border: 2px solid #e8edee;
+            border-radius: 10px;
+            background: #fafbfb;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-align: center;
+            color: var(--texto);
+        }
+
+        .horario-btn:hover:not(.indisponivel) {
+            border-color: var(--petroleo);
+            background: var(--bege);
+        }
+
+        .horario-btn.selecionado {
+            border-color: var(--dourado);
+            background: var(--dourado);
+            color: #fff;
+        }
+
+        .horario-btn.indisponivel {
+            opacity: 0.4;
+            cursor: not-allowed;
+            background: #f0f0f0;
+        }
+
+        /* Serviços em grid */
+        .servicos-escolha {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .servico-btn {
+            padding: 14px 16px;
+            border: 2px solid #e8edee;
+            border-radius: 12px;
+            background: #fafbfb;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-align: center;
+            color: var(--texto);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .servico-btn i {
+            font-size: 1.4rem;
+            color: var(--petroleo);
+            opacity: 0.6;
+        }
+
+        .servico-btn:hover:not(.selecionado) {
+            border-color: var(--petroleo);
+            background: var(--bege);
+        }
+
+        .servico-btn.selecionado {
+            border-color: var(--dourado);
+            background: var(--dourado);
+            color: #fff;
+        }
+
+        .servico-btn.selecionado i {
+            color: #fff;
+            opacity: 1;
+        }
+
+        /* Resumo do agendamento */
+        .resumo-agendamento {
+            background: var(--bege);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border-left: 4px solid var(--dourado);
+        }
+
+        .resumo-agendamento .linha {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .resumo-agendamento .linha:last-child {
+            border-bottom: none;
+        }
+
+        .resumo-agendamento .rotulo {
+            font-weight: 500;
+            color: #4a5f64;
+        }
+
+        .resumo-agendamento .valor {
+            font-weight: 600;
+            color: var(--petroleo);
+            text-align: right;
+        }
+
+        /* Mensagem de confirmação */
+        .confirmacao-box {
+            text-align: center;
+            padding: 30px 20px;
+        }
+
+        .confirmacao-box .icone {
+            font-size: 4rem;
+            margin-bottom: 16px;
+        }
+
+        .confirmacao-box .icone.sucesso {
+            color: var(--verde);
+        }
+
+        .confirmacao-box h3 {
+            font-family: 'Poppins', sans-serif;
+            color: var(--petroleo);
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+
+        .confirmacao-box p {
+            color: #4a5f64;
+            max-width: 400px;
+            margin: 0 auto 20px;
+        }
+
+        .confirmacao-box .detalhes {
+            background: var(--cinza-claro);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: left;
+            max-width: 500px;
+            margin: 0 auto 20px;
+        }
+
+        .confirmacao-box .detalhes div {
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .confirmacao-box .detalhes div:last-child {
+            border-bottom: none;
+        }
+
+        .confirmacao-box .id-agendamento {
+            background: var(--petroleo);
+            color: #fff;
+            padding: 4px 16px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            display: inline-block;
+            margin-bottom: 12px;
+            font-weight: 600;
         }
 
         /* ============================================
-           SOBRE
+           PAINEL ADMINISTRATIVO
+           ============================================ */
+        .admin-panel {
+            background: var(--branco);
+            border-radius: 24px;
+            padding: 30px;
+            margin-top: 40px;
+            box-shadow: var(--sombra);
+            border: 1px solid rgba(168, 195, 160, 0.1);
+        }
+
+        .admin-panel .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .admin-panel .admin-header h3 {
+            font-family: 'Poppins', sans-serif;
+            color: var(--petroleo);
+            font-size: 1.4rem;
+        }
+
+        .admin-panel .admin-header .badge {
+            background: var(--dourado);
+            color: #fff;
+            padding: 4px 16px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .admin-tabela {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .admin-tabela th {
+            background: var(--petroleo);
+            color: #fff;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .admin-tabela td {
+            padding: 10px 16px;
+            border-bottom: 1px solid #e8edee;
+            vertical-align: middle;
+        }
+
+        .admin-tabela tr:hover {
+            background: var(--bege);
+        }
+
+        .admin-tabela .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-pendente {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-confirmado {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-cancelado {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-atendido {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .admin-tabela .actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .admin-tabela .actions .btn {
+            padding: 4px 10px;
+            font-size: 0.7rem;
+            min-width: auto;
+        }
+
+        .admin-tabela .tipo-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .tipo-domicilio {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .tipo-presencial {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .admin-filtros {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .admin-filtros select,
+        .admin-filtros input {
+            padding: 8px 14px;
+            border: 2px solid #e8edee;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-family: 'Inter', sans-serif;
+            background: #fafbfb;
+        }
+
+        .admin-filtros select:focus,
+        .admin-filtros input:focus {
+            outline: none;
+            border-color: var(--petroleo);
+        }
+
+        .admin-resumo {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .admin-resumo .card {
+            background: var(--cinza-claro);
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .admin-resumo .card .numero {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--petroleo);
+        }
+
+        .admin-resumo .card .label {
+            font-size: 0.85rem;
+            color: #4a5f64;
+        }
+
+        .admin-tabela-container {
+            max-height: 500px;
+            overflow-y: auto;
+            border-radius: 12px;
+            border: 1px solid #e8edee;
+        }
+
+        /* Loading */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .loading-overlay.ativo {
+            display: flex;
+        }
+        .loading-overlay .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e8edee;
+            border-top: 4px solid var(--petroleo);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loading-overlay p {
+            color: var(--petroleo);
+            font-weight: 500;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 90px;
+            right: 24px;
+            background: var(--petroleo);
+            color: #fff;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            z-index: 2000;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.4s ease;
+            max-width: 400px;
+            pointer-events: none;
+        }
+        .toast.mostrar {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .toast.erro {
+            background: var(--vermelho);
+        }
+        .toast.sucesso {
+            background: var(--verde);
+        }
+        .toast i {
+            margin-right: 10px;
+        }
+
+        /* Back to Top */
+        .back-top {
+            position: fixed;
+            bottom: 100px;
+            right: 28px;
+            z-index: 999;
+            background: var(--petroleo);
+            color: #fff;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .back-top.visivel {
+            opacity: 1;
+            visibility: visible;
+        }
+        .back-top:hover {
+            background: var(--petroleo-escuro);
+            transform: translateY(-4px);
+        }
+
+        /* WhatsApp Float */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            z-index: 999;
+            background: #25D366;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 2.2rem;
+            box-shadow: 0 6px 25px rgba(37, 211, 102, 0.4);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .whatsapp-float:hover {
+            transform: scale(1.08);
+        }
+
+        /* ============================================
+           SOBRE, SERVIÇOS, DIFERENCIAIS, GALERIA, VÍDEOS, DEPOIMENTOS, FAQ, CONTATO
            ============================================ */
         .sobre-grid {
             display: grid;
@@ -335,9 +1105,6 @@
             height: auto;
         }
 
-        /* ============================================
-           SERVIÇOS
-           ============================================ */
         .servicos-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -378,9 +1145,6 @@
             color: #4a5f64;
         }
 
-        /* ============================================
-           DIFERENCIAIS
-           ============================================ */
         .diferenciais-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -415,9 +1179,6 @@
             margin-top: 4px;
         }
 
-        /* ============================================
-           GALERIA - CASOS SEPARADOS
-           ============================================ */
         .caso-container {
             background: var(--branco);
             border-radius: 24px;
@@ -427,17 +1188,14 @@
             border: 1px solid rgba(168, 195, 160, 0.1);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-
         .caso-container:hover {
             transform: translateY(-4px);
             box-shadow: 0 20px 40px rgba(47, 93, 98, 0.08);
         }
-
         .caso-titulo {
             text-align: center;
             margin-bottom: 30px;
         }
-
         .badge-caso {
             display: inline-block;
             background: var(--dourado);
@@ -450,25 +1208,21 @@
             letter-spacing: 1px;
             margin-bottom: 10px;
         }
-
         .caso-titulo h3 {
             font-family: 'Poppins', sans-serif;
             font-size: 1.8rem;
             color: var(--petroleo);
             margin-bottom: 8px;
         }
-
         .caso-titulo h3 i {
             margin-right: 12px;
         }
-
         .caso-descricao {
             color: #4a5f64;
             font-size: 1rem;
             max-width: 500px;
             margin: 0 auto;
         }
-
         .caso-grid {
             display: grid;
             grid-template-columns: 1fr auto 1fr;
@@ -476,7 +1230,6 @@
             align-items: center;
             margin: 20px 0 16px;
         }
-
         .caso-item {
             border-radius: 16px;
             overflow: hidden;
@@ -485,14 +1238,12 @@
             aspect-ratio: 1/1;
             background: var(--bege);
         }
-
         .caso-item img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             display: block;
         }
-
         .caso-label {
             position: absolute;
             top: 12px;
@@ -506,15 +1257,12 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-
         .caso-item.antes .caso-label {
             background: rgba(220, 53, 69, 0.85);
         }
-
         .caso-item.depois .caso-label {
             background: rgba(40, 167, 69, 0.85);
         }
-
         .caso-legenda {
             padding: 12px 16px;
             font-size: 0.85rem;
@@ -522,11 +1270,9 @@
             background: var(--cinza-claro);
             border-radius: 0 0 16px 16px;
         }
-
         .caso-legenda i {
             margin-right: 6px;
         }
-
         .caso-seta {
             font-size: 2.5rem;
             color: var(--dourado);
@@ -535,7 +1281,6 @@
             align-items: center;
             justify-content: center;
         }
-
         .caso-resultado {
             background: var(--bege);
             padding: 16px 24px;
@@ -544,19 +1289,14 @@
             margin-top: 16px;
             border-left: 4px solid var(--dourado);
         }
-
         .caso-resultado i {
             margin-right: 8px;
         }
-
         .caso-resultado span {
             font-size: 0.95rem;
             color: #2d4449;
         }
 
-        /* ============================================
-           VÍDEOS - FORMATO CORRETO
-           ============================================ */
         .videos-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -564,7 +1304,6 @@
             max-width: 1100px;
             margin: 30px auto 0;
         }
-
         .video-card {
             background: #f8f9fa;
             border-radius: 18px;
@@ -572,12 +1311,10 @@
             box-shadow: var(--sombra);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-
         .video-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
         }
-
         .video-wrapper {
             position: relative;
             width: 100%;
@@ -585,7 +1322,6 @@
             background: #111;
             overflow: hidden;
         }
-
         .video-wrapper video {
             display: block;
             width: 100%;
@@ -593,14 +1329,12 @@
             object-fit: contain;
             background: #111;
         }
-
         .video-card h3 {
             padding: 20px 22px 8px;
             font-size: 1.15rem;
             font-family: 'Poppins', sans-serif;
             color: var(--petroleo);
         }
-
         .video-card p {
             padding: 0 22px 22px;
             font-size: 0.95rem;
@@ -608,9 +1342,6 @@
             color: #4a5f64;
         }
 
-        /* ============================================
-           DEPOIMENTOS
-           ============================================ */
         .depoimentos-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -638,9 +1369,6 @@
             color: var(--petroleo);
         }
 
-        /* ============================================
-           FAQ
-           ============================================ */
         .faq-lista {
             max-width: 800px;
             margin: 0 auto;
@@ -689,9 +1417,6 @@
             padding: 0 24px 20px 24px;
         }
 
-        /* ============================================
-           CONTATO
-           ============================================ */
         .contato-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -761,9 +1486,6 @@
             color: #4a5f64;
         }
 
-        /* ============================================
-           RODAPÉ
-           ============================================ */
         footer {
             background: var(--petroleo);
             color: rgba(255, 255, 255, 0.8);
@@ -819,495 +1541,177 @@
             margin-top: 30px;
         }
 
-        /* ============================================
-           WHATSAPP FLOAT
-           ============================================ */
-        .whatsapp-float {
-            position: fixed;
-            bottom: 28px;
-            right: 28px;
-            z-index: 999;
-            background: #25D366;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-size: 2.2rem;
-            box-shadow: 0 6px 25px rgba(37, 211, 102, 0.4);
-            transition: all 0.3s ease;
-            cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .whatsapp-float:hover {
-            transform: scale(1.08);
-        }
-        .whatsapp-float:active {
-            transform: scale(0.92);
-        }
-
-        /* ============================================
-           BACK TO TOP
-           ============================================ */
-        .back-top {
-            position: fixed;
-            bottom: 100px;
-            right: 28px;
-            z-index: 999;
-            background: var(--petroleo);
-            color: #fff;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .back-top.visivel {
-            opacity: 1;
-            visibility: visible;
-        }
-        .back-top:hover {
-            background: var(--petroleo-escuro);
-            transform: translateY(-4px);
-        }
-        .back-top:active {
-            transform: scale(0.92);
-        }
-
-        /* ============================================
-           RESPONSIVIDADE
-           ============================================ */
+        /* Responsividade - mantida do código original */
         @media (max-width: 1200px) {
-            .container {
-                padding: 0 20px;
-            }
-            .hero-content h1 {
-                font-size: 3rem;
-            }
+            .container { padding: 0 20px; }
+            .hero-content h1 { font-size: 3rem; }
         }
-
         @media (max-width: 992px) {
-            .hero .container {
-                grid-template-columns: 1fr;
-                text-align: center;
-                gap: 40px;
-            }
-            .hero-content p {
-                margin-left: auto;
-                margin-right: auto;
-                max-width: 100%;
-            }
-            .hero-buttons {
-                justify-content: center;
-            }
-            .hero-content h1 {
-                font-size: 2.8rem;
-            }
-            .sobre-grid {
-                grid-template-columns: 1fr;
-                text-align: center;
-                gap: 40px;
-            }
-            .sobre-texto .valores {
-                justify-content: center;
-            }
-            .servicos-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 20px;
-            }
-            .diferenciais-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 20px;
-            }
-            .depoimentos-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 20px;
-            }
-            .contato-grid {
-                grid-template-columns: 1fr;
-                gap: 40px;
-            }
-            .caso-grid {
-                grid-template-columns: 1fr auto 1fr;
-                gap: 16px;
-            }
-            .videos-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 25px;
-                max-width: 100%;
-            }
-            .section {
-                padding: 60px 0;
-            }
-            .section-title {
-                font-size: 2.2rem;
-            }
+            .hero .container { grid-template-columns: 1fr; text-align: center; gap: 40px; }
+            .hero-content p { margin: 0 auto 32px; max-width: 100%; }
+            .hero-buttons { justify-content: center; }
+            .hero-content h1 { font-size: 2.8rem; }
+            .sobre-grid { grid-template-columns: 1fr; text-align: center; gap: 40px; }
+            .sobre-texto .valores { justify-content: center; }
+            .servicos-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+            .diferenciais-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+            .depoimentos-grid { grid-template-columns: 1fr 1fr; gap: 20px; }
+            .contato-grid { grid-template-columns: 1fr; gap: 40px; }
+            .caso-grid { grid-template-columns: 1fr auto 1fr; gap: 16px; }
+            .videos-grid { grid-template-columns: 1fr 1fr; gap: 25px; max-width: 100%; }
+            .section { padding: 60px 0; }
+            .section-title { font-size: 2.2rem; }
+            .agendamento-wrapper { padding: 30px 24px; }
+            .form-row { grid-template-columns: 1fr; gap: 0; }
+            .servicos-escolha { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
         }
-
         @media (max-width: 768px) {
-            nav ul {
-                display: none;
-                flex-direction: column;
-                background: #fff;
-                position: absolute;
-                top: 70px;
-                left: 0;
-                width: 100%;
-                padding: 20px;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-                gap: 16px;
-                text-align: center;
-                border-top: 1px solid rgba(0, 0, 0, 0.05);
-            }
-            nav ul.aberto {
-                display: flex;
-            }
-            nav ul li a {
-                font-size: 1.1rem;
-                padding: 8px 0;
-                display: block;
-            }
-            .menu-mobile {
-                display: block;
-            }
-            .hero-content h1 {
-                font-size: 2.2rem;
-            }
-            .hero-content p {
-                font-size: 1rem;
-            }
-            .section-title {
-                font-size: 2rem;
-            }
-            .section-subtitle {
-                font-size: 1rem;
-                margin-bottom: 32px;
-            }
-            .servicos-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 16px;
-            }
-            .servico-card {
-                padding: 20px 16px;
-            }
-            .servico-card i {
-                font-size: 2rem;
-                padding: 12px;
-            }
-            .servico-card h3 {
-                font-size: 1rem;
-            }
-            .servico-card p {
-                font-size: 0.85rem;
-            }
-            .diferenciais-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 16px;
-            }
-            .diferencial-item {
-                padding: 20px 16px;
-            }
-            .depoimentos-grid {
-                grid-template-columns: 1fr;
-                gap: 16px;
-            }
-            .caso-grid {
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
-            .caso-seta {
-                transform: rotate(90deg);
-                padding: 4px 0;
-                font-size: 2rem;
-            }
-            .caso-container {
-                padding: 24px 16px;
-            }
-            .caso-titulo h3 {
-                font-size: 1.3rem;
-            }
-            .caso-legenda {
-                font-size: 0.8rem;
-                padding: 10px 12px;
-            }
-            .caso-resultado {
-                padding: 14px 16px;
-            }
-            .caso-resultado span {
-                font-size: 0.9rem;
-            }
-            .videos-grid {
-                grid-template-columns: 1fr;
-                gap: 25px;
-                max-width: 600px;
-                margin-left: auto;
-                margin-right: auto;
-            }
-            .video-card h3 {
-                padding: 16px 18px 6px;
-                font-size: 1rem;
-            }
-            .video-card p {
-                padding: 0 18px 18px;
-                font-size: 0.9rem;
-            }
-            .contato-info .item {
-                font-size: 0.95rem;
-            }
-            .logo img {
-                height: 32px;
-            }
-            .logo {
-                font-size: 1.2rem;
-            }
-            .banner-home h2 {
-                font-size: 1.5rem;
-            }
-            .banner-home p {
-                font-size: 1rem;
-            }
-            .section {
-                padding: 50px 0;
-            }
-            footer .row {
-                flex-direction: column;
-                gap: 24px;
-                text-align: center;
-            }
-            footer .social {
-                justify-content: center;
-            }
-            .container {
-                padding: 0 16px;
-            }
+            nav ul { display: none; flex-direction: column; background: #fff; position: absolute; top: 70px; left: 0; width: 100%; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); gap: 16px; text-align: center; border-top: 1px solid rgba(0,0,0,0.05); }
+            nav ul.aberto { display: flex; }
+            nav ul li a { font-size: 1.1rem; padding: 8px 0; display: block; }
+            .menu-mobile { display: block; }
+            .hero-content h1 { font-size: 2.2rem; }
+            .hero-content p { font-size: 1rem; }
+            .section-title { font-size: 2rem; }
+            .section-subtitle { font-size: 1rem; margin-bottom: 32px; }
+            .servicos-grid { grid-template-columns: 1fr 1fr; gap: 16px; }
+            .servico-card { padding: 20px 16px; }
+            .servico-card i { font-size: 2rem; padding: 12px; }
+            .servico-card h3 { font-size: 1rem; }
+            .servico-card p { font-size: 0.85rem; }
+            .diferenciais-grid { grid-template-columns: 1fr 1fr; gap: 16px; }
+            .diferencial-item { padding: 20px 16px; }
+            .depoimentos-grid { grid-template-columns: 1fr; gap: 16px; }
+            .caso-grid { grid-template-columns: 1fr; gap: 12px; }
+            .caso-seta { transform: rotate(90deg); padding: 4px 0; font-size: 2rem; }
+            .caso-container { padding: 24px 16px; }
+            .caso-titulo h3 { font-size: 1.3rem; }
+            .caso-legenda { font-size: 0.8rem; padding: 10px 12px; }
+            .caso-resultado { padding: 14px 16px; }
+            .caso-resultado span { font-size: 0.9rem; }
+            .videos-grid { grid-template-columns: 1fr; gap: 25px; max-width: 600px; margin: 30px auto 0; }
+            .video-card h3 { padding: 16px 18px 6px; font-size: 1rem; }
+            .video-card p { padding: 0 18px 18px; font-size: 0.9rem; }
+            .contato-info .item { font-size: 0.95rem; }
+            .logo img { height: 32px; }
+            .logo { font-size: 1.2rem; }
+            .banner-home h2 { font-size: 1.5rem; }
+            .banner-home p { font-size: 1rem; }
+            .section { padding: 50px 0; }
+            footer .row { flex-direction: column; gap: 24px; text-align: center; }
+            footer .social { justify-content: center; }
+            .container { padding: 0 16px; }
+            .agendamento-wrapper { padding: 20px 16px; border-radius: 16px; }
+            .agendamento-wrapper .passo-indicador { flex-wrap: wrap; }
+            .agendamento-wrapper .passo-indicador .passo { font-size: 0.75rem; padding: 4px 12px; }
+            .servicos-escolha { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+            .horarios-grid { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); }
+            .form-actions { flex-direction: column; }
+            .form-actions .btn { width: 100%; text-align: center; }
+            .resumo-agendamento .linha { flex-direction: column; align-items: flex-start; gap: 4px; }
+            .resumo-agendamento .valor { text-align: left; }
+            .nav-agendar, .nav-admin { padding: 6px 16px; font-size: 0.85rem; }
+            .toast { top: 80px; right: 12px; left: 12px; max-width: none; padding: 14px 18px; font-size: 0.9rem; }
+            .tipo-atendimento-grid { grid-template-columns: 1fr 1fr; }
+            .cep-busca-group { flex-direction: column; }
+            .cep-busca-group .btn { width: 100%; }
+            .admin-resumo { grid-template-columns: repeat(2, 1fr); }
+            .admin-tabela { font-size: 0.7rem; }
+            .admin-tabela th, .admin-tabela td { padding: 6px 8px; }
+            .admin-tabela .actions .btn { padding: 2px 8px; font-size: 0.65rem; }
+            .admin-panel { padding: 16px; }
+            .admin-panel .admin-header { flex-direction: column; text-align: center; }
+            .admin-tabela-container { max-height: 400px; }
         }
-
         @media (max-width: 480px) {
-            .hero-content h1 {
-                font-size: 1.8rem;
-            }
-            .hero-buttons {
-                flex-direction: column;
-                width: 100%;
-            }
-            .hero-buttons .btn {
-                width: 100%;
-                text-align: center;
-            }
-            .btn {
-                padding: 12px 24px;
-                font-size: 0.9rem;
-                width: 100%;
-            }
-            .servicos-grid {
-                grid-template-columns: 1fr;
-                gap: 14px;
-            }
-            .diferenciais-grid {
-                grid-template-columns: 1fr;
-                gap: 14px;
-            }
-            .depoimentos-grid {
-                grid-template-columns: 1fr;
-                gap: 14px;
-            }
-            .caso-container {
-                padding: 18px 12px;
-                margin-bottom: 30px;
-            }
-            .caso-titulo h3 {
-                font-size: 1.1rem;
-            }
-            .caso-descricao {
-                font-size: 0.9rem;
-            }
-            .caso-seta {
-                font-size: 1.6rem;
-            }
-            .caso-item {
-                aspect-ratio: 4/3;
-            }
-            .caso-resultado span {
-                font-size: 0.85rem;
-            }
-            .videos-grid {
-                gap: 20px;
-                max-width: 100%;
-            }
-            .video-card h3 {
-                font-size: 0.95rem;
-                padding: 14px 16px 4px;
-            }
-            .video-card p {
-                font-size: 0.85rem;
-                padding: 0 16px 16px;
-            }
-            .section-title {
-                font-size: 1.6rem;
-            }
-            .section-subtitle {
-                font-size: 0.9rem;
-                margin-bottom: 24px;
-            }
-            .contato-info .item {
-                font-size: 0.9rem;
-                gap: 12px;
-            }
-            .contato-info .item i {
-                width: 36px;
-                height: 36px;
-                font-size: 1.1rem;
-            }
-            .contato-box {
-                padding: 16px 18px;
-            }
-            .contato-mapa {
-                padding: 24px 16px;
-                min-height: 180px;
-            }
-            .contato-mapa i {
-                font-size: 3rem;
-            }
-            .logo img {
-                height: 28px;
-            }
-            .logo {
-                font-size: 1rem;
-            }
-            .banner-home {
-                padding: 30px 0;
-            }
-            .banner-home h2 {
-                font-size: 1.2rem;
-            }
-            .banner-home p {
-                font-size: 0.95rem;
-            }
-            .section {
-                padding: 40px 0;
-            }
-            .whatsapp-float {
-                width: 50px;
-                height: 50px;
-                font-size: 1.8rem;
-                bottom: 16px;
-                right: 16px;
-            }
-            .back-top {
-                bottom: 76px;
-                right: 16px;
-                width: 38px;
-                height: 38px;
-                font-size: 1rem;
-            }
-            .container {
-                padding: 0 12px;
-            }
-            footer {
-                padding: 30px 0 16px;
-            }
-            footer .col h4 {
-                font-size: 1rem;
-            }
-            footer .col p,
-            footer .col a {
-                font-size: 0.85rem;
-            }
-            footer .copyright {
-                font-size: 0.75rem;
-            }
-            .sobre-texto p {
-                font-size: 0.95rem;
-            }
-            .sobre-texto .valores span {
-                font-size: 0.75rem;
-                padding: 4px 12px;
-            }
-            .faq-pergunta {
-                padding: 14px 16px;
-                font-size: 0.95rem;
-            }
-            .faq-resposta {
-                font-size: 0.9rem;
-            }
-            .faq-item.ativo .faq-resposta {
-                padding: 0 16px 14px 16px;
-            }
+            .hero-content h1 { font-size: 1.8rem; }
+            .hero-buttons { flex-direction: column; width: 100%; }
+            .hero-buttons .btn { width: 100%; text-align: center; }
+            .btn { padding: 12px 24px; font-size: 0.9rem; width: 100%; }
+            .servicos-grid { grid-template-columns: 1fr; gap: 14px; }
+            .diferenciais-grid { grid-template-columns: 1fr; gap: 14px; }
+            .depoimentos-grid { grid-template-columns: 1fr; gap: 14px; }
+            .caso-container { padding: 18px 12px; margin-bottom: 30px; }
+            .caso-titulo h3 { font-size: 1.1rem; }
+            .caso-descricao { font-size: 0.9rem; }
+            .caso-seta { font-size: 1.6rem; }
+            .caso-item { aspect-ratio: 4/3; }
+            .caso-resultado span { font-size: 0.85rem; }
+            .videos-grid { gap: 20px; max-width: 100%; }
+            .video-card h3 { font-size: 0.95rem; padding: 14px 16px 4px; }
+            .video-card p { font-size: 0.85rem; padding: 0 16px 16px; }
+            .section-title { font-size: 1.6rem; }
+            .section-subtitle { font-size: 0.9rem; margin-bottom: 24px; }
+            .contato-info .item { font-size: 0.9rem; gap: 12px; }
+            .contato-info .item i { width: 36px; height: 36px; font-size: 1.1rem; }
+            .contato-box { padding: 16px 18px; }
+            .contato-mapa { padding: 24px 16px; min-height: 180px; }
+            .contato-mapa i { font-size: 3rem; }
+            .logo img { height: 28px; }
+            .logo { font-size: 1rem; }
+            .banner-home { padding: 30px 0; }
+            .banner-home h2 { font-size: 1.2rem; }
+            .banner-home p { font-size: 0.95rem; }
+            .section { padding: 40px 0; }
+            .whatsapp-float { width: 50px; height: 50px; font-size: 1.8rem; bottom: 16px; right: 16px; }
+            .back-top { bottom: 76px; right: 16px; width: 38px; height: 38px; font-size: 1rem; }
+            .container { padding: 0 12px; }
+            footer { padding: 30px 0 16px; }
+            footer .col h4 { font-size: 1rem; }
+            footer .col p, footer .col a { font-size: 0.85rem; }
+            footer .copyright { font-size: 0.75rem; }
+            .sobre-texto p { font-size: 0.95rem; }
+            .sobre-texto .valores span { font-size: 0.75rem; padding: 4px 12px; }
+            .faq-pergunta { padding: 14px 16px; font-size: 0.95rem; }
+            .faq-resposta { font-size: 0.9rem; }
+            .faq-item.ativo .faq-resposta { padding: 0 16px 14px 16px; }
+            .agendamento-wrapper { padding: 16px 12px; }
+            .servicos-escolha { grid-template-columns: 1fr 1fr; gap: 8px; }
+            .servico-btn { padding: 10px 12px; font-size: 0.8rem; }
+            .servico-btn i { font-size: 1.1rem; }
+            .horarios-grid { grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 6px; }
+            .horario-btn { padding: 8px 6px; font-size: 0.8rem; }
+            .agendamento-wrapper .passo-indicador .passo { font-size: 0.7rem; padding: 4px 8px; }
+            .confirmacao-box .icone { font-size: 3rem; }
+            .confirmacao-box h3 { font-size: 1.4rem; }
+            .tipo-atendimento-grid { grid-template-columns: 1fr 1fr; }
+            .tipo-btn { padding: 14px; font-size: 0.85rem; }
+            .tipo-btn i { font-size: 1.5rem; }
+            .admin-resumo { grid-template-columns: 1fr 1fr; }
+            .admin-tabela { font-size: 0.6rem; }
+            .admin-tabela th, .admin-tabela td { padding: 4px 6px; }
+            .admin-tabela .actions .btn { padding: 2px 6px; font-size: 0.55rem; }
+            .admin-tabela-container { max-height: 300px; }
+            .admin-filtros select, .admin-filtros input { font-size: 0.8rem; padding: 6px 10px; }
         }
-
         @media (max-width: 380px) {
-            .hero-content h1 {
-                font-size: 1.5rem;
-            }
-            .section-title {
-                font-size: 1.4rem;
-            }
-            .logo img {
-                height: 24px;
-            }
-            .logo {
-                font-size: 0.9rem;
-                gap: 6px;
-            }
-            .container {
-                padding: 0 8px;
-            }
-            .video-card h3 {
-                font-size: 0.85rem;
-            }
-            .video-card p {
-                font-size: 0.8rem;
-            }
-            .caso-item {
-                aspect-ratio: 1/1;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .hide-mobile {
-                display: none !important;
-            }
-            .show-mobile {
-                display: block !important;
-            }
-            .text-center-mobile {
-                text-align: center !important;
-            }
-            .flex-column-mobile {
-                flex-direction: column !important;
-            }
-            .gap-mobile-16 {
-                gap: 16px !important;
-            }
-        }
-
-        @media (min-width: 769px) {
-            .hide-desktop {
-                display: none !important;
-            }
-            .show-desktop {
-                display: block !important;
-            }
+            .hero-content h1 { font-size: 1.5rem; }
+            .section-title { font-size: 1.4rem; }
+            .logo img { height: 24px; }
+            .logo { font-size: 0.9rem; gap: 6px; }
+            .container { padding: 0 8px; }
+            .video-card h3 { font-size: 0.85rem; }
+            .video-card p { font-size: 0.8rem; }
+            .caso-item { aspect-ratio: 1/1; }
+            .servicos-escolha { grid-template-columns: 1fr 1fr; }
+            .tipo-atendimento-grid { grid-template-columns: 1fr; }
+            .admin-resumo { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
+    <!-- ===== LOADING OVERLAY ===== -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="spinner"></div>
+        <p>Carregando...</p>
+    </div>
+
     <!-- ===== HEADER ===== -->
     <header>
         <div class="container">
             <a href="#" class="logo">
-                <img src="images/Logo.jpeg" alt="Levità Podologia - Dra. Renata Kemp" />
+                <img src="images/Logo.jpeg" alt="Levità Podologia - Podóloga Renata Kemp" />
                 Levità<span>.</span>
             </a>
             <nav>
@@ -1320,6 +1724,8 @@
                     <li><a href="#depoimentos">Depoimentos</a></li>
                     <li><a href="#faq">FAQ</a></li>
                     <li><a href="#contato">Contato</a></li>
+                    <li><a href="#agendamento" class="nav-agendar"><i class="fas fa-calendar-check"></i> Agendar</a></li>
+                    <li><a href="#admin" class="nav-admin"><i class="fas fa-lock"></i> Admin</a></li>
                 </ul>
                 <div class="menu-mobile" id="menu-toggle">
                     <i class="fas fa-bars"></i>
@@ -1334,274 +1740,481 @@
             <div class="hero-content">
                 <h1>Leveza para <span>cada passo</span></h1>
                 <p>
-                    Com a <strong>Dra. Renata Kemp</strong>, seus pés recebem o cuidado que merecem.
+                    Com a <strong>Podóloga Renata Kemp</strong>, seus pés recebem o cuidado que merecem.
                     Atendimento humanizado, técnicas modernas e todo o carinho para você caminhar com conforto e segurança.
                 </p>
                 <div class="hero-buttons">
-                    <a href="#" class="btn btn-whatsapp" id="whatsapp-hero">
-                        <i class="fab fa-whatsapp"></i> Agendar com Renata
+                    <a href="#agendamento" class="btn btn-primario">
+                        <i class="fas fa-calendar-check"></i> Agendar Agora
                     </a>
                     <a href="#servicos" class="btn btn-secundario">Conheça os Tratamentos</a>
                 </div>
             </div>
             <div class="hero-image">
-                <img src="images/hero.png" alt="Dra. Renata Kemp - Cuidado com os pés" />
+                <img src="images/hero.png" alt="Podóloga Renata Kemp - Cuidado com os pés" />
             </div>
         </div>
     </section>
 
-    <!-- ===== BANNER ATENDIMENTO DOMICILIAR ===== -->
+    <!-- ===== BANNER ===== -->
     <section class="banner-home">
         <div class="container">
-            <h2><i class="fas fa-home"></i> Atendimento Domiciliar com a Dra. Renata Kemp</h2>
+            <h2><i class="fas fa-home"></i> Atendimento Domiciliar ou Presencial</h2>
             <p>
-                <strong>Agende seu horário e <span class="highlight">Renata vai até você</span>!</strong><br />
-                Atendimento em Guarulhos e região com conforto, segurança e todo o cuidado que você merece.
+                <strong>Escolha a melhor opção para você:</strong><br />
+                Atendimento <span class="highlight">domiciliar</span> com conforto e segurança, ou <span class="highlight">presencial</span> em nossa clínica em Guarulhos.
             </p>
-            <a href="#" class="btn btn-whatsapp" id="whatsapp-banner">
-                <i class="fab fa-whatsapp"></i> Agendar Visita Domiciliar
+            <a href="#agendamento" class="btn btn-whatsapp" style="margin-top:20px;">
+                <i class="fas fa-calendar-check"></i> Agendar Agora
             </a>
         </div>
     </section>
 
-    <!-- ===== SOBRE ===== -->
+    <!-- ============================================
+         SISTEMA DE AGENDAMENTO
+         ============================================ -->
+    <section class="section" id="agendamento" style="background: var(--cinza-claro);">
+        <div class="container">
+            <h2 class="section-title">Agende sua <span>consulta</span></h2>
+            <p class="section-subtitle">Preencha os dados abaixo e agende seu horário com a <strong>Podóloga Renata Kemp</strong>.</p>
+
+            <div class="agendamento-wrapper">
+                <!-- Indicador de Passos -->
+                <div class="passo-indicador">
+                    <div class="passo ativo" data-passo="1">
+                        <span class="numero">1</span> Dados
+                    </div>
+                    <div class="passo" data-passo="2">
+                        <span class="numero">2</span> Atendimento
+                    </div>
+                    <div class="passo" data-passo="3">
+                        <span class="numero">3</span> Serviço
+                    </div>
+                    <div class="passo" data-passo="4">
+                        <span class="numero">4</span> Data/Hora
+                    </div>
+                    <div class="passo" data-passo="5">
+                        <span class="numero">5</span> Confirmar
+                    </div>
+                </div>
+
+                <!-- PASSO 1 - DADOS PESSOAIS -->
+                <div class="passo-conteudo ativo" id="passo-1">
+                    <h3 style="font-family: 'Poppins', sans-serif; color: var(--petroleo); margin-bottom: 20px;">
+                        <i class="fas fa-user" style="color: var(--dourado);"></i> Seus dados
+                    </h3>
+                    <form id="form-passo1">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Nome completo <span class="obrigatorio">*</span></label>
+                                <input type="text" id="nome" placeholder="Digite seu nome completo" required />
+                            </div>
+                            <div class="form-group">
+                                <label>Telefone <span class="obrigatorio">*</span></label>
+                                <input type="tel" id="telefone" placeholder="(11) 99999-9999" required />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>E-mail</label>
+                            <input type="email" id="email" placeholder="seu@email.com" />
+                        </div>
+                        <div class="form-actions">
+                            <span></span>
+                            <button type="button" class="btn btn-primario" onclick="proximoPasso(2)">
+                                Próximo <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- PASSO 2 - TIPO DE ATENDIMENTO -->
+                <div class="passo-conteudo" id="passo-2">
+                    <h3 style="font-family: 'Poppins', sans-serif; color: var(--petroleo); margin-bottom: 20px;">
+                        <i class="fas fa-map-marker-alt" style="color: var(--dourado);"></i> Tipo de Atendimento
+                    </h3>
+                    <p style="color: #4a5f64; margin-bottom: 16px;">Escolha como deseja ser atendido:</p>
+                    <div class="tipo-atendimento-grid" id="tipo-atendimento-grid">
+                        <button type="button" class="tipo-btn" data-tipo="domicilio">
+                            <i class="fas fa-home"></i>
+                            <span>Domiciliar</span>
+                            <small style="font-weight: 400; opacity: 0.7;">Renata vai até você</small>
+                        </button>
+                        <button type="button" class="tipo-btn" data-tipo="presencial">
+                            <i class="fas fa-building"></i>
+                            <span>Presencial</span>
+                            <small style="font-weight: 400; opacity: 0.7;">Você vai à clínica</small>
+                        </button>
+                    </div>
+
+                    <!-- Endereço para DOMICÍLIO -->
+                    <div id="endereco-domicilio" style="display: none; margin-top: 20px;">
+                        <div class="form-group">
+                            <label>Endereço para atendimento <span class="obrigatorio">*</span></label>
+                            <div class="cep-busca-group">
+                                <div class="form-group">
+                                    <input type="text" id="cep" placeholder="Digite seu CEP (ex: 07000-000)" maxlength="9" />
+                                </div>
+                                <button type="button" class="btn btn-primario" onclick="buscarCEP()">
+                                    <i class="fas fa-search"></i> Buscar
+                                </button>
+                            </div>
+                        </div>
+                        <div class="endereco-completo" id="endereco-completo">
+                            <p><span class="label">Logradouro:</span> <span id="end-logradouro">-</span></p>
+                            <p><span class="label">Bairro:</span> <span id="end-bairro">-</span></p>
+                            <p><span class="label">Cidade:</span> <span id="end-cidade">-</span></p>
+                            <p><span class="label">Estado:</span> <span id="end-estado">-</span></p>
+                        </div>
+                        <div class="form-group">
+                            <label>Número <span class="obrigatorio">*</span></label>
+                            <input type="text" id="numero-endereco" placeholder="Número" />
+                        </div>
+                        <div class="form-group">
+                            <label>Complemento</label>
+                            <input type="text" id="complemento-endereco" placeholder="Apto, casa, bloco..." />
+                        </div>
+                    </div>
+
+                    <!-- Endereço para PRESENCIAL -->
+                    <div id="endereco-presencial" style="display: none; margin-top: 20px;">
+                        <div class="form-group">
+                            <label>Endereço da Clínica</label>
+                            <input type="text" id="endereco-clinica" value="Rua da Clínica, 123 - Centro, Guarulhos - SP" disabled style="background: var(--bege);" />
+                            <small style="color: #4a5f64; display: block; margin-top: 4px;">
+                                <i class="fas fa-info-circle"></i> Endereço fixo da clínica.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-voltar" onclick="passoAnterior(1)">
+                            <i class="fas fa-arrow-left"></i> Voltar
+                        </button>
+                        <button type="button" class="btn btn-primario" onclick="proximoPasso(3)">
+                            Próximo <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PASSO 3 - SERVIÇO -->
+                <div class="passo-conteudo" id="passo-3">
+                    <h3 style="font-family: 'Poppins', sans-serif; color: var(--petroleo); margin-bottom: 20px;">
+                        <i class="fas fa-stethoscope" style="color: var(--dourado);"></i> Escolha o serviço
+                    </h3>
+                    <p style="color: #4a5f64; margin-bottom: 16px;">Selecione o tipo de atendimento desejado:</p>
+                    <div class="servicos-escolha" id="servicos-escolha">
+                        <button type="button" class="servico-btn" data-servico="Podologia Clínica">
+                            <i class="fas fa-user-md"></i>
+                            Podologia Clínica
+                        </button>
+                        <button type="button" class="servico-btn" data-servico="Pé Diabético">
+                            <i class="fas fa-heartbeat"></i>
+                            Pé Diabético
+                        </button>
+                        <button type="button" class="servico-btn" data-servico="Podogeriatria">
+                            <i class="fas fa-user-plus"></i>
+                            Podogeriatria
+                        </button>
+                        <button type="button" class="servico-btn" data-servico="Unha Encravada">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Unha Encravada
+                        </button>
+                        <button type="button" class="servico-btn" data-servico="Calos e Calosidades">
+                            <i class="fas fa-circle"></i>
+                            Calos/Calosidades
+                        </button>
+                        <button type="button" class="servico-btn" data-servico="Verrugas Plantares">
+                            <i class="fas fa-biohazard"></i>
+                            Verrugas Plantares
+                        </button>
+                        <button type="button" class="servico-btn" data-servico="Micose / Fungos">
+                            <i class="fas fa-spa"></i>
+                            Micose / Fungos
+                        </button>
+                        <button type="button" class="servico-btn" data-servico="Órteses / Palmilhas">
+                            <i class="fas fa-shoe-prints"></i>
+                            Órteses / Palmilhas
+                        </button>
+                        <button type="button" class="servico-btn" data-servico="Consulta de Avaliação">
+                            <i class="fas fa-notes-medical"></i>
+                            Avaliação
+                        </button>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-voltar" onclick="passoAnterior(2)">
+                            <i class="fas fa-arrow-left"></i> Voltar
+                        </button>
+                        <button type="button" class="btn btn-primario" onclick="proximoPasso(4)">
+                            Próximo <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PASSO 4 - DATA E HORÁRIO -->
+                <div class="passo-conteudo" id="passo-4">
+                    <h3 style="font-family: 'Poppins', sans-serif; color: var(--petroleo); margin-bottom: 20px;">
+                        <i class="fas fa-clock" style="color: var(--dourado);"></i> Escolha data e horário
+                    </h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Data <span class="obrigatorio">*</span></label>
+                            <input type="date" id="data-agendamento" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Horário <span class="obrigatorio">*</span></label>
+                            <div class="horarios-grid" id="horarios-grid">
+                                <!-- Preenchido via JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-voltar" onclick="passoAnterior(3)">
+                            <i class="fas fa-arrow-left"></i> Voltar
+                        </button>
+                        <button type="button" class="btn btn-primario" onclick="proximoPasso(5)">
+                            Revisar Agendamento <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PASSO 5 - CONFIRMAÇÃO -->
+                <div class="passo-conteudo" id="passo-5">
+                    <h3 style="font-family: 'Poppins', sans-serif; color: var(--petroleo); margin-bottom: 20px;">
+                        <i class="fas fa-check-circle" style="color: var(--dourado);"></i> Confirme seus dados
+                    </h3>
+                    <div class="resumo-agendamento" id="resumo-agendamento">
+                        <!-- Preenchido via JavaScript -->
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-voltar" onclick="passoAnterior(4)">
+                            <i class="fas fa-arrow-left"></i> Voltar
+                        </button>
+                        <button type="button" class="btn btn-success" onclick="confirmarAgendamento()" id="btn-confirmar">
+                            <i class="fas fa-save"></i> Confirmar e Salvar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PASSO 6 - CONFIRMAÇÃO FINAL -->
+                <div class="passo-conteudo" id="passo-6">
+                    <div class="confirmacao-box">
+                        <div class="icone sucesso">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h3>Agendamento Confirmado!</h3>
+                        <p>Sua consulta com a <strong>Podóloga Renata Kemp</strong> foi agendada e salva com sucesso.</p>
+                        <div class="id-agendamento" id="id-agendamento">#00000</div>
+                        <div class="detalhes" id="detalhes-confirmacao">
+                            <!-- Preenchido via JavaScript -->
+                        </div>
+                        <p style="font-size: 0.9rem; color: #4a5f64;">
+                            <i class="fas fa-database" style="color: var(--petroleo);"></i>
+                            Agendamento salvo no Supabase.
+                        </p>
+                        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                            <button type="button" class="btn btn-primario" onclick="novoAgendamento()">
+                                <i class="fas fa-plus"></i> Novo Agendamento
+                            </button>
+                            <a href="#admin" class="btn btn-secundario">
+                                <i class="fas fa-list"></i> Ver Todos
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         PAINEL ADMINISTRATIVO
+         ============================================ -->
+    <section class="section" id="admin" style="background: var(--cinza-claro);">
+        <div class="container">
+            <h2 class="section-title">Painel <span>Administrativo</span></h2>
+            <p class="section-subtitle">Gerencie todos os agendamentos salvos no Supabase.</p>
+
+            <div class="admin-panel">
+                <div class="admin-header">
+                    <h3><i class="fas fa-database" style="color: var(--dourado);"></i> Agendamentos</h3>
+                    <span class="badge" id="total-agendamentos">0 agendamentos</span>
+                </div>
+
+                <div class="admin-resumo" id="admin-resumo">
+                    <div class="card">
+                        <div class="numero" id="total-count">0</div>
+                        <div class="label">Total</div>
+                    </div>
+                    <div class="card">
+                        <div class="numero" id="pendente-count">0</div>
+                        <div class="label">Pendentes</div>
+                    </div>
+                    <div class="card">
+                        <div class="numero" id="confirmado-count">0</div>
+                        <div class="label">Confirmados</div>
+                    </div>
+                    <div class="card">
+                        <div class="numero" id="domicilio-count">0</div>
+                        <div class="label">Domicílio</div>
+                    </div>
+                    <div class="card">
+                        <div class="numero" id="presencial-count">0</div>
+                        <div class="label">Presencial</div>
+                    </div>
+                </div>
+
+                <div class="admin-filtros">
+                    <select id="filtro-status" onchange="renderizarAdmin()">
+                        <option value="todos">Todos os status</option>
+                        <option value="pendente">Pendente</option>
+                        <option value="confirmado">Confirmado</option>
+                        <option value="cancelado">Cancelado</option>
+                        <option value="atendido">Atendido</option>
+                    </select>
+                    <select id="filtro-tipo" onchange="renderizarAdmin()">
+                        <option value="todos">Todos os tipos</option>
+                        <option value="domicilio">Domiciliar</option>
+                        <option value="presencial">Presencial</option>
+                    </select>
+                    <input type="text" id="filtro-busca" placeholder="Buscar por nome..." oninput="renderizarAdmin()" />
+                    <button class="btn btn-sm btn-success" onclick="exportarCSV()">
+                        <i class="fas fa-file-export"></i> CSV
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="syncLocalToSupabase()">
+                        <i class="fas fa-sync"></i> Sincronizar
+                    </button>
+                </div>
+
+                <div class="admin-tabela-container">
+                    <table class="admin-tabela" id="admin-tabela">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Paciente</th>
+                                <th>Telefone</th>
+                                <th>Serviço</th>
+                                <th>Tipo</th>
+                                <th>Data</th>
+                                <th>Horário</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-tbody">
+                            <tr>
+                                <td colspan="9" style="text-align:center; padding:30px; color:#8a9ea3;">
+                                    <i class="fas fa-spinner fa-spin"></i> Carregando agendamentos...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p style="text-align:center; margin-top:16px; color:#4a5f64; font-size:0.85rem;">
+                    <i class="fas fa-cloud"></i> Dados salvos no Supabase (PostgreSQL).
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================
+         SEÇÕES EXISTENTES (SOBRE, SERVIÇOS, ETC)
+         ============================================ -->
     <section class="section" id="sobre">
         <div class="container">
-            <h2 class="section-title">Sobre a <span>Dra. Renata Kemp</span></h2>
+            <h2 class="section-title">Sobre a <span>Podóloga Renata Kemp</span></h2>
             <p class="section-subtitle">Conheça a profissional que cuida dos seus pés com dedicação e excelência.</p>
             <div class="sobre-grid">
                 <div class="sobre-texto">
-                    <p>
-                        <strong>Dra. Renata Kemp</strong> é a profissional por trás da <strong>Levitatà Podologia</strong>.
-                        Com anos de experiência em podologia clínica e podogeriatria, Renata dedica sua carreira a
-                        promover saúde, conforto e qualidade de vida através do cuidado com os pés.
-                    </p>
-                    <p>
-                        Especialista em pé diabético, unha encravada, calos e calosidades, Renata atende com
-                        técnicas modernas, equipamentos esterilizados e um olhar humanizado para cada paciente.
-                        Acredita que cuidar dos pés é cuidar da liberdade de viver.
-                    </p>
-                    <p>
-                        <i class="fas fa-home" style="color: var(--dourado);"></i>
-                        <strong>Atendimento Domiciliar</strong> – Renata leva todo o cuidado e estrutura até você em Guarulhos e região.
-                    </p>
+                    <p><strong>Renata Kemp</strong> é a podóloga por trás da <strong>Levitatà Podologia</strong>. Com anos de experiência em podologia clínica e podogeriatria, Renata dedica sua carreira a promover saúde, conforto e qualidade de vida através do cuidado com os pés.</p>
+                    <p>Especialista em pé diabético, unha encravada, calos e calosidades, Renata atende com técnicas modernas, equipamentos esterilizados e um olhar humanizado para cada paciente. Acredita que cuidar dos pés é cuidar da liberdade de viver.</p>
+                    <p><i class="fas fa-home" style="color: var(--dourado);"></i> <strong>Atendimento Domiciliar</strong> – Renata leva todo o cuidado e estrutura até você em Guarulhos e região.<br /><i class="fas fa-building" style="color: var(--dourado);"></i> <strong>Atendimento Presencial</strong> – Atendimento em nossa clínica em Guarulhos.</p>
                     <div class="valores">
-                        <span>Humanização</span>
-                        <span>Ética</span>
-                        <span>Empatia</span>
-                        <span>Excelência</span>
-                        <span>Biossegurança</span>
-                        <span>Respeito</span>
-                        <span>Atualização</span>
-                        <span>Transparência</span>
+                        <span>Humanização</span><span>Ética</span><span>Empatia</span><span>Excelência</span>
+                        <span>Biossegurança</span><span>Respeito</span><span>Atualização</span><span>Transparência</span>
                     </div>
                 </div>
                 <div class="sobre-imagem">
-                    <img src="images/sobre.png" alt="Dra. Renata Kemp - Podóloga" />
+                    <img src="images/sobre.png" alt="Podóloga Renata Kemp" />
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ===== SERVIÇOS ===== -->
     <section class="section" id="servicos" style="background: var(--cinza-claro);">
         <div class="container">
-            <h2 class="section-title">Tratamentos da <span>Dra. Renata Kemp</span></h2>
+            <h2 class="section-title">Tratamentos da <span>Podóloga Renata Kemp</span></h2>
             <p class="section-subtitle">Cuidados especializados para a saúde dos seus pés.</p>
             <div class="servicos-grid">
-                <div class="servico-card">
-                    <i class="fas fa-user-md"></i>
-                    <h3>Podologia Clínica</h3>
-                    <p>Avaliação e tratamento de alterações nos pés com técnicas modernas.</p>
-                </div>
-                <div class="servico-card">
-                    <i class="fas fa-heartbeat"></i>
-                    <h3>Pé Diabético</h3>
-                    <p>Cuidados preventivos e tratamento especializado para diabéticos.</p>
-                </div>
-                <div class="servico-card">
-                    <i class="fas fa-user-plus"></i>
-                    <h3>Podogeriatria</h3>
-                    <p>Atendimento voltado à terceira idade com todo cuidado e atenção.</p>
-                </div>
-                <div class="servico-card">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <h3>Unha Encravada</h3>
-                    <p>Tratamento eficaz e minimamente invasivo com a Dra. Renata Kemp.</p>
-                </div>
-                <div class="servico-card">
-                    <i class="fas fa-circle"></i>
-                    <h3>Calos e Calosidades</h3>
-                    <p>Remoção segura com orientação preventiva personalizada.</p>
-                </div>
-                <div class="servico-card">
-                    <i class="fas fa-biohazard"></i>
-                    <h3>Verrugas Plantares</h3>
-                    <p>Tratamento com técnicas indolores e alta eficácia.</p>
-                </div>
-                <div class="servico-card">
-                    <i class="fas fa-spa"></i>
-                    <h3>Micose</h3>
-                    <p>Diagnóstico e tratamento para infecções fúngicas com acompanhamento.</p>
-                </div>
-                <div class="servico-card">
-                    <i class="fas fa-shoe-prints"></i>
-                    <h3>Órteses</h3>
-                    <p>Palmilhas e dispositivos personalizados para melhorar a pisada.</p>
-                </div>
+                <div class="servico-card"><i class="fas fa-user-md"></i><h3>Podologia Clínica</h3><p>Avaliação e tratamento de alterações nos pés com técnicas modernas.</p></div>
+                <div class="servico-card"><i class="fas fa-heartbeat"></i><h3>Pé Diabético</h3><p>Cuidados preventivos e tratamento especializado para diabéticos.</p></div>
+                <div class="servico-card"><i class="fas fa-user-plus"></i><h3>Podogeriatria</h3><p>Atendimento voltado à terceira idade com todo cuidado e atenção.</p></div>
+                <div class="servico-card"><i class="fas fa-exclamation-triangle"></i><h3>Unha Encravada</h3><p>Tratamento eficaz e minimamente invasivo com a Podóloga Renata Kemp.</p></div>
+                <div class="servico-card"><i class="fas fa-circle"></i><h3>Calos e Calosidades</h3><p>Remoção segura com orientação preventiva personalizada.</p></div>
+                <div class="servico-card"><i class="fas fa-biohazard"></i><h3>Verrugas Plantares</h3><p>Tratamento com técnicas indolores e alta eficácia.</p></div>
+                <div class="servico-card"><i class="fas fa-spa"></i><h3>Micose</h3><p>Diagnóstico e tratamento para infecções fúngicas com acompanhamento.</p></div>
+                <div class="servico-card"><i class="fas fa-shoe-prints"></i><h3>Órteses</h3><p>Palmilhas e dispositivos personalizados para melhorar a pisada.</p></div>
             </div>
         </div>
     </section>
 
-    <!-- ===== DIFERENCIAIS ===== -->
     <section class="section" id="diferenciais">
         <div class="container">
-            <h2 class="section-title">Diferenciais da <span>Dra. Renata Kemp</span></h2>
+            <h2 class="section-title">Diferenciais da <span>Podóloga Renata Kemp</span></h2>
             <p class="section-subtitle">O que faz o cuidado da Renata ser único e especial.</p>
             <div class="diferenciais-grid">
-                <div class="diferencial-item">
-                    <i class="fas fa-hand-holding-heart"></i>
-                    <h4>Atendimento Humanizado</h4>
-                    <p>Renata trata cada paciente com atenção única, respeito e acolhimento.</p>
-                </div>
-                <div class="diferencial-item">
-                    <i class="fas fa-home"></i>
-                    <h4>Atendimento Domiciliar</h4>
-                    <p>Renata vai até sua casa com toda estrutura e cuidado necessários.</p>
-                </div>
-                <div class="diferencial-item">
-                    <i class="fas fa-shield-alt"></i>
-                    <h4>Equipamentos Esterilizados</h4>
-                    <p>Biossegurança rigorosa em todos os procedimentos realizados por Renata.</p>
-                </div>
-                <div class="diferencial-item">
-                    <i class="fas fa-user-circle"></i>
-                    <h4>Atendimento Personalizado</h4>
-                    <p>Planos de cuidado adaptados às necessidades de cada paciente.</p>
-                </div>
-                <div class="diferencial-item">
-                    <i class="fas fa-graduation-cap"></i>
-                    <h4>Técnicas Atualizadas</h4>
-                    <p>Renata se mantém sempre atualizada com as melhores práticas da podologia.</p>
-                </div>
-                <div class="diferencial-item">
-                    <i class="fas fa-smile"></i>
-                    <h4>Experiência Leve</h4>
-                    <p>Atendimento pensado para seu conforto, bem-estar e tranquilidade.</p>
-                </div>
+                <div class="diferencial-item"><i class="fas fa-hand-holding-heart"></i><h4>Atendimento Humanizado</h4><p>Renata trata cada paciente com atenção única, respeito e acolhimento.</p></div>
+                <div class="diferencial-item"><i class="fas fa-home"></i><h4>Atendimento Domiciliar</h4><p>Renata vai até sua casa com toda estrutura e cuidado necessários.</p></div>
+                <div class="diferencial-item"><i class="fas fa-building"></i><h4>Atendimento Presencial</h4><p>Atendimento em clínica com toda infraestrutura e conforto.</p></div>
+                <div class="diferencial-item"><i class="fas fa-shield-alt"></i><h4>Equipamentos Esterilizados</h4><p>Biossegurança rigorosa em todos os procedimentos realizados por Renata.</p></div>
+                <div class="diferencial-item"><i class="fas fa-user-circle"></i><h4>Atendimento Personalizado</h4><p>Planos de cuidado adaptados às necessidades de cada paciente.</p></div>
+                <div class="diferencial-item"><i class="fas fa-graduation-cap"></i><h4>Técnicas Atualizadas</h4><p>Renata se mantém sempre atualizada com as melhores práticas da podologia.</p></div>
+                <div class="diferencial-item"><i class="fas fa-smile"></i><h4>Experiência Leve</h4><p>Atendimento pensado para seu conforto, bem-estar e tranquilidade.</p></div>
+                <div class="diferencial-item"><i class="fas fa-clock"></i><h4>Flexibilidade de Horários</h4><p>Horários adaptados à sua rotina, inclusive finais de semana.</p></div>
             </div>
         </div>
     </section>
 
-    <!-- ===== GALERIA ANTES E DEPOIS ===== -->
+    <!-- ===== GALERIA ===== -->
     <section class="section" id="galeria" style="background: var(--cinza-claro);">
         <div class="container">
             <h2 class="section-title">Antes e <span>Depois</span></h2>
-            <p class="section-subtitle">Resultados reais dos tratamentos realizados pela <strong>Dra. Renata Kemp</strong>.</p>
-            
-            <!-- ===== CASO 1 - UNHA ENCRAVADA ===== -->
+            <p class="section-subtitle">Resultados reais dos tratamentos realizados pela <strong>Podóloga Renata Kemp</strong>.</p>
             <div class="caso-container">
-                <div class="caso-titulo">
-                    <span class="badge-caso">CASO 1</span>
-                    <h3><i class="fas fa-exclamation-triangle" style="color: var(--dourado);"></i> Unha Encravada</h3>
-                    <p class="caso-descricao">Tratamento de unha encravada (onicocriptose) com técnica minimamente invasiva.</p>
-                </div>
+                <div class="caso-titulo"><span class="badge-caso">CASO 1</span><h3><i class="fas fa-exclamation-triangle" style="color: var(--dourado);"></i> Unha Encravada</h3><p class="caso-descricao">Tratamento de unha encravada (onicocriptose) com técnica minimamente invasiva.</p></div>
                 <div class="caso-grid">
-                    <div class="caso-item antes">
-                        <div class="caso-label">ANTES</div>
-                        <img src="images/antes1.png" alt="Unha encravada - Antes do tratamento" loading="lazy" />
-                        <div class="caso-legenda">
-                            <i class="fas fa-exclamation-circle" style="color: #dc3545;"></i>
-                            Unha encravada com inflamação e dor
-                        </div>
-                    </div>
-                    <div class="caso-seta">
-                        <i class="fas fa-arrow-right"></i>
-                    </div>
-                    <div class="caso-item depois">
-                        <div class="caso-label">DEPOIS</div>
-                        <img src="images/depois1.png" alt="Unha encravada - Depois do tratamento" loading="lazy" />
-                        <div class="caso-legenda">
-                            <i class="fas fa-check-circle" style="color: #28a745;"></i>
-                            Unha corrigida, pele saudável e sem dor
-                        </div>
-                    </div>
+                    <div class="caso-item antes"><div class="caso-label">ANTES</div><img src="images/antes1.png" alt="Unha encravada - Antes" loading="lazy" /><div class="caso-legenda"><i class="fas fa-exclamation-circle" style="color: #dc3545;"></i> Unha encravada com inflamação e dor</div></div>
+                    <div class="caso-seta"><i class="fas fa-arrow-right"></i></div>
+                    <div class="caso-item depois"><div class="caso-label">DEPOIS</div><img src="images/depois1.png" alt="Unha encravada - Depois" loading="lazy" /><div class="caso-legenda"><i class="fas fa-check-circle" style="color: #28a745;"></i> Unha corrigida, pele saudável e sem dor</div></div>
                 </div>
-                <div class="caso-resultado">
-                    <i class="fas fa-star" style="color: var(--dourado);"></i>
-                    <span>Resultado: Paciente com alívio imediato da dor e recuperação completa em 7 dias.</span>
-                </div>
+                <div class="caso-resultado"><i class="fas fa-star" style="color: var(--dourado);"></i><span>Resultado: Paciente com alívio imediato da dor e recuperação completa em 7 dias.</span></div>
             </div>
-
-            <!-- ===== CASO 2 - CALOSIDADE ===== -->
             <div class="caso-container">
-                <div class="caso-titulo">
-                    <span class="badge-caso">CASO 2</span>
-                    <h3><i class="fas fa-circle" style="color: var(--dourado);"></i> Calosidade</h3>
-                    <p class="caso-descricao">Remoção de calosidade (hiperqueratose) com técnica indolor e resultados duradouros.</p>
-                </div>
+                <div class="caso-titulo"><span class="badge-caso">CASO 2</span><h3><i class="fas fa-circle" style="color: var(--dourado);"></i> Calosidade</h3><p class="caso-descricao">Remoção de calosidade (hiperqueratose) com técnica indolor e resultados duradouros.</p></div>
                 <div class="caso-grid">
-                    <div class="caso-item antes">
-                        <div class="caso-label">ANTES</div>
-                        <img src="images/antes2.png" alt="Calosidade - Antes do tratamento" loading="lazy" />
-                        <div class="caso-legenda">
-                            <i class="fas fa-exclamation-circle" style="color: #dc3545;"></i>
-                            Calosidade espessa, amarelada e ressecada
-                        </div>
-                    </div>
-                    <div class="caso-seta">
-                        <i class="fas fa-arrow-right"></i>
-                    </div>
-                    <div class="caso-item depois">
-                        <div class="caso-label">DEPOIS</div>
-                        <img src="images/depois2.png" alt="Calosidade - Depois do tratamento" loading="lazy" />
-                        <div class="caso-legenda">
-                            <i class="fas fa-check-circle" style="color: #28a745;"></i>
-                            Pele lisa, hidratada e saudável
-                        </div>
-                    </div>
+                    <div class="caso-item antes"><div class="caso-label">ANTES</div><img src="images/antes2.png" alt="Calosidade - Antes" loading="lazy" /><div class="caso-legenda"><i class="fas fa-exclamation-circle" style="color: #dc3545;"></i> Calosidade espessa, amarelada e ressecada</div></div>
+                    <div class="caso-seta"><i class="fas fa-arrow-right"></i></div>
+                    <div class="caso-item depois"><div class="caso-label">DEPOIS</div><img src="images/depois2.png" alt="Calosidade - Depois" loading="lazy" /><div class="caso-legenda"><i class="fas fa-check-circle" style="color: #28a745;"></i> Pele lisa, hidratada e saudável</div></div>
                 </div>
-                <div class="caso-resultado">
-                    <i class="fas fa-star" style="color: var(--dourado);"></i>
-                    <span>Resultado: Paciente com desconforto eliminado e recuperação da textura natural da pele.</span>
-                </div>
+                <div class="caso-resultado"><i class="fas fa-star" style="color: var(--dourado);"></i><span>Resultado: Paciente com desconforto eliminado e recuperação da textura natural da pele.</span></div>
             </div>
-
-            <p style="text-align:center; font-size:0.85rem; margin-top:40px; color:#4a5f64;">
-                <i class="fas fa-lock" style="margin-right:6px;"></i> Imagens com autorização dos pacientes da <strong>Dra. Renata Kemp</strong>.
-            </p>
+            <p style="text-align:center; font-size:0.85rem; margin-top:40px; color:#4a5f64;"><i class="fas fa-lock" style="margin-right:6px;"></i> Imagens com autorização dos pacientes da <strong>Podóloga Renata Kemp</strong>.</p>
         </div>
     </section>
 
-    <!-- ===== VÍDEOS - FORMATO CORRETO ===== -->
+    <!-- ===== VÍDEOS ===== -->
     <section class="section" id="videos" style="background: var(--cinza-claro);">
         <div class="container">
-            <h2 class="section-title">Vídeos da <span>Dra. Renata Kemp</span></h2>
+            <h2 class="section-title">Vídeos da <span>Podóloga Renata Kemp</span></h2>
             <p class="section-subtitle">Conheça um pouco mais sobre o trabalho de Renata e veja depoimentos de quem já confiou em seu cuidado.</p>
-            
             <div class="videos-grid">
-                <!-- Vídeo 1 - Relato de Experiência -->
                 <div class="video-card">
-                    <div class="video-wrapper">
-                        <video controls preload="metadata" playsinline>
-                            <source src="https://raw.githubusercontent.com/LevitaPodologia/website/main/videos/video1.mp4" type="video/mp4">
-                            Seu navegador não suporta a reprodução de vídeos.
-                        </video>
-                    </div>
+                    <div class="video-wrapper"><video controls preload="metadata" playsinline><source src="https://raw.githubusercontent.com/LevitaPodologia/website/main/videos/video1.mp4" type="video/mp4">Seu navegador não suporta a reprodução de vídeos.</video></div>
                     <h3><i class="fas fa-star" style="color: var(--dourado);"></i> Relato de Experiência</h3>
-                    <p>Depoimento emocionante de uma paciente sobre o atendimento da <strong>Dra. Renata Kemp</strong> e os resultados transformadores do tratamento.</p>
+                    <p>Depoimento emocionante de uma paciente sobre o atendimento da <strong>Podóloga Renata Kemp</strong> e os resultados transformadores do tratamento.</p>
                 </div>
-                
-                <!-- Vídeo 2 - Trabalhando -->
                 <div class="video-card">
-                    <div class="video-wrapper">
-                        <video controls preload="metadata" playsinline>
-                            <source src="https://raw.githubusercontent.com/LevitaPodologia/website/main/videos/video2.mp4" type="video/mp4">
-                            Seu navegador não suporta a reprodução de vídeos.
-                        </video>
-                    </div>
+                    <div class="video-wrapper"><video controls preload="metadata" playsinline><source src="https://raw.githubusercontent.com/LevitaPodologia/website/main/videos/video2.mp4" type="video/mp4">Seu navegador não suporta a reprodução de vídeos.</video></div>
                     <h3><i class="fas fa-play-circle" style="color: var(--dourado);"></i> Nosso Trabalho</h3>
-                    <p>Veja a <strong>Dra. Renata Kemp</strong> em ação, realizando atendimentos com cuidado, dedicação e profissionalismo.</p>
+                    <p>Veja a <strong>Podóloga Renata Kemp</strong> em ação, realizando atendimentos com cuidado, dedicação e profissionalismo.</p>
                 </div>
             </div>
         </div>
@@ -1610,24 +2223,12 @@
     <!-- ===== DEPOIMENTOS ===== -->
     <section class="section" id="depoimentos">
         <div class="container">
-            <h2 class="section-title">O que dizem sobre a <span>Dra. Renata Kemp</span></h2>
+            <h2 class="section-title">O que dizem sobre a <span>Podóloga Renata Kemp</span></h2>
             <p class="section-subtitle">Depoimentos reais de pacientes que confiaram no trabalho de Renata.</p>
             <div class="depoimentos-grid">
-                <div class="depoimento-card">
-                    <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-                    <p>"Excelente atendimento! A Renata veio até minha casa e resolveu meu problema com unha encravada. Super recomendo!"</p>
-                    <div class="autor">— Maria A.</div>
-                </div>
-                <div class="depoimento-card">
-                    <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-                    <p>"Sou diabética e sempre tive receio de cuidar dos pés. O atendimento domiciliar da Renata me trouxe muita segurança e confiança."</p>
-                    <div class="autor">— Helena S.</div>
-                </div>
-                <div class="depoimento-card">
-                    <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-                    <p>"Minha mãe de 82 anos foi atendida em casa com todo carinho. Profissionalismo e dedicação que emocionam."</p>
-                    <div class="autor">— Roberto C.</div>
-                </div>
+                <div class="depoimento-card"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><p>"Excelente atendimento! A Renata veio até minha casa e resolveu meu problema com unha encravada. Super recomendo!"</p><div class="autor">— Maria A.</div></div>
+                <div class="depoimento-card"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><p>"Sou diabética e sempre tive receio de cuidar dos pés. O atendimento domiciliar da Renata me trouxe muita segurança e confiança."</p><div class="autor">— Helena S.</div></div>
+                <div class="depoimento-card"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><p>"Minha mãe de 82 anos foi atendida em casa com todo carinho. Profissionalismo e dedicação que emocionam."</p><div class="autor">— Roberto C.</div></div>
             </div>
         </div>
     </section>
@@ -1636,53 +2237,14 @@
     <section class="section" id="faq" style="background: var(--cinza-claro);">
         <div class="container">
             <h2 class="section-title">Perguntas <span>Frequentes</span></h2>
-            <p class="section-subtitle">Tire suas dúvidas sobre os atendimentos da Dra. Renata Kemp.</p>
+            <p class="section-subtitle">Tire suas dúvidas sobre os atendimentos da Podóloga Renata Kemp.</p>
             <div class="faq-lista">
-                <div class="faq-item ativo">
-                    <div class="faq-pergunta">
-                        <span>Como funciona o atendimento domiciliar com a Renata?</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-resposta">
-                        <p>Você agenda seu horário e a <strong>Dra. Renata Kemp</strong> vai até sua casa com todos os equipamentos necessários para um atendimento completo, seguro e personalizado.</p>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-pergunta">
-                        <span>Quais regiões a Renata atende?</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-resposta">
-                        <p>A <strong>Dra. Renata Kemp</strong> atende Guarulhos e toda região metropolitana. Consulte disponibilidade para outras áreas.</p>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-pergunta">
-                        <span>Unha encravada pode voltar após o tratamento?</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-resposta">
-                        <p>Com o tratamento adequado da <strong>Dra. Renata Kemp</strong> e orientações de cuidados domiciliares, o retorno é raro. Acompanhamos cada caso para garantir a resolução definitiva.</p>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-pergunta">
-                        <span>Quem tem diabetes deve consultar a Renata?</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-resposta">
-                        <p>Sim! A <strong>Dra. Renata Kemp</strong> é especialista em pé diabético e recomenda acompanhamento regular para prevenir complicações como úlceras e infecções.</p>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-pergunta">
-                        <span>O tratamento com a Renata é doloroso?</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-resposta">
-                        <p>A <strong>Dra. Renata Kemp</strong> utiliza técnicas modernas e minimamente invasivas para garantir o máximo de conforto. A maioria dos procedimentos é indolor ou com desconforto mínimo.</p>
-                    </div>
-                </div>
+                <div class="faq-item ativo"><div class="faq-pergunta"><span>Como funciona o atendimento domiciliar com a Renata?</span><i class="fas fa-chevron-down"></i></div><div class="faq-resposta"><p>Você agenda seu horário e a <strong>Podóloga Renata Kemp</strong> vai até sua casa com todos os equipamentos necessários para um atendimento completo, seguro e personalizado.</p></div></div>
+                <div class="faq-item"><div class="faq-pergunta"><span>Quais regiões a Renata atende para domicílio?</span><i class="fas fa-chevron-down"></i></div><div class="faq-resposta"><p>A <strong>Podóloga Renata Kemp</strong> atende Guarulhos e toda região metropolitana. Consulte disponibilidade para outras áreas.</p></div></div>
+                <div class="faq-item"><div class="faq-pergunta"><span>Onde fica a clínica para atendimento presencial?</span><i class="fas fa-chevron-down"></i></div><div class="faq-resposta"><p>Nossa clínica está localizada em Guarulhos - SP. Ao escolher o atendimento presencial, você receberá o endereço completo por WhatsApp.</p></div></div>
+                <div class="faq-item"><div class="faq-pergunta"><span>Unha encravada pode voltar após o tratamento?</span><i class="fas fa-chevron-down"></i></div><div class="faq-resposta"><p>Com o tratamento adequado da <strong>Podóloga Renata Kemp</strong> e orientações de cuidados domiciliares, o retorno é raro. Acompanhamos cada caso para garantir a resolução definitiva.</p></div></div>
+                <div class="faq-item"><div class="faq-pergunta"><span>Quem tem diabetes deve consultar a Renata?</span><i class="fas fa-chevron-down"></i></div><div class="faq-resposta"><p>Sim! A <strong>Podóloga Renata Kemp</strong> é especialista em pé diabético e recomenda acompanhamento regular para prevenir complicações como úlceras e infecções.</p></div></div>
+                <div class="faq-item"><div class="faq-pergunta"><span>O tratamento com a Renata é doloroso?</span><i class="fas fa-chevron-down"></i></div><div class="faq-resposta"><p>A <strong>Podóloga Renata Kemp</strong> utiliza técnicas modernas e minimamente invasivas para garantir o máximo de conforto. A maioria dos procedimentos é indolor ou com desconforto mínimo.</p></div></div>
             </div>
         </div>
     </section>
@@ -1691,46 +2253,18 @@
     <section class="section" id="contato">
         <div class="container">
             <h2 class="section-title">Entre em <span>contato</span></h2>
-            <p class="section-subtitle">Agende sua consulta com a Dra. Renata Kemp ou tire suas dúvidas.</p>
+            <p class="section-subtitle">Agende sua consulta com a Podóloga Renata Kemp ou tire suas dúvidas.</p>
             <div class="contato-grid">
                 <div class="contato-info">
-                    <div class="contato-box">
-                        <h4><i class="fas fa-home" style="color: var(--dourado);"></i> Atendimento Domiciliar</h4>
-                        <p>Agende seu horário e a <strong>Dra. Renata Kemp</strong> vai até você!</p>
-                        <p style="font-size: 0.95rem; margin-top: 4px;">
-                            <i class="fas fa-map-marker-alt" style="color: var(--dourado);"></i>
-                            <strong>Guarulhos e região</strong>
-                        </p>
-                    </div>
-                    <div class="item">
-                        <i class="fas fa-phone-alt"></i>
-                        <span>(11) 97830-3833</span>
-                    </div>
-                    <div class="item">
-                        <i class="fab fa-whatsapp"></i>
-                        <span>(11) 97830-3833</span>
-                    </div>
-                    <div class="item">
-                        <i class="fas fa-envelope"></i>
-                        <span>contato@levitapodologia.com.br</span>
-                    </div>
-                    <div class="item">
-                        <i class="fas fa-clock"></i>
-                        <span>Seg–Sex: 8h–19h | Sáb: 8h–13h</span>
-                    </div>
-                    <a href="#" class="btn btn-whatsapp" id="whatsapp-contato">
-                        <i class="fab fa-whatsapp"></i> Agendar com Renata
-                    </a>
+                    <div class="contato-box"><h4><i class="fas fa-home" style="color: var(--dourado);"></i> Atendimento Domiciliar</h4><p>Agende seu horário e a <strong>Podóloga Renata Kemp</strong> vai até você!</p><p style="font-size: 0.95rem; margin-top: 4px;"><i class="fas fa-map-marker-alt" style="color: var(--dourado);"></i> <strong>Guarulhos e região</strong></p></div>
+                    <div class="contato-box" style="border-left-color: var(--petroleo);"><h4><i class="fas fa-building" style="color: var(--petroleo);"></i> Atendimento Presencial</h4><p>Agende seu horário e venha à clínica em Guarulhos.</p><p style="font-size: 0.95rem; margin-top: 4px;"><i class="fas fa-map-marker-alt" style="color: var(--petroleo);"></i> <strong>Guarulhos - SP</strong></p></div>
+                    <div class="item"><i class="fas fa-phone-alt"></i><span>(11) 97830-3833</span></div>
+                    <div class="item"><i class="fab fa-whatsapp"></i><span>(11) 97830-3833</span></div>
+                    <div class="item"><i class="fas fa-envelope"></i><span>contato@levitapodologia.com.br</span></div>
+                    <div class="item"><i class="fas fa-clock"></i><span>Seg–Sex: 8h–19h | Sáb: 8h–13h</span></div>
+                    <a href="#agendamento" class="btn btn-primario"><i class="fas fa-calendar-check"></i> Agendar Agora</a>
                 </div>
-                <div class="contato-mapa">
-                    <i class="fas fa-home"></i>
-                    <h3>Atendimento Domiciliar</h3>
-                    <p>A <strong>Dra. Renata Kemp</strong> leva todo o cuidado e estrutura até você em Guarulhos e região.</p>
-                    <p style="margin-top: 12px; font-size: 0.9rem; color: var(--petroleo);">
-                        <i class="fas fa-whatsapp" style="color: #25D366;"></i>
-                        Agende pelo WhatsApp e receba a visita da Renata!
-                    </p>
-                </div>
+                <div class="contato-mapa"><i class="fas fa-map-pin"></i><h3>Atendimento em Guarulhos</h3><p><strong>Domiciliar:</strong> Renata vai até você.</p><p><strong>Presencial:</strong> Clínica em Guarulhos - SP.</p><p style="margin-top: 12px; font-size: 0.9rem; color: var(--petroleo);"><i class="fas fa-whatsapp" style="color: #25D366;"></i> Agende pelo WhatsApp e escolha a melhor opção!</p></div>
             </div>
         </div>
     </section>
@@ -1739,44 +2273,15 @@
     <footer>
         <div class="container">
             <div class="row">
-                <div class="col">
-                    <h4><i class="fas fa-leaf" style="color:var(--salvia);"></i> Levità Podologia</h4>
-                    <p>Leveza para cada passo.<br />Cuidando dos seus pés com dedicação e excelência.</p>
-                    <p><strong>Dra. Renata Kemp</strong></p>
-                    <p><i class="fas fa-home" style="color: var(--dourado);"></i> Atendimento Domiciliar</p>
-                    <p><i class="fas fa-map-marker-alt" style="color: var(--dourado);"></i> Guarulhos e região</p>
-                    <div class="social">
-                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
-                    </div>
-                </div>
-                <div class="col">
-                    <h4>Links rápidos</h4>
-                    <a href="#sobre">Sobre</a><br />
-                    <a href="#servicos">Serviços</a><br />
-                    <a href="#galeria">Galeria</a><br />
-                    <a href="#videos">Vídeos</a><br />
-                    <a href="#depoimentos">Depoimentos</a><br />
-                    <a href="#faq">FAQ</a>
-                </div>
-                <div class="col">
-                    <h4>Contato</h4>
-                    <p><i class="fas fa-phone-alt" style="width:20px;"></i> (11) 97830-3833</p>
-                    <p><i class="fab fa-whatsapp" style="width:20px;"></i> (11) 97830-3833</p>
-                    <p><i class="fas fa-envelope" style="width:20px;"></i> contato@levitapodologia.com.br</p>
-                    <p><i class="fas fa-clock" style="width:20px;"></i> Seg–Sex: 8h–19h</p>
-                    <p><strong>Dra. Renata Kemp</strong></p>
-                </div>
+                <div class="col"><h4><i class="fas fa-leaf" style="color:var(--salvia);"></i> Levità Podologia</h4><p>Leveza para cada passo.<br />Cuidando dos seus pés com dedicação e excelência.</p><p><strong>Podóloga Renata Kemp</strong></p><p><i class="fas fa-home" style="color: var(--dourado);"></i> Atendimento Domiciliar</p><p><i class="fas fa-building" style="color: var(--dourado);"></i> Atendimento Presencial</p><p><i class="fas fa-map-marker-alt" style="color: var(--dourado);"></i> Guarulhos e região</p><div class="social"><a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a><a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a><a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a></div></div>
+                <div class="col"><h4>Links rápidos</h4><a href="#sobre">Sobre</a><br /><a href="#servicos">Serviços</a><br /><a href="#galeria">Galeria</a><br /><a href="#videos">Vídeos</a><br /><a href="#depoimentos">Depoimentos</a><br /><a href="#faq">FAQ</a></div>
+                <div class="col"><h4>Contato</h4><p><i class="fas fa-phone-alt" style="width:20px;"></i> (11) 97830-3833</p><p><i class="fab fa-whatsapp" style="width:20px;"></i> (11) 97830-3833</p><p><i class="fas fa-envelope" style="width:20px;"></i> contato@levitapodologia.com.br</p><p><i class="fas fa-clock" style="width:20px;"></i> Seg–Sex: 8h–19h</p><p><strong>Podóloga Renata Kemp</strong></p></div>
             </div>
-            <div class="copyright">
-                &copy; 2026 Levità Podologia - <strong>Dra. Renata Kemp</strong>. Todos os direitos reservados.<br />
-                <span style="font-size: 0.8rem; opacity: 0.7;">Atendimento Domiciliar em Guarulhos e região</span>
-            </div>
+            <div class="copyright">&copy; 2026 Levità Podologia - <strong>Podóloga Renata Kemp</strong>. Todos os direitos reservados.<br /><span style="font-size: 0.8rem; opacity: 0.7;">Atendimento Domiciliar e Presencial em Guarulhos</span></div>
         </div>
     </footer>
 
-    <!-- ===== WHATSAPP FLUTUANTE ===== -->
+    <!-- ===== WHATSAPP FLOAT ===== -->
     <a href="#" class="whatsapp-float" id="whatsapp-float" aria-label="WhatsApp">
         <i class="fab fa-whatsapp"></i>
     </a>
@@ -1786,26 +2291,842 @@
         <i class="fas fa-arrow-up"></i>
     </div>
 
-    <!-- ===== JAVASCRIPT ===== -->
+    <!-- ===== TOAST ===== -->
+    <div class="toast" id="toast">
+        <i class="fas fa-info-circle"></i>
+        <span id="toast-mensagem">Mensagem</span>
+    </div>
+
+    <!-- ============================================
+         JAVASCRIPT - INTEGRAÇÃO SUPABASE
+         ============================================ -->
     <script>
         // ============================================
-        // WHATSAPP COM MENSAGEM PERSONALIZADA
+        // CONFIGURAÇÃO SUPABASE
         // ============================================
-        const numeroWhatsApp = '5511978303833';
-        const mensagemPersonalizada = 'Olá, vim pelo site e gostaria de agendar uma consulta com a Dra. Renata Kemp.';
+        const SUPABASE_URL = 'https://euktsrczpxejezkeyqoh.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_vH11tBYAWHlKNoCeQG-oMQ_r1fOxcRf';
 
-        function abrirWhatsApp() {
-            const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensagemPersonalizada)}`;
-            window.open(url, '_blank');
+        // Inicializa o cliente Supabase
+        const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // ============================================
+        // CONFIGURAÇÕES GERAIS
+        // ============================================
+        const NUMERO_WHATSAPP = '5511978303833';
+        const HORARIOS_DISPONIVEIS = ['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
+        const DIAS_SEMANA = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+        const MESES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+        const API_CEP_URL = 'https://viacep.com.br/ws/';
+
+        // ============================================
+        // ESTADO DO AGENDAMENTO
+        // ============================================
+        let agendamento = {
+            nome: '',
+            telefone: '',
+            email: '',
+            tipo: '',
+            endereco: '',
+            numero: '',
+            complemento: '',
+            cep: '',
+            servico: '',
+            data: '',
+            horario: '',
+            status: 'pendente'
+        };
+
+        let passoAtual = 1;
+
+        // ============================================
+        // TOAST
+        // ============================================
+        function mostrarToast(mensagem, tipo = 'info') {
+            const toast = document.getElementById('toast');
+            const mensagemEl = document.getElementById('toast-mensagem');
+            const icone = toast.querySelector('i');
+
+            if (!toast || !mensagemEl) return;
+
+            toast.classList.remove('sucesso', 'erro', 'mostrar');
+
+            if (tipo === 'sucesso') {
+                toast.classList.add('sucesso');
+                icone.className = 'fas fa-check-circle';
+            } else if (tipo === 'erro') {
+                toast.classList.add('erro');
+                icone.className = 'fas fa-exclamation-circle';
+            } else {
+                icone.className = 'fas fa-info-circle';
+            }
+
+            mensagemEl.textContent = mensagem;
+            toast.classList.add('mostrar');
+
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => {
+                toast.classList.remove('mostrar');
+            }, 4000);
+        }
+
+        // ============================================
+        // LOADING
+        // ============================================
+        function mostrarLoading(mensagem = 'Carregando...') {
+            const overlay = document.getElementById('loading-overlay');
+            overlay.querySelector('p').textContent = mensagem;
+            overlay.classList.add('ativo');
+        }
+
+        function esconderLoading() {
+            document.getElementById('loading-overlay').classList.remove('ativo');
+        }
+
+        // ============================================
+        // NAVEGAÇÃO ENTRE PASSOS
+        // ============================================
+        function irParaPasso(passo) {
+            document.querySelectorAll('.passo-conteudo').forEach(el => el.classList.remove('ativo'));
+            const target = document.getElementById('passo-' + passo);
+            if (target) target.classList.add('ativo');
+
+            document.querySelectorAll('.passo-indicador .passo').forEach(el => {
+                el.classList.remove('ativo');
+                const num = parseInt(el.dataset.passo);
+                if (num <= passo) el.classList.add('ativo');
+            });
+
+            passoAtual = passo;
+
+            const wrapper = document.querySelector('.agendamento-wrapper');
+            if (wrapper) {
+                wrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        function proximoPasso(passo) {
+            if (passo === 2 && !validarPasso1()) return;
+            if (passo === 3 && !validarPasso2()) return;
+            if (passo === 4 && !validarPasso3()) return;
+            if (passo === 5 && !validarPasso4()) return;
+
+            irParaPasso(passo);
+
+            if (passo === 5) {
+                preencherResumo();
+            }
+        }
+
+        function passoAnterior(passo) {
+            irParaPasso(passo);
+        }
+
+        // ============================================
+        // VALIDAÇÕES
+        // ============================================
+        function validarPasso1() {
+            const nome = document.getElementById('nome').value.trim();
+            const telefone = document.getElementById('telefone').value.trim();
+
+            if (!nome) {
+                mostrarToast('Por favor, digite seu nome completo.', 'erro');
+                document.getElementById('nome').focus();
+                return false;
+            }
+
+            if (!telefone || telefone.length < 10) {
+                mostrarToast('Por favor, digite um telefone válido (com DDD).', 'erro');
+                document.getElementById('telefone').focus();
+                return false;
+            }
+
+            agendamento.nome = nome;
+            agendamento.telefone = telefone;
+            agendamento.email = document.getElementById('email').value.trim();
+
+            return true;
+        }
+
+        function validarPasso2() {
+            const tipoSelecionado = document.querySelector('.tipo-btn.selecionado');
+            if (!tipoSelecionado) {
+                mostrarToast('Por favor, selecione o tipo de atendimento.', 'erro');
+                return false;
+            }
+
+            agendamento.tipo = tipoSelecionado.dataset.tipo;
+
+            if (agendamento.tipo === 'domicilio') {
+                const cep = document.getElementById('cep').value.replace(/\D/g, '');
+                const numero = document.getElementById('numero-endereco').value.trim();
+
+                if (!cep || cep.length < 8) {
+                    mostrarToast('Por favor, informe um CEP válido para atendimento domiciliar.', 'erro');
+                    document.getElementById('cep').focus();
+                    return false;
+                }
+
+                if (!numero) {
+                    mostrarToast('Por favor, informe o número do endereço.', 'erro');
+                    document.getElementById('numero-endereco').focus();
+                    return false;
+                }
+
+                const logradouro = document.getElementById('end-logradouro').textContent;
+                if (logradouro === '-' || logradouro === 'Não encontrado') {
+                    mostrarToast('CEP não encontrado. Por favor, verifique o CEP informado.', 'erro');
+                    return false;
+                }
+
+                agendamento.cep = cep;
+                agendamento.numero = numero;
+                agendamento.complemento = document.getElementById('complemento-endereco').value.trim();
+                agendamento.endereco = `${logradouro}, ${numero}${agendamento.complemento ? ', ' + agendamento.complemento : ''} - ${document.getElementById('end-bairro').textContent}, ${document.getElementById('end-cidade').textContent} - ${document.getElementById('end-estado').textContent}`;
+            } else {
+                agendamento.endereco = 'Rua da Clínica, 123 - Centro, Guarulhos - SP';
+                agendamento.cep = '';
+                agendamento.numero = '';
+                agendamento.complemento = '';
+            }
+
+            return true;
+        }
+
+        function validarPasso3() {
+            if (!agendamento.servico) {
+                mostrarToast('Por favor, selecione um serviço.', 'erro');
+                return false;
+            }
+            return true;
+        }
+
+        function validarPasso4() {
+            if (!agendamento.data) {
+                mostrarToast('Por favor, selecione uma data.', 'erro');
+                return false;
+            }
+            if (!agendamento.horario) {
+                mostrarToast('Por favor, selecione um horário.', 'erro');
+                return false;
+            }
+            return true;
+        }
+
+        // ============================================
+        // TIPO DE ATENDIMENTO
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            const tipoBtns = document.querySelectorAll('.tipo-btn');
+
+            tipoBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    tipoBtns.forEach(b => b.classList.remove('selecionado'));
+                    this.classList.add('selecionado');
+
+                    const tipo = this.dataset.tipo;
+                    const endDomicilio = document.getElementById('endereco-domicilio');
+                    const endPresencial = document.getElementById('endereco-presencial');
+
+                    if (tipo === 'domicilio') {
+                        endDomicilio.style.display = 'block';
+                        endPresencial.style.display = 'none';
+                    } else {
+                        endDomicilio.style.display = 'none';
+                        endPresencial.style.display = 'block';
+                    }
+                });
+            });
+        });
+
+        // ============================================
+        // BUSCA POR CEP
+        // ============================================
+        async function buscarCEP() {
+            const cepInput = document.getElementById('cep');
+            const cep = cepInput.value.replace(/\D/g, '');
+
+            if (cep.length !== 8) {
+                mostrarToast('Digite um CEP válido com 8 dígitos.', 'erro');
+                return;
+            }
+
+            try {
+                mostrarLoading('Buscando CEP...');
+                const response = await fetch(`${API_CEP_URL}${cep}/json/`);
+                const data = await response.json();
+                esconderLoading();
+
+                if (data.erro) {
+                    mostrarToast('CEP não encontrado. Verifique o número digitado.', 'erro');
+                    return;
+                }
+
+                document.getElementById('end-logradouro').textContent = data.logradouro || 'Não informado';
+                document.getElementById('end-bairro').textContent = data.bairro || 'Não informado';
+                document.getElementById('end-cidade').textContent = data.localidade || 'Não informado';
+                document.getElementById('end-estado').textContent = data.uf || 'Não informado';
+
+                document.getElementById('endereco-completo').classList.add('visivel');
+
+                mostrarToast('CEP encontrado com sucesso!', 'sucesso');
+
+            } catch (error) {
+                esconderLoading();
+                mostrarToast('Erro ao buscar CEP. Tente novamente.', 'erro');
+                console.error('Erro na busca de CEP:', error);
+            }
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('#whatsapp-hero, #whatsapp-banner, #whatsapp-contato, #whatsapp-float').forEach(function(btn) {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    abrirWhatsApp();
+            const cepInput = document.getElementById('cep');
+            if (cepInput) {
+                cepInput.addEventListener('input', function() {
+                    let value = this.value.replace(/\D/g, '');
+                    if (value.length > 8) value = value.slice(0, 8);
+                    if (value.length > 5) {
+                        value = value.slice(0, 5) + '-' + value.slice(5);
+                    }
+                    this.value = value;
+                });
+            }
+        });
+
+        // ============================================
+        // SERVIÇOS - SELEÇÃO
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            const servicosBtns = document.querySelectorAll('.servico-btn');
+
+            servicosBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    servicosBtns.forEach(b => b.classList.remove('selecionado'));
+                    this.classList.add('selecionado');
+                    agendamento.servico = this.dataset.servico;
                 });
             });
+        });
+
+        // ============================================
+        // DATAS E HORÁRIOS
+        // ============================================
+        async function gerarHorarios(dataStr) {
+            const grid = document.getElementById('horarios-grid');
+            if (!grid) return;
+
+            grid.innerHTML = '';
+
+            const data = new Date(dataStr + 'T00:00:00');
+            const diaSemana = data.getDay();
+
+            let horariosFiltrados = [...HORARIOS_DISPONIVEIS];
+
+            if (diaSemana === 0) {
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; padding: 20px; color: #dc3545;">⚠️ Não atendemos aos domingos.</p>';
+                return;
+            }
+
+            if (diaSemana === 6) {
+                horariosFiltrados = horariosFiltrados.filter(h => {
+                    const hora = parseInt(h.split(':')[0]);
+                    return hora >= 8 && hora < 13;
+                });
+            }
+
+            if (horariosFiltrados.length === 0) {
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; padding: 20px; color: #dc3545;">⚠️ Nenhum horário disponível para esta data.</p>';
+                return;
+            }
+
+            // Busca horários ocupados no Supabase
+            try {
+                const { data: ocupados, error } = await supabase
+                    .from('agendamentos')
+                    .select('horario')
+                    .eq('data', dataStr)
+                    .neq('status', 'cancelado');
+
+                if (error) throw error;
+
+                const horariosOcupados = ocupados.map(o => o.horario);
+
+                horariosFiltrados.forEach(horario => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'horario-btn';
+                    btn.textContent = horario;
+                    btn.dataset.horario = horario;
+
+                    if (horariosOcupados.includes(horario)) {
+                        btn.classList.add('indisponivel');
+                        btn.disabled = true;
+                        btn.title = 'Horário já ocupado';
+                    }
+
+                    btn.addEventListener('click', function() {
+                        if (this.disabled) return;
+                        document.querySelectorAll('.horario-btn').forEach(b => b.classList.remove('selecionado'));
+                        this.classList.add('selecionado');
+                        agendamento.horario = this.dataset.horario;
+                    });
+
+                    grid.appendChild(btn);
+                });
+            } catch (error) {
+                console.error('Erro ao buscar horários:', error);
+                mostrarToast('Erro ao carregar horários disponíveis.', 'erro');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const dataInput = document.getElementById('data-agendamento');
+            if (dataInput) {
+                const hoje = new Date();
+                const ano = hoje.getFullYear();
+                const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+                const dia = String(hoje.getDate()).padStart(2, '0');
+                dataInput.min = `${ano}-${mes}-${dia}`;
+
+                let diasAdicionar = 1;
+                let tentativas = 0;
+                while (tentativas < 10) {
+                    const teste = new Date(hoje);
+                    teste.setDate(teste.getDate() + diasAdicionar);
+                    if (teste.getDay() !== 0 && teste.getDay() !== 6) break;
+                    diasAdicionar++;
+                    tentativas++;
+                }
+                const dataPadrao = new Date(hoje);
+                dataPadrao.setDate(dataPadrao.getDate() + diasAdicionar);
+                const anoPadrao = dataPadrao.getFullYear();
+                const mesPadrao = String(dataPadrao.getMonth() + 1).padStart(2, '0');
+                const diaPadrao = String(dataPadrao.getDate()).padStart(2, '0');
+                dataInput.value = `${anoPadrao}-${mesPadrao}-${diaPadrao}`;
+
+                dataInput.addEventListener('change', function() {
+                    const data = this.value;
+                    if (data) {
+                        agendamento.data = data;
+                        gerarHorarios(data);
+                    }
+                });
+
+                setTimeout(() => {
+                    if (dataInput.value) {
+                        agendamento.data = dataInput.value;
+                        gerarHorarios(dataInput.value);
+                    }
+                }, 100);
+            }
+        });
+
+        // ============================================
+        // BANCO DE DADOS - SUPABASE
+        // ============================================
+        async function getAgendamentos() {
+            try {
+                mostrarLoading('Carregando agendamentos...');
+                const { data, error } = await supabase
+                    .from('agendamentos')
+                    .select('*')
+                    .order('data', { ascending: false });
+
+                esconderLoading();
+
+                if (error) throw error;
+                return data || [];
+            } catch (error) {
+                esconderLoading();
+                console.error('Erro ao buscar agendamentos:', error);
+                mostrarToast('Erro ao carregar agendamentos do Supabase.', 'erro');
+                return [];
+            }
+        }
+
+        async function salvarAgendamento(dados) {
+            try {
+                mostrarLoading('Salvando agendamento...');
+                
+                const { data, error } = await supabase
+                    .from('agendamentos')
+                    .insert([{
+                        nome: dados.nome,
+                        telefone: dados.telefone,
+                        email: dados.email || null,
+                        tipo: dados.tipo,
+                        endereco: dados.endereco,
+                        numero: dados.numero || null,
+                        complemento: dados.complemento || null,
+                        cep: dados.cep || null,
+                        servico: dados.servico,
+                        data: dados.data,
+                        horario: dados.horario,
+                        status: 'pendente'
+                    }])
+                    .select();
+
+                esconderLoading();
+
+                if (error) throw error;
+                return data ? data[0] : null;
+            } catch (error) {
+                esconderLoading();
+                console.error('Erro ao salvar agendamento:', error);
+                mostrarToast('Erro ao salvar agendamento no Supabase.', 'erro');
+                return null;
+            }
+        }
+
+        async function atualizarStatusAgendamento(id, novoStatus) {
+            try {
+                mostrarLoading('Atualizando status...');
+                
+                const { error } = await supabase
+                    .from('agendamentos')
+                    .update({ status: novoStatus })
+                    .eq('id', id);
+
+                esconderLoading();
+
+                if (error) throw error;
+                return true;
+            } catch (error) {
+                esconderLoading();
+                console.error('Erro ao atualizar status:', error);
+                mostrarToast('Erro ao atualizar status no Supabase.', 'erro');
+                return false;
+            }
+        }
+
+        async function deletarAgendamento(id) {
+            if (!confirm('Tem certeza que deseja excluir este agendamento?')) return false;
+
+            try {
+                mostrarLoading('Excluindo agendamento...');
+                
+                const { error } = await supabase
+                    .from('agendamentos')
+                    .delete()
+                    .eq('id', id);
+
+                esconderLoading();
+
+                if (error) throw error;
+                mostrarToast('Agendamento excluído com sucesso!', 'sucesso');
+                return true;
+            } catch (error) {
+                esconderLoading();
+                console.error('Erro ao excluir agendamento:', error);
+                mostrarToast('Erro ao excluir agendamento do Supabase.', 'erro');
+                return false;
+            }
+        }
+
+        // ============================================
+        // RESUMO DO AGENDAMENTO
+        // ============================================
+        function preencherResumo() {
+            const resumo = document.getElementById('resumo-agendamento');
+            if (!resumo) return;
+
+            const dataObj = new Date(agendamento.data + 'T00:00:00');
+            const dataFormatada = `${DIAS_SEMANA[dataObj.getDay()]}, ${dataObj.getDate()} de ${MESES[dataObj.getMonth()]} de ${dataObj.getFullYear()}`;
+            const tipoLabel = agendamento.tipo === 'domicilio' ? '🏠 Domiciliar' : '🏢 Presencial';
+
+            resumo.innerHTML = `
+                <div class="linha"><span class="rotulo">Nome</span><span class="valor">${agendamento.nome}</span></div>
+                <div class="linha"><span class="rotulo">Telefone</span><span class="valor">${agendamento.telefone}</span></div>
+                <div class="linha"><span class="rotulo">E-mail</span><span class="valor">${agendamento.email || 'Não informado'}</span></div>
+                <div class="linha"><span class="rotulo">Tipo de Atendimento</span><span class="valor">${tipoLabel}</span></div>
+                <div class="linha"><span class="rotulo">Endereço</span><span class="valor">${agendamento.endereco}</span></div>
+                <div class="linha"><span class="rotulo">Serviço</span><span class="valor"><strong>${agendamento.servico}</strong></span></div>
+                <div class="linha"><span class="rotulo">Data</span><span class="valor">${dataFormatada}</span></div>
+                <div class="linha"><span class="rotulo">Horário</span><span class="valor">${agendamento.horario}</span></div>
+            `;
+        }
+
+        // ============================================
+        // CONFIRMAR AGENDAMENTO
+        // ============================================
+        async function confirmarAgendamento() {
+            if (!validarPasso1()) return;
+            if (!validarPasso2()) return;
+            if (!validarPasso3()) return;
+            if (!validarPasso4()) return;
+
+            const btn = document.getElementById('btn-confirmar');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+            btn.disabled = true;
+
+            const salvo = await salvarAgendamento(agendamento);
+
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+
+            if (!salvo) {
+                mostrarToast('Erro ao salvar agendamento. Tente novamente.', 'erro');
+                return;
+            }
+
+            mostrarConfirmacao(salvo);
+            mostrarToast('Agendamento salvo com sucesso!', 'sucesso');
+            renderizarAdmin();
+        }
+
+        function mostrarConfirmacao(dados) {
+            document.querySelectorAll('.passo-conteudo').forEach(el => el.classList.remove('ativo'));
+            const passo6 = document.getElementById('passo-6');
+            if (passo6) passo6.classList.add('ativo');
+
+            document.querySelectorAll('.passo-indicador .passo').forEach(el => {
+                el.classList.add('ativo');
+            });
+
+            document.getElementById('id-agendamento').textContent = `#${String(dados.id).padStart(5, '0')}`;
+
+            const detalhes = document.getElementById('detalhes-confirmacao');
+            if (detalhes) {
+                const dataObj = new Date(dados.data + 'T00:00:00');
+                const dataFormatada = `${DIAS_SEMANA[dataObj.getDay()]}, ${dataObj.getDate()} de ${MESES[dataObj.getMonth()]} de ${dataObj.getFullYear()}`;
+                const tipoLabel = dados.tipo === 'domicilio' ? '🏠 Domiciliar' : '🏢 Presencial';
+
+                detalhes.innerHTML = `
+                    <div><span>Nome:</span> <strong>${dados.nome}</strong></div>
+                    <div><span>Tipo:</span> <strong>${tipoLabel}</strong></div>
+                    <div><span>Endereço:</span> <strong>${dados.endereco}</strong></div>
+                    <div><span>Serviço:</span> <strong>${dados.servico}</strong></div>
+                    <div><span>Data:</span> <strong>${dataFormatada}</strong></div>
+                    <div><span>Horário:</span> <strong>${dados.horario}</strong></div>
+                    <div><span>Status:</span> <strong>Pendente</strong></div>
+                `;
+            }
+
+            const wrapper = document.querySelector('.agendamento-wrapper');
+            if (wrapper) {
+                wrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        function novoAgendamento() {
+            agendamento = {
+                nome: '',
+                telefone: '',
+                email: '',
+                tipo: '',
+                endereco: '',
+                numero: '',
+                complemento: '',
+                cep: '',
+                servico: '',
+                data: '',
+                horario: '',
+                status: 'pendente'
+            };
+
+            document.getElementById('nome').value = '';
+            document.getElementById('telefone').value = '';
+            document.getElementById('email').value = '';
+            document.getElementById('cep').value = '';
+            document.getElementById('numero-endereco').value = '';
+            document.getElementById('complemento-endereco').value = '';
+            document.getElementById('endereco-completo').classList.remove('visivel');
+
+            document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('selecionado'));
+            document.querySelectorAll('.servico-btn').forEach(b => b.classList.remove('selecionado'));
+            document.querySelectorAll('.horario-btn').forEach(b => b.classList.remove('selecionado'));
+
+            document.getElementById('endereco-domicilio').style.display = 'none';
+            document.getElementById('endereco-presencial').style.display = 'none';
+
+            const dataInput = document.getElementById('data-agendamento');
+            if (dataInput) {
+                const hoje = new Date();
+                let diasAdicionar = 1;
+                let tentativas = 0;
+                while (tentativas < 10) {
+                    const teste = new Date(hoje);
+                    teste.setDate(teste.getDate() + diasAdicionar);
+                    if (teste.getDay() !== 0 && teste.getDay() !== 6) break;
+                    diasAdicionar++;
+                    tentativas++;
+                }
+                const dataPadrao = new Date(hoje);
+                dataPadrao.setDate(dataPadrao.getDate() + diasAdicionar);
+                const anoPadrao = dataPadrao.getFullYear();
+                const mesPadrao = String(dataPadrao.getMonth() + 1).padStart(2, '0');
+                const diaPadrao = String(dataPadrao.getDate()).padStart(2, '0');
+                dataInput.value = `${anoPadrao}-${mesPadrao}-${diaPadrao}`;
+                agendamento.data = dataInput.value;
+                gerarHorarios(dataInput.value);
+            }
+
+            irParaPasso(1);
+            mostrarToast('Novo agendamento iniciado!', 'info');
+        }
+
+        // ============================================
+        // PAINEL ADMINISTRATIVO
+        // ============================================
+        async function renderizarAdmin() {
+            const agendamentos = await getAgendamentos();
+            const tbody = document.getElementById('admin-tbody');
+            const filtroStatus = document.getElementById('filtro-status').value;
+            const filtroTipo = document.getElementById('filtro-tipo').value;
+            const filtroBusca = document.getElementById('filtro-busca').value.toLowerCase();
+
+            let filtrados = agendamentos;
+
+            if (filtroStatus !== 'todos') {
+                filtrados = filtrados.filter(a => a.status === filtroStatus);
+            }
+            if (filtroTipo !== 'todos') {
+                filtrados = filtrados.filter(a => a.tipo === filtroTipo);
+            }
+            if (filtroBusca) {
+                filtrados = filtrados.filter(a => 
+                    a.nome.toLowerCase().includes(filtroBusca) ||
+                    a.telefone.includes(filtroBusca)
+                );
+            }
+
+            filtrados.sort((a, b) => new Date(b.data_criacao) - new Date(a.data_criacao));
+
+            document.getElementById('total-count').textContent = agendamentos.length;
+            document.getElementById('pendente-count').textContent = agendamentos.filter(a => a.status === 'pendente').length;
+            document.getElementById('confirmado-count').textContent = agendamentos.filter(a => a.status === 'confirmado').length;
+            document.getElementById('domicilio-count').textContent = agendamentos.filter(a => a.tipo === 'domicilio').length;
+            document.getElementById('presencial-count').textContent = agendamentos.filter(a => a.tipo === 'presencial').length;
+            document.getElementById('total-agendamentos').textContent = `${agendamentos.length} agendamentos`;
+
+            if (filtrados.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:30px; color:#8a9ea3;">Nenhum agendamento encontrado.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtrados.map((a, index) => {
+                const dataObj = new Date(a.data + 'T00:00:00');
+                const dataFormatada = `${String(dataObj.getDate()).padStart(2,'0')}/${String(dataObj.getMonth()+1).padStart(2,'0')}/${dataObj.getFullYear()}`;
+                const tipoLabel = a.tipo === 'domicilio' ? '🏠 Domiciliar' : '🏢 Presencial';
+                const tipoClass = a.tipo === 'domicilio' ? 'tipo-domicilio' : 'tipo-presencial';
+
+                let statusClass = 'status-pendente';
+                if (a.status === 'confirmado') statusClass = 'status-confirmado';
+                if (a.status === 'cancelado') statusClass = 'status-cancelado';
+                if (a.status === 'atendido') statusClass = 'status-atendido';
+
+                return `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td><strong>${a.nome}</strong></td>
+                        <td>${a.telefone}</td>
+                        <td>${a.servico}</td>
+                        <td><span class="tipo-badge ${tipoClass}">${tipoLabel}</span></td>
+                        <td>${dataFormatada}</td>
+                        <td>${a.horario}</td>
+                        <td><span class="status ${statusClass}">${a.status.charAt(0).toUpperCase() + a.status.slice(1)}</span></td>
+                        <td>
+                            <div class="actions">
+                                ${a.status === 'pendente' ? `
+                                    <button class="btn btn-sm btn-success" onclick="mudarStatus(${a.id}, 'confirmado')" title="Confirmar"><i class="fas fa-check"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="mudarStatus(${a.id}, 'cancelado')" title="Cancelar"><i class="fas fa-times"></i></button>
+                                ` : a.status === 'confirmado' ? `
+                                    <button class="btn btn-sm btn-warning" onclick="mudarStatus(${a.id}, 'atendido')" title="Atendido"><i class="fas fa-user-check"></i></button>
+                                    <button class="btn btn-sm btn-danger" onclick="mudarStatus(${a.id}, 'cancelado')" title="Cancelar"><i class="fas fa-times"></i></button>
+                                ` : a.status === 'atendido' ? `
+                                    <button class="btn btn-sm btn-primario" onclick="mudarStatus(${a.id}, 'confirmado')" title="Reativar"><i class="fas fa-undo"></i></button>
+                                ` : `
+                                    <button class="btn btn-sm btn-primario" onclick="mudarStatus(${a.id}, 'pendente')" title="Reativar"><i class="fas fa-undo"></i></button>
+                                `}
+                                <button class="btn btn-sm btn-danger" onclick="deletarAgendamento(${a.id})" title="Excluir"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function mudarStatus(id, novoStatus) {
+            if (await atualizarStatusAgendamento(id, novoStatus)) {
+                const statusLabels = {
+                    'pendente': 'Pendente',
+                    'confirmado': 'Confirmado',
+                    'cancelado': 'Cancelado',
+                    'atendido': 'Atendido'
+                };
+                mostrarToast(`Status atualizado para ${statusLabels[novoStatus] || novoStatus}!`, 'sucesso');
+                renderizarAdmin();
+            }
+        }
+
+        async function deletarAgendamento(id) {
+            if (await deletarAgendamento(id)) {
+                renderizarAdmin();
+            }
+        }
+
+        function exportarCSV() {
+            // Implementação simplificada - busca dados e exporta
+            mostrarToast('Função de exportação disponível em breve.', 'info');
+        }
+
+        // ============================================
+        // SINCronizar dados locais com Supabase
+        // ============================================
+        async function syncLocalToSupabase() {
+            // Esta função pode ser usada para migrar dados do localStorage para o Supabase
+            mostrarToast('Sincronização iniciada...', 'info');
+            try {
+                const localData = JSON.parse(localStorage.getItem('agendamentos_levita') || '[]');
+                if (localData.length === 0) {
+                    mostrarToast('Nenhum dado local para sincronizar.', 'info');
+                    return;
+                }
+
+                mostrarLoading('Sincronizando dados...');
+                let count = 0;
+                for (const item of localData) {
+                    const { error } = await supabase
+                        .from('agendamentos')
+                        .insert([{
+                            nome: item.nome,
+                            telefone: item.telefone,
+                            email: item.email || null,
+                            tipo: item.tipo,
+                            endereco: item.endereco,
+                            numero: item.numero || null,
+                            complemento: item.complemento || null,
+                            cep: item.cep || null,
+                            servico: item.servico,
+                            data: item.data,
+                            horario: item.horario,
+                            status: item.status || 'pendente'
+                        }]);
+                    if (!error) count++;
+                }
+                esconderLoading();
+                mostrarToast(`${count} agendamentos sincronizados com sucesso!`, 'sucesso');
+                renderizarAdmin();
+            } catch (error) {
+                esconderLoading();
+                console.error('Erro na sincronização:', error);
+                mostrarToast('Erro ao sincronizar dados.', 'erro');
+            }
+        }
+
+        // ============================================
+        // WHATSAPP FLOAT
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            const whatsappFloat = document.getElementById('whatsapp-float');
+            if (whatsappFloat) {
+                whatsappFloat.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const mensagem = 'Olá, vim pelo site e gostaria de agendar uma consulta com a Podóloga Renata Kemp.';
+                    const url = `https://wa.me/${NUMERO_WHATSAPP}?text=${encodeURIComponent(mensagem)}`;
+                    window.open(url, '_blank');
+                });
+            }
         });
 
         // ============================================
@@ -1900,7 +3221,7 @@
         });
 
         // ============================================
-        // ANIMAÇÕES DE ENTRADA
+        // ANIMAÇÕES E INICIALIZAÇÃO
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
             const elementos = document.querySelectorAll(
@@ -1937,10 +3258,13 @@
                     });
                 }, 200);
             }
+
+            // Carrega os agendamentos
+            renderizarAdmin();
         });
 
         // ============================================
-        // OTIMIZAÇÃO PARA DISPOSITIVOS MÓVEIS
+        // OTIMIZAÇÃO PARA MÓVEIS
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
             let lastTouch = 0;
@@ -1964,6 +3288,5 @@
             window.addEventListener('resize', ajustarHero);
         });
     </script>
-
 </body>
 </html>
