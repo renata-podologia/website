@@ -9,6 +9,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     
     <style>
+        /* ============================================
+           TODOS OS ESTILOS (MANTENHA O MESMO QUE VOCÊ JÁ TEM)
+           ============================================ */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html { scroll-behavior: smooth; font-size: 16px; }
         body {
@@ -270,7 +273,7 @@
             color: #1e2b2f;
             position: relative;
         }
-        .horario-btn:hover:not(.indisponivel):not(.confirmado) { border-color: #2F5D62; background: #F4EFE8; }
+        .horario-btn:hover:not(.indisponivel):not(.confirmado):not(.passado) { border-color: #2F5D62; background: #F4EFE8; }
         .horario-btn.selecionado { border-color: #C9A227; background: #C9A227; color: #fff; }
         .horario-btn.indisponivel { 
             opacity: 0.5; 
@@ -295,6 +298,18 @@
         .horario-btn.indisponivel::after {
             content: " ⏳";
             color: #856404;
+        }
+        .horario-btn.passado {
+            opacity: 0.3;
+            cursor: not-allowed;
+            background: #e8edee;
+            border-color: #ccc;
+            color: #8a9ea3;
+            text-decoration: line-through;
+        }
+        .horario-btn.passado::after {
+            content: " ⏰";
+            color: #8a9ea3;
         }
         
         .servicos-escolha {
@@ -463,6 +478,7 @@
         .legenda-horarios .bola.disponivel { background: #28a745; }
         .legenda-horarios .bola.pendente { background: #f0ad4e; }
         .legenda-horarios .bola.confirmado { background: #dc3545; }
+        .legenda-horarios .bola.passado { background: #8a9ea3; }
         
         @media (max-width: 768px) {
             body { padding: 10px; }
@@ -686,6 +702,7 @@
                         <span class="item"><span class="bola disponivel"></span> Disponível</span>
                         <span class="item"><span class="bola pendente"></span> Já agendado (pendente)</span>
                         <span class="item"><span class="bola confirmado"></span> Já confirmado</span>
+                        <span class="item"><span class="bola passado"></span> Horário já passou</span>
                     </div>
                 </div>
             </div>
@@ -1023,14 +1040,13 @@
         });
 
         // ============================================
-        // DATAS E HORÁRIOS - CONSULTA CORRIGIDA
+        // DATAS E HORÁRIOS - COM FILTRO DE HORÁRIOS FUTUROS
         // ============================================
         function gerarHorarios(dataStr) {
             var grid = document.getElementById('horarios-grid');
             grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; padding: 20px; color: #8a9ea3;"><i class="fas fa-spinner fa-spin"></i> Carregando horários...</p>';
             
             console.log('🔍 [CONSULTA] Data selecionada:', dataStr);
-            console.log('🔍 [CONSULTA] Tipo da data:', typeof dataStr);
             
             if (!supabaseClient) {
                 console.error('❌ Supabase não disponível!');
@@ -1045,21 +1061,35 @@
             
             var data = new Date(dataStr + 'T00:00:00');
             var diaSemana = data.getDay();
+            var hoje = new Date();
             
+            // Verifica se a data selecionada é HOJE
+            var ehHoje = dataStr === hoje.toISOString().split('T')[0];
+            console.log('📅 É hoje?', ehHoje);
+            
+            // Hora atual (para filtrar horários que já passaram)
+            var horaAtual = hoje.getHours();
+            var minutoAtual = hoje.getMinutes();
+            console.log('🕐 Hora atual:', horaAtual + ':' + String(minutoAtual).padStart(2, '0'));
+            
+            // Verifica se é domingo
             if (diaSemana === 0) {
                 grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; padding: 20px; color: #dc3545;">⚠️ Não atendemos aos domingos.</p>';
                 return;
             }
             
+            // Filtra horários base
             var horariosFiltrados = HORARIOS_BASE.slice();
-            if (diaSemana === 6) {
-                horariosFiltrados = horariosFiltrados.filter(function(h) {
-                    return parseInt(h.split(':')[0]) >= 8 && parseInt(h.split(':')[0]) < 13;
-                });
-            }
+            
+            // Se for sábado, filtra apenas até 13:00 (se você quiser)
+            // if (diaSemana === 6) {
+            //     horariosFiltrados = horariosFiltrados.filter(function(h) {
+            //         return parseInt(h.split(':')[0]) >= 8 && parseInt(h.split(':')[0]) < 13;
+            //     });
+            // }
             
             if (horariosFiltrados.length === 0) {
-                grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; padding: 20px; color: #dc3545;">⚠️ Nenhum horário disponível para sábado.</p>';
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; padding: 20px; color: #dc3545;">⚠️ Nenhum horário disponível.</p>';
                 return;
             }
 
@@ -1101,6 +1131,8 @@
                     grid.innerHTML = '';
                     
                     var totalBloqueados = 0;
+                    var totalPassados = 0;
+                    
                     for (var k = 0; k < horariosFiltrados.length; k++) {
                         var horario = horariosFiltrados[k];
                         var btn = document.createElement('button');
@@ -1109,9 +1141,29 @@
                         btn.textContent = horario;
                         btn.dataset.horario = horario;
                         
+                        // ============================================
+                        // VERIFICA SE O HORÁRIO JÁ PASSOU (hoje)
+                        // ============================================
+                        var estaPassado = false;
+                        if (ehHoje) {
+                            var horaHorario = parseInt(horario.split(':')[0]);
+                            var minutoHorario = parseInt(horario.split(':')[1]);
+                            
+                            if (horaHorario < horaAtual || (horaHorario === horaAtual && minutoHorario <= minutoAtual)) {
+                                estaPassado = true;
+                            }
+                        }
+                        
+                        // Verifica se está ocupado
                         var estaOcupado = horariosOcupados.indexOf(horario) !== -1;
                         
-                        if (estaOcupado) {
+                        if (estaPassado) {
+                            btn.classList.add('passado');
+                            btn.disabled = true;
+                            btn.title = '⏰ Horário já passou!';
+                            totalPassados++;
+                            console.log('  ⏰ ' + horario + ' - JÁ PASSOU');
+                        } else if (estaOcupado) {
                             btn.classList.add('confirmado');
                             btn.disabled = true;
                             btn.title = '❌ Horário já ocupado!';
@@ -1139,11 +1191,14 @@
                     }
                     
                     console.log('📊 [CONSULTA] Total bloqueados:', totalBloqueados, 'de', horariosFiltrados.length);
+                    console.log('📊 [CONSULTA] Total passados:', totalPassados, 'de', horariosFiltrados.length);
                     
-                    if (totalBloqueados === horariosFiltrados.length && horariosFiltrados.length > 0) {
+                    // Verifica se todos estão bloqueados
+                    var totalIndisponiveis = totalBloqueados + totalPassados;
+                    if (totalIndisponiveis === horariosFiltrados.length && horariosFiltrados.length > 0) {
                         var msg = document.createElement('p');
                         msg.style.cssText = 'grid-column: 1/-1; text-align:center; padding: 20px; color: #dc3545; font-weight: 600;';
-                        msg.innerHTML = '⚠️ TODOS os horários deste dia já estão ocupados. Escolha outra data.';
+                        msg.innerHTML = '⚠️ Nenhum horário disponível para esta data. Escolha outra data.';
                         grid.appendChild(msg);
                     }
                 })
@@ -1162,12 +1217,19 @@
             var hoje = new Date();
             dataInput.min = hoje.getFullYear() + '-' + String(hoje.getMonth() + 1).padStart(2, '0') + '-' + String(hoje.getDate()).padStart(2, '0');
             
-            var diasAdicionar = 1;
-            while (new Date(hoje.getTime() + diasAdicionar * 86400000).getDay() === 0 || 
-                   new Date(hoje.getTime() + diasAdicionar * 86400000).getDay() === 6) {
-                diasAdicionar++;
-            }
+            // Define a data padrão (hoje ou próximo dia útil)
+            var diasAdicionar = 0;
             var dataPadrao = new Date(hoje);
+            
+            // Se hoje for domingo, vai para segunda
+            if (hoje.getDay() === 0) {
+                diasAdicionar = 1;
+            }
+            // Se hoje for sábado, vai para segunda
+            else if (hoje.getDay() === 6) {
+                diasAdicionar = 2;
+            }
+            
             dataPadrao.setDate(dataPadrao.getDate() + diasAdicionar);
             dataInput.value = dataPadrao.getFullYear() + '-' + String(dataPadrao.getMonth() + 1).padStart(2, '0') + '-' + String(dataPadrao.getDate()).padStart(2, '0');
             
@@ -1303,7 +1365,6 @@
                             // ============================================
                             if (typeof enviarWhatsAppSimplificado === 'function') {
                                 try {
-                                    // Abre o WhatsApp da Renata com a mensagem pronta
                                     enviarWhatsAppSimplificado(salvo);
                                     mostrarToast('📱 Notificação enviada para a Renata!', 'sucesso');
                                 } catch(err) {
@@ -1317,7 +1378,6 @@
                             mostrarConfirmacao(salvo);
                             mostrarToast('Agendamento salvo com sucesso!', 'sucesso');
                             
-                            // Recarrega o painel se existir
                             if (typeof renderizarAdmin === 'function') {
                                 renderizarAdmin();
                             }
@@ -1411,12 +1471,15 @@
             
             var dataInput = document.getElementById('data-agendamento');
             var hoje = new Date();
-            var diasAdicionar = 1;
-            while (new Date(hoje.getTime() + diasAdicionar * 86400000).getDay() === 0 || 
-                   new Date(hoje.getTime() + diasAdicionar * 86400000).getDay() === 6) {
-                diasAdicionar++;
-            }
+            var diasAdicionar = 0;
             var dataPadrao = new Date(hoje);
+            
+            if (hoje.getDay() === 0) {
+                diasAdicionar = 1;
+            } else if (hoje.getDay() === 6) {
+                diasAdicionar = 2;
+            }
+            
             dataPadrao.setDate(dataPadrao.getDate() + diasAdicionar);
             dataInput.value = dataPadrao.getFullYear() + '-' + String(dataPadrao.getMonth() + 1).padStart(2, '0') + '-' + String(dataPadrao.getDate()).padStart(2, '0');
             agendamento.data = dataInput.value;
