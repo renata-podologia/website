@@ -1259,6 +1259,21 @@
 
     <script>
         // ============================================
+        // WHATSAPP FLOAT - PEDIR MAIS INFORMAÇÕES
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            const whatsappFloat = document.getElementById('whatsapp-float');
+            if (whatsappFloat) {
+                whatsappFloat.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const mensagem = 'Olá! 👋 Vim pelo site e gostaria de mais informações sobre os atendimentos da Podóloga Renata Kemp.';
+                    const url = 'https://wa.me/5511978303833?text=' + encodeURIComponent(mensagem);
+                    window.open(url, '_blank');
+                });
+            }
+        });
+
+        // ============================================
         // MENU MOBILE
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
@@ -1345,21 +1360,6 @@
 
                 backTop.addEventListener('click', function() {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
-                });
-            }
-        });
-
-        // ============================================
-        // WHATSAPP FLOAT
-        // ============================================
-        document.addEventListener('DOMContentLoaded', function() {
-            const whatsappFloat = document.getElementById('whatsapp-float');
-            if (whatsappFloat) {
-                whatsappFloat.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const mensagem = 'Olá, vim pelo site e gostaria de agendar uma consulta com a Podóloga Renata Kemp.';
-                    const url = 'https://wa.me/5511978303833?text=' + encodeURIComponent(mensagem);
-                    window.open(url, '_blank');
                 });
             }
         });

@@ -12,12 +12,10 @@ Site institucional da Levità Podologia - atendimento domiciliar em Guarulhos e 
 - CSS
 - JavaScript
 
-## Como usar
-
-1. Abra o arquivo `index.html` no navegador
-2. Ou acesse o site pelo GitHub Pages
-
-## Estrutura
-
+## video
 
 https://raw.githubusercontent.com/renata-podologia/website/main/videos/video1.mp4
+
+
+## Site
+https://renata-podologia.github.io/website/
