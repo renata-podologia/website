@@ -1,4 +1,3 @@
-cat > js/google-calendar.js << 'EOF'
 // ============================================
 // GOOGLE CALENDAR API - INTEGRAÇÃO
 // ============================================
@@ -26,6 +25,10 @@ try {
     CLIENT_ID = 'SEU_CLIENT_ID_AQUI';
     CLIENT_SECRET = 'SUA_CLIENT_SECRET_AQUI';
 }
+
+// ============================================
+// CONFIGURAÇÃO DO GOOGLE CALENDAR
+// ============================================
 
 const CALENDAR_CONFIG = {
     clientId: CLIENT_ID,
@@ -184,20 +187,7 @@ async function criarEventoCalendar(dados) {
         var evento = {
             'summary': dados.servico + ' - ' + dados.nome,
             'location': dados.endereco || 'Clínica - Guarulhos',
-            'description': `
-🔔 NOVO AGENDAMENTO
-
-👤 Paciente: ${dados.nome}
-📱 Telefone: ${dados.telefone}
-📧 E-mail: ${dados.email}
-📋 Serviço: ${dados.servico}
-📍 Tipo: ${tipoLabel}
-🏠 Endereço: ${dados.endereco || 'Presencial - Clínica'}
-📌 Status: Pendente
-🔑 Protocolo: #${String(dados.id).padStart(5, '0')}
-
-🔗 Ver no painel: https://renata-podologia.github.io/website/admin.html
-            `,
+            'description': '\n🔔 NOVO AGENDAMENTO\n\n👤 Paciente: ' + dados.nome + '\n📱 Telefone: ' + dados.telefone + '\n📧 E-mail: ' + dados.email + '\n📋 Serviço: ' + dados.servico + '\n📍 Tipo: ' + tipoLabel + '\n🏠 Endereço: ' + (dados.endereco || 'Presencial - Clínica') + '\n📌 Status: Pendente\n🔑 Protocolo: #' + String(dados.id).padStart(5, '0') + '\n\n🔗 Ver no painel: https://renata-podologia.github.io/website/admin.html',
             'start': {
                 'dateTime': dataHoraInicio,
                 'timeZone': 'America/Sao_Paulo'
@@ -296,4 +286,3 @@ window.processarAgendamento = processarAgendamento;
 window.criarEventoCalendar = criarEventoCalendar;
 
 console.log('✅ Google Calendar integrado!');
-EOF

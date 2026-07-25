@@ -1,4 +1,3 @@
-cat > js/email-notificacoes.js << 'EOF'
 // ============================================
 // SISTEMA DE NOTIFICAÇÕES POR E-MAIL
 // ============================================
@@ -364,13 +363,35 @@ async function enviarNotificacoesEmail(dados) {
         
         return {
             sucesso: true,
-            cliente: dados.email ? (clienteResult ? 'enviado' : 'falhou') : 'pulado',
+            cliente: dados.email ? (clienteResult.success ? 'enviado' : 'falhou') : 'pulado',
             renata: renataResult.success ? 'enviado' : 'falhou'
         };
         
     } catch (error) {
         console.error('❌ Erro ao enviar e-mails:', error);
         return { sucesso: false, error: error.message };
+    }
+}
+
+// ============================================
+// FUNÇÃO SIMPLIFICADA - APENAS PARA RENATA
+// ============================================
+async function enviarEmailRenata(dados) {
+    try {
+        console.log('📧 Enviando e-mail para a Renata...');
+        
+        const emailRenata = gerarEmailRenataHTML(dados);
+        const result = await enviarEmail(
+            EMAIL_CONFIG.to,
+            '🔔 NOVO AGENDAMENTO - ' + dados.nome,
+            emailRenata
+        );
+        
+        return result;
+        
+    } catch (error) {
+        console.error('❌ Erro ao enviar e-mail para a Renata:', error);
+        return { success: false, error: error.message };
     }
 }
 
@@ -382,4 +403,3 @@ window.enviarEmailRenata = enviarEmailRenata;
 window.enviarEmail = enviarEmail;
 
 console.log('✅ Sistema de e-mail carregado!');
-EOF
