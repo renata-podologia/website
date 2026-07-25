@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <title>Painel Administrativo - Levità Podologia</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; font-size: 16px; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #F7F8FA;
+            color: #1e2b2f;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #FFFFFF;
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(168, 195, 160, 0.15);
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            text-align: center;
+        }
+        .btn-sm { padding: 6px 12px; font-size: 0.75rem; min-width: auto; border-radius: 30px; }
+        .btn-success { background: #28a745; color: #fff; }
+        .btn-success:hover { background: #1e7e34; }
+        .btn-danger { background: #dc3545; color: #fff; }
+        .btn-danger:hover { background: #bd2130; }
+        .btn-warning { background: #ffc107; color: #212529; }
+        .btn-warning:hover { background: #e0a800; }
+        .btn-primario { background: #2F5D62; color: #fff; }
+        .btn-primario:hover { background: #1c3e42; }
+        .btn-voltar { background: #F7F8FA; color: #1e2b2f; }
+        .btn-voltar:hover { background: #e8edee; }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #F7F8FA;
+        }
+        .header h1 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: #2F5D62;
+        }
+        .header h1 span { color: #C9A227; }
+        .header .badge {
+            background: #C9A227;
+            color: #fff;
+            padding: 6px 18px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .header .back-link {
+            color: #2F5D62;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .header .back-link:hover { color: #C9A227; }
+        .header .back-link i { margin-right: 8px; }
+        
+        .resumo {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .resumo .card {
+            background: #F7F8FA;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .resumo .card .numero {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2F5D62;
+        }
+        .resumo .card .label {
+            font-size: 0.85rem;
+            color: #4a5f64;
+        }
+        
+        .filtros {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .filtros select,
+        .filtros input {
+            padding: 8px 14px;
+            border: 2px solid #e8edee;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-family: 'Inter', sans-serif;
+            background: #fafbfb;
+        }
+        .filtros select:focus,
+        .filtros input:focus {
+            outline: none;
+            border-color: #2F5D62;
+        }
+        
+        .tabela-container {
+            max-height: 500px;
+            overflow-y: auto;
+            border-radius: 12px;
+            border: 1px solid #e8edee;
+        }
+        .tabela {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .tabela th {
+            background: #2F5D62;
+            color: #fff;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .tabela td {
+            padding: 10px 16px;
+            border-bottom: 1px solid #e8edee;
+            vertical-align: middle;
+        }
+        .tabela tr:hover { background: #F4EFE8; }
+        
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        .status-pendente { background: #fff3cd; color: #856404; }
+        .status-confirmado { background: #d4edda; color: #155724; }
+        .status-cancelado { background: #f8d7da; color: #721c24; }
+        .status-atendido { background: #cce5ff; color: #004085; }
+        
+        .tipo-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        .tipo-domicilio { background: #cce5ff; color: #004085; }
+        .tipo-presencial { background: #d4edda; color: #155724; }
+        
+        .actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .actions .btn { padding: 4px 10px; font-size: 0.65rem; min-width: auto; }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 24px;
+            background: #2F5D62;
+            color: #fff;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            z-index: 2000;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.4s ease;
+            max-width: 400px;
+            pointer-events: none;
+        }
+        .toast.mostrar { opacity: 1; transform: translateY(0); }
+        .toast.erro { background: #dc3545; }
+        .toast.sucesso { background: #28a745; }
+        .toast i { margin-right: 10px; }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .loading-overlay.ativo { display: flex; }
+        .loading-overlay .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e8edee;
+            border-top: 4px solid #2F5D62;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loading-overlay p { color: #2F5D62; font-weight: 500; }
+        
+        .vazio {
+            text-align: center;
+            padding: 40px;
+            color: #8a9ea3;
+        }
+        .vazio i { font-size: 3rem; margin-bottom: 12px; display: block; }
+        
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .container { padding: 16px; }
+            .header h1 { font-size: 1.4rem; }
+            .header { flex-direction: column; text-align: center; }
+            .resumo { grid-template-columns: repeat(2, 1fr); }
+            .filtros { flex-direction: column; }
+            .filtros select, .filtros input { width: 100%; }
+            .tabela { font-size: 0.7rem; }
+            .tabela th, .tabela td { padding: 6px 8px; }
+            .actions .btn { padding: 2px 6px; font-size: 0.55rem; }
+        }
+        @media (max-width: 480px) {
+            .resumo { grid-template-columns: 1fr 1fr; }
+            .tabela-container { max-height: 350px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LOADING -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="spinner"></div>
+        <p>Carregando...</p>
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast">
+        <i class="fas fa-info-circle"></i>
+        <span id="toast-mensagem">Mensagem</span>
+    </div>
+
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <div>
+                <h1><i class="fas fa-database" style="color: #C9A227;"></i> Painel <span>Administrativo</span></h1>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                <span class="badge" id="total-agendamentos">0 agendamentos</span>
+                <a href="index.html" class="btn btn-voltar"><i class="fas fa-arrow-left"></i> Voltar ao site</a>
+            </div>
+        </div>
+
+        <!-- RESUMO -->
+        <div class="resumo" id="admin-resumo">
+            <div class="card">
+                <div class="numero" id="total-count">0</div>
+                <div class="label">Total</div>
+            </div>
+            <div class="card">
+                <div class="numero" id="pendente-count">0</div>
+                <div class="label">Pendentes</div>
+            </div>
+            <div class="card">
+                <div class="numero" id="confirmado-count">0</div>
+                <div class="label">Confirmados</div>
+            </div>
+            <div class="card">
+                <div class="numero" id="domicilio-count">0</div>
+                <div class="label">Domicílio</div>
+            </div>
+            <div class="card">
+                <div class="numero" id="presencial-count">0</div>
+                <div class="label">Presencial</div>
+            </div>
+        </div>
+
+        <!-- FILTROS -->
+        <div class="filtros">
+            <select id="filtro-status" onchange="renderizarAdmin()">
+                <option value="todos">Todos os status</option>
+                <option value="pendente">Pendente</option>
+                <option value="confirmado">Confirmado</option>
+                <option value="cancelado">Cancelado</option>
+                <option value="atendido">Atendido</option>
+            </select>
+            <select id="filtro-tipo" onchange="renderizarAdmin()">
+                <option value="todos">Todos os tipos</option>
+                <option value="domicilio">Domiciliar</option>
+                <option value="presencial">Presencial</option>
+            </select>
+            <input type="text" id="filtro-busca" placeholder="Buscar por nome..." oninput="renderizarAdmin()" />
+            <button class="btn btn-success" onclick="exportarCSV()"><i class="fas fa-file-export"></i> CSV</button>
+            <button class="btn btn-primario" onclick="atualizarDados()"><i class="fas fa-sync"></i> Atualizar</button>
+        </div>
+
+        <!-- TABELA -->
+        <div class="tabela-container">
+            <table class="tabela" id="admin-tabela">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Paciente</th>
+                        <th>Telefone</th>
+                        <th>Serviço</th>
+                        <th>Tipo</th>
+                        <th>Data</th>
+                        <th>Horário</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-tbody">
+                    <tr>
+                        <td colspan="9" class="vazio">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            Carregando agendamentos...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <p style="text-align:center; margin-top:16px; color:#4a5f64; font-size:0.85rem;">
+            <i class="fas fa-cloud" style="color: #2F5D62;"></i> Dados salvos no Supabase (PostgreSQL).
+        </p>
+    </div>
+
+    <!-- SUPABASE -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        // ============================================
+        // CONFIGURAÇÃO SUPABASE
+        // ============================================
+        var SUPABASE_URL = 'https://euktsrczpxejezkeyqoh.supabase.co';
+        var SUPABASE_ANON_KEY = 'sb_publishable_vH11tBYAWHlKNoCeQG-oMQ_r1fOxcRf';
+        
+        // Inicializa Supabase
+        var supabaseClient;
+        if (typeof supabaseJs !== 'undefined') {
+            supabaseClient = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } else {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+
+        // ============================================
+        // TOAST
+        // ============================================
+        function mostrarToast(mensagem, tipo) {
+            tipo = tipo || 'info';
+            var toast = document.getElementById('toast');
+            var mensagemEl = document.getElementById('toast-mensagem');
+            var icone = toast.querySelector('i');
+            if (!toast || !mensagemEl) return;
+            toast.classList.remove('sucesso', 'erro', 'mostrar');
+            if (tipo === 'sucesso') {
+                toast.classList.add('sucesso');
+                icone.className = 'fas fa-check-circle';
+            } else if (tipo === 'erro') {
+                toast.classList.add('erro');
+                icone.className = 'fas fa-exclamation-circle';
+            } else {
+                icone.className = 'fas fa-info-circle';
+            }
+            mensagemEl.textContent = mensagem;
+            toast.classList.add('mostrar');
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(function() {
+                toast.classList.remove('mostrar');
+            }, 4000);
+        }
+
+        // ============================================
+        // LOADING
+        // ============================================
+        function mostrarLoading(mensagem) {
+            mensagem = mensagem || 'Carregando...';
+            var overlay = document.getElementById('loading-overlay');
+            overlay.querySelector('p').textContent = mensagem;
+            overlay.classList.add('ativo');
+        }
+        function esconderLoading() {
+            document.getElementById('loading-overlay').classList.remove('ativo');
+        }
+
+        // ============================================
+        // BUSCAR AGENDAMENTOS
+        // ============================================
+        function getAgendamentos() {
+            mostrarLoading('Carregando agendamentos...');
+            return supabaseClient
+                .from('agendamentos')
+                .select('*')
+                .order('data', { ascending: false })
+                .then(function(response) {
+                    esconderLoading();
+                    if (response.error) throw response.error;
+                    return response.data || [];
+                })
+                .catch(function(error) {
+                    esconderLoading();
+                    console.error('Erro ao buscar agendamentos:', error);
+                    mostrarToast('Erro ao carregar agendamentos.', 'erro');
+                    return [];
+                });
+        }
+
+        // ============================================
+        // ATUALIZAR STATUS
+        // ============================================
+        function atualizarStatus(id, novoStatus) {
+            mostrarLoading('Atualizando status...');
+            return supabaseClient
+                .from('agendamentos')
+                .update({ status: novoStatus })
+                .eq('id', id)
+                .then(function(response) {
+                    esconderLoading();
+                    if (response.error) throw response.error;
+                    return true;
+                })
+                .catch(function(error) {
+                    esconderLoading();
+                    console.error('Erro ao atualizar status:', error);
+                    mostrarToast('Erro ao atualizar status.', 'erro');
+                    return false;
+                });
+        }
+
+        // ============================================
+        // DELETAR AGENDAMENTO
+        // ============================================
+        function deletarAgendamento(id) {
+            if (!confirm('Tem certeza que deseja excluir este agendamento?')) return;
+            
+            mostrarLoading('Excluindo agendamento...');
+            supabaseClient
+                .from('agendamentos')
+                .delete()
+                .eq('id', id)
+                .then(function(response) {
+                    esconderLoading();
+                    if (response.error) throw response.error;
+                    mostrarToast('Agendamento excluído com sucesso!', 'sucesso');
+                    renderizarAdmin();
+                })
+                .catch(function(error) {
+                    esconderLoading();
+                    console.error('Erro ao excluir:', error);
+                    mostrarToast('Erro ao excluir agendamento.', 'erro');
+                });
+        }
+
+        // ============================================
+        // RENDERIZAR ADMIN
+        // ============================================
+        function renderizarAdmin() {
+            getAgendamentos().then(function(agendamentos) {
+                var tbody = document.getElementById('admin-tbody');
+                var filtroStatus = document.getElementById('filtro-status').value;
+                var filtroTipo = document.getElementById('filtro-tipo').value;
+                var filtroBusca = document.getElementById('filtro-busca').value.toLowerCase();
+
+                var filtrados = agendamentos;
+
+                if (filtroStatus !== 'todos') {
+                    filtrados = filtrados.filter(function(a) { return a.status === filtroStatus; });
+                }
+                if (filtroTipo !== 'todos') {
+                    filtrados = filtrados.filter(function(a) { return a.tipo === filtroTipo; });
+                }
+                if (filtroBusca) {
+                    filtrados = filtrados.filter(function(a) {
+                        return a.nome.toLowerCase().indexOf(filtroBusca) !== -1 ||
+                               a.telefone.indexOf(filtroBusca) !== -1;
+                    });
+                }
+
+                // Atualiza resumo
+                document.getElementById('total-count').textContent = agendamentos.length;
+                document.getElementById('pendente-count').textContent = agendamentos.filter(function(a) { return a.status === 'pendente'; }).length;
+                document.getElementById('confirmado-count').textContent = agendamentos.filter(function(a) { return a.status === 'confirmado'; }).length;
+                document.getElementById('domicilio-count').textContent = agendamentos.filter(function(a) { return a.tipo === 'domicilio'; }).length;
+                document.getElementById('presencial-count').textContent = agendamentos.filter(function(a) { return a.tipo === 'presencial'; }).length;
+                document.getElementById('total-agendamentos').textContent = agendamentos.length + ' agendamentos';
+
+                if (filtrados.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="9" class="vazio"><i class="fas fa-inbox"></i> Nenhum agendamento encontrado.</td></tr>';
+                    return;
+                }
+
+                var html = '';
+                for (var i = 0; i < filtrados.length; i++) {
+                    var a = filtrados[i];
+                    var dataObj = new Date(a.data + 'T00:00:00');
+                    var dataFormatada = String(dataObj.getDate()).padStart(2, '0') + '/' + String(dataObj.getMonth() + 1).padStart(2, '0') + '/' + dataObj.getFullYear();
+                    var tipoLabel = a.tipo === 'domicilio' ? '🏠 Domiciliar' : '🏢 Presencial';
+                    var tipoClass = a.tipo === 'domicilio' ? 'tipo-domicilio' : 'tipo-presencial';
+
+                    var statusClass = 'status-pendente';
+                    if (a.status === 'confirmado') statusClass = 'status-confirmado';
+                    if (a.status === 'cancelado') statusClass = 'status-cancelado';
+                    if (a.status === 'atendido') statusClass = 'status-atendido';
+
+                    var statusLabel = a.status.charAt(0).toUpperCase() + a.status.slice(1);
+                    var acoes = '';
+
+                    if (a.status === 'pendente') {
+                        acoes = 
+                            '<button class="btn btn-success btn-sm" onclick="mudarStatus(' + a.id + ', \'confirmado\')" title="Confirmar"><i class="fas fa-check"></i></button>' +
+                            '<button class="btn btn-danger btn-sm" onclick="mudarStatus(' + a.id + ', \'cancelado\')" title="Cancelar"><i class="fas fa-times"></i></button>';
+                    } else if (a.status === 'confirmado') {
+                        acoes = 
+                            '<button class="btn btn-warning btn-sm" onclick="mudarStatus(' + a.id + ', \'atendido\')" title="Atendido"><i class="fas fa-user-check"></i></button>' +
+                            '<button class="btn btn-danger btn-sm" onclick="mudarStatus(' + a.id + ', \'cancelado\')" title="Cancelar"><i class="fas fa-times"></i></button>';
+                    } else if (a.status === 'atendido') {
+                        acoes = 
+                            '<button class="btn btn-primario btn-sm" onclick="mudarStatus(' + a.id + ', \'confirmado\')" title="Reativar"><i class="fas fa-undo"></i></button>';
+                    } else {
+                        acoes = 
+                            '<button class="btn btn-primario btn-sm" onclick="mudarStatus(' + a.id + ', \'pendente\')" title="Reativar"><i class="fas fa-undo"></i></button>';
+                    }
+                    acoes += '<button class="btn btn-danger btn-sm" onclick="deletarAgendamento(' + a.id + ')" title="Excluir"><i class="fas fa-trash"></i></button>';
+
+                    html += 
+                        '<tr>' +
+                        '<td>' + (i + 1) + '</td>' +
+                        '<td><strong>' + a.nome + '</strong></td>' +
+                        '<td>' + a.telefone + '</td>' +
+                        '<td>' + a.servico + '</td>' +
+                        '<td><span class="tipo-badge ' + tipoClass + '">' + tipoLabel + '</span></td>' +
+                        '<td>' + dataFormatada + '</td>' +
+                        '<td>' + a.horario + '</td>' +
+                        '<td><span class="status ' + statusClass + '">' + statusLabel + '</span></td>' +
+                        '<td><div class="actions">' + acoes + '</div></td>' +
+                        '</tr>';
+                }
+                tbody.innerHTML = html;
+            });
+        }
+
+        // ============================================
+        // MUDAR STATUS (wrapper)
+        // ============================================
+        function mudarStatus(id, novoStatus) {
+            var statusLabels = {
+                'pendente': 'Pendente',
+                'confirmado': 'Confirmado',
+                'cancelado': 'Cancelado',
+                'atendido': 'Atendido'
+            };
+            atualizarStatus(id, novoStatus).then(function(sucesso) {
+                if (sucesso) {
+                    mostrarToast('Status atualizado para ' + (statusLabels[novoStatus] || novoStatus) + '!', 'sucesso');
+                    renderizarAdmin();
+                }
+            });
+        }
+
+        // ============================================
+        // EXPORTAR CSV
+        // ============================================
+        function exportarCSV() {
+            mostrarToast('Função de exportação disponível em breve.', 'info');
+        }
+
+        // ============================================
+        // ATUALIZAR DADOS
+        // ============================================
+        function atualizarDados() {
+            renderizarAdmin();
+            mostrarToast('Dados atualizados!', 'sucesso');
+        }
+
+        // ============================================
+        // INICIALIZAR
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            renderizarAdmin();
+        });
+    </script>
+</body>
+</html>
