@@ -174,6 +174,7 @@ async function criarEventoCalendar(dados) {
         
         var tipoLabel = dados.tipo === 'domicilio' ? '🏠 Domiciliar' : '🏢 Presencial';
         
+        // Verifica se está logado
         if (!isLogado()) {
             console.log('🔑 Usuário não logado. Solicitando login...');
             try {
@@ -184,6 +185,7 @@ async function criarEventoCalendar(dados) {
             }
         }
         
+        // Cria o evento
         var evento = {
             'summary': dados.servico + ' - ' + dados.nome,
             'location': dados.endereco || 'Clínica - Guarulhos',
@@ -203,12 +205,13 @@ async function criarEventoCalendar(dados) {
             'reminders': {
                 'useDefault': false,
                 'overrides': [
-                    {'method': 'email', 'minutes': 24 * 60},
-                    {'method': 'popup', 'minutes': 30}
+                    {'method': 'email', 'minutes': 24 * 60},  // 1 dia antes
+                    {'method': 'popup', 'minutes': 30}         // 30 minutos antes
                 ]
             }
         };
         
+        // Envia para o Google Calendar
         var request = gapi.client.calendar.events.insert({
             'calendarId': CALENDAR_CONFIG.calendarId,
             'resource': evento
@@ -218,6 +221,7 @@ async function criarEventoCalendar(dados) {
         
         if (response.error) {
             console.error('❌ Erro ao criar evento:', response.error);
+            console.log('❌ Detalhes do erro:', response.error.message);
             return null;
         }
         
@@ -241,6 +245,7 @@ async function processarAgendamento(dados) {
     try {
         console.log('📅 Processando agendamento no Google Calendar...');
         
+        // Verifica se o Client ID está configurado
         if (!CALENDAR_CONFIG.clientId || CALENDAR_CONFIG.clientId === 'SEU_CLIENT_ID_AQUI') {
             console.error('❌ Google Calendar não configurado!');
             console.error('⚠️ Configure os secrets no GitHub:');
@@ -252,8 +257,13 @@ async function processarAgendamento(dados) {
             };
         }
         
+        // 1. Carregar Google API
         await carregarGoogleAPI();
+        
+        // 2. Inicializar cliente
         await initGoogleClient();
+        
+        // 3. Criar evento no Google Calendar
         var evento = await criarEventoCalendar(dados);
         
         if (evento) {
@@ -286,3 +296,4 @@ window.processarAgendamento = processarAgendamento;
 window.criarEventoCalendar = criarEventoCalendar;
 
 console.log('✅ Google Calendar integrado!');
+console.log('📅 Client ID:', CALENDAR_CONFIG.clientId ? (CALENDAR_CONFIG.clientId === 'SEU_CLIENT_ID_AQUI' ? '⚠️ NÃO CONFIGURADO' : '✅ Configurado') : '❌ NÃO CONFIGURADO');
