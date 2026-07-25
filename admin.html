@@ -42,7 +42,7 @@
             font-family: 'Inter', sans-serif;
             text-align: center;
         }
-        .btn-sm { padding: 6px 12px; font-size: 0.75rem; min-width: auto; border-radius: 30px; }
+        .btn-sm { padding: 6px 14px; font-size: 0.75rem; min-width: auto; border-radius: 30px; }
         .btn-success { background: #28a745; color: #fff; }
         .btn-success:hover { background: #1e7e34; }
         .btn-danger { background: #dc3545; color: #fff; }
@@ -53,6 +53,8 @@
         .btn-primario:hover { background: #1c3e42; }
         .btn-voltar { background: #F7F8FA; color: #1e2b2f; }
         .btn-voltar:hover { background: #e8edee; }
+        .btn-outline { background: transparent; color: #2F5D62; border: 2px solid #2F5D62; }
+        .btn-outline:hover { background: #2F5D62; color: #fff; }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
         
         .header {
@@ -72,121 +74,146 @@
             color: #2F5D62;
         }
         .header h1 span { color: #C9A227; }
-        .header .badge {
-            background: #C9A227;
-            color: #fff;
-            padding: 6px 18px;
-            border-radius: 30px;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
         .header .back-link {
             color: #2F5D62;
             font-weight: 600;
             text-decoration: none;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 20px;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            border: 2px solid #2F5D62;
         }
-        .header .back-link:hover { color: #C9A227; }
-        .header .back-link i { margin-right: 8px; }
+        .header .back-link:hover { background: #2F5D62; color: #fff; transform: translateY(-2px); }
+        .header .back-link i { font-size: 1rem; }
         
-        .resumo {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-        .resumo .card {
-            background: #F7F8FA;
-            padding: 16px;
-            border-radius: 12px;
-            text-align: center;
-        }
-        .resumo .card .numero {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #2F5D62;
-        }
-        .resumo .card .label {
-            font-size: 0.85rem;
-            color: #4a5f64;
-        }
-        
-        .filtros {
+        .tabs {
             display: flex;
-            gap: 12px;
+            gap: 8px;
             flex-wrap: wrap;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #e8edee;
+            padding-bottom: 4px;
+        }
+        .tabs .tab {
+            padding: 10px 24px;
+            border-radius: 30px 30px 0 0;
+            cursor: pointer;
+            font-weight: 600;
+            color: #4a5f64;
+            transition: all 0.3s ease;
+            border: none;
+            background: transparent;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+        }
+        .tabs .tab:hover { background: #F7F8FA; }
+        .tabs .tab.ativo {
+            background: #2F5D62;
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(47, 93, 98, 0.2);
+        }
+        
+        .tab-content { display: none; animation: fadeIn 0.4s ease; }
+        .tab-content.ativo { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .config-card {
+            background: #F7F8FA;
+            border-radius: 16px;
+            padding: 24px;
             margin-bottom: 20px;
         }
-        .filtros select,
-        .filtros input {
-            padding: 8px 14px;
+        .config-card h3 {
+            font-family: 'Poppins', sans-serif;
+            color: #2F5D62;
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+        }
+        .config-card .sub {
+            color: #4a5f64;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+        }
+        
+        .form-group { margin-bottom: 16px; }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #2F5D62;
+            margin-bottom: 4px;
+            font-size: 0.9rem;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px 14px;
             border: 2px solid #e8edee;
             border-radius: 10px;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             font-family: 'Inter', sans-serif;
-            background: #fafbfb;
+            transition: border-color 0.3s ease;
+            background: #fff;
+            color: #1e2b2f;
         }
-        .filtros select:focus,
-        .filtros input:focus {
+        .form-group input:focus,
+        .form-group select:focus {
             outline: none;
             border-color: #2F5D62;
         }
         
-        .tabela-container {
-            max-height: 500px;
-            overflow-y: auto;
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+        
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+        .item-card {
+            background: #fff;
+            padding: 12px 16px;
             border-radius: 12px;
             border: 1px solid #e8edee;
-        }
-        .tabela {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85rem;
-        }
-        .tabela th {
-            background: #2F5D62;
-            color: #fff;
-            padding: 12px 16px;
-            text-align: left;
-            font-weight: 600;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-        .tabela td {
-            padding: 10px 16px;
-            border-bottom: 1px solid #e8edee;
-            vertical-align: middle;
-        }
-        .tabela tr:hover { background: #F4EFE8; }
-        
-        .status {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 30px;
-            font-size: 0.7rem;
-            font-weight: 600;
-        }
-        .status-pendente { background: #fff3cd; color: #856404; }
-        .status-confirmado { background: #d4edda; color: #155724; }
-        .status-cancelado { background: #f8d7da; color: #721c24; }
-        .status-atendido { background: #cce5ff; color: #004085; }
-        
-        .tipo-badge {
-            display: inline-block;
-            padding: 2px 10px;
-            border-radius: 30px;
-            font-size: 0.7rem;
-            font-weight: 600;
-        }
-        .tipo-domicilio { background: #cce5ff; color: #004085; }
-        .tipo-presencial { background: #d4edda; color: #155724; }
-        
-        .actions {
             display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
         }
-        .actions .btn { padding: 4px 10px; font-size: 0.65rem; min-width: auto; }
+        .item-card:hover { border-color: #2F5D62; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .item-card .info { font-weight: 500; }
+        .item-card .info small { display: block; font-weight: 400; color: #4a5f64; font-size: 0.8rem; }
+        
+        .toggle {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background: #ccc;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+        .toggle.ativo { background: #28a745; }
+        .toggle .slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .toggle.ativo .slider { left: 22px; }
         
         .toast {
             position: fixed;
@@ -240,26 +267,19 @@
         
         .vazio {
             text-align: center;
-            padding: 40px;
+            padding: 30px;
             color: #8a9ea3;
         }
-        .vazio i { font-size: 3rem; margin-bottom: 12px; display: block; }
+        .vazio i { font-size: 2rem; margin-bottom: 8px; display: block; }
         
         @media (max-width: 768px) {
             body { padding: 10px; }
             .container { padding: 16px; }
-            .header h1 { font-size: 1.4rem; }
             .header { flex-direction: column; text-align: center; }
-            .resumo { grid-template-columns: repeat(2, 1fr); }
-            .filtros { flex-direction: column; }
-            .filtros select, .filtros input { width: 100%; }
-            .tabela { font-size: 0.7rem; }
-            .tabela th, .tabela td { padding: 6px 8px; }
-            .actions .btn { padding: 2px 6px; font-size: 0.55rem; }
-        }
-        @media (max-width: 480px) {
-            .resumo { grid-template-columns: 1fr 1fr; }
-            .tabela-container { max-height: 350px; }
+            .header h1 { font-size: 1.4rem; }
+            .form-row, .form-row-3 { grid-template-columns: 1fr; }
+            .items-grid { grid-template-columns: 1fr; }
+            .tabs .tab { padding: 8px 16px; font-size: 0.85rem; }
         }
     </style>
 </head>
@@ -280,88 +300,147 @@
     <div class="container">
         <!-- HEADER -->
         <div class="header">
-            <div>
-                <h1><i class="fas fa-database" style="color: #C9A227;"></i> Painel <span>Administrativo</span></h1>
+            <h1><i class="fas fa-cog" style="color: #C9A227;"></i> Painel <span>Administrativo</span></h1>
+            <a href="index.html" class="back-link">
+                <i class="fas fa-arrow-left"></i> Voltar ao site
+            </a>
+        </div>
+
+        <!-- TABS -->
+        <div class="tabs">
+            <button class="tab ativo" data-tab="agendamentos" onclick="abrirTab('agendamentos')">
+                <i class="fas fa-calendar-check"></i> Agendamentos
+            </button>
+            <button class="tab" data-tab="horarios" onclick="abrirTab('horarios')">
+                <i class="fas fa-clock"></i> Horários
+            </button>
+            <button class="tab" data-tab="servicos" onclick="abrirTab('servicos')">
+                <i class="fas fa-stethoscope"></i> Serviços
+            </button>
+            <button class="tab" data-tab="dias" onclick="abrirTab('dias')">
+                <i class="fas fa-calendar-day"></i> Dias de Funcionamento
+            </button>
+        </div>
+
+        <!-- TAB 1: AGENDAMENTOS -->
+        <div class="tab-content ativo" id="tab-agendamentos">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+                <div>
+                    <span style="font-weight: 600; color: #2F5D62;">Total:</span>
+                    <span id="total-agendamentos" style="background: #2F5D62; color: #fff; padding: 2px 12px; border-radius: 30px; font-size: 0.85rem;">0</span>
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button class="btn btn-sm btn-success" onclick="exportarCSV()"><i class="fas fa-file-export"></i> CSV</button>
+                    <button class="btn btn-sm btn-primario" onclick="carregarAgendamentos()"><i class="fas fa-sync"></i> Atualizar</button>
+                </div>
             </div>
-            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                <span class="badge" id="total-agendamentos">0 agendamentos</span>
-                <a href="index.html" class="btn btn-voltar"><i class="fas fa-arrow-left"></i> Voltar ao site</a>
+            
+            <div class="config-card">
+                <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;">
+                    <select id="filtro-status" onchange="filtrarAgendamentos()" style="padding: 8px 14px; border: 2px solid #e8edee; border-radius: 10px; font-family: 'Inter', sans-serif;">
+                        <option value="todos">Todos os status</option>
+                        <option value="pendente">Pendente</option>
+                        <option value="confirmado">Confirmado</option>
+                        <option value="cancelado">Cancelado</option>
+                        <option value="atendido">Atendido</option>
+                    </select>
+                    <select id="filtro-tipo" onchange="filtrarAgendamentos()" style="padding: 8px 14px; border: 2px solid #e8edee; border-radius: 10px; font-family: 'Inter', sans-serif;">
+                        <option value="todos">Todos os tipos</option>
+                        <option value="domicilio">Domiciliar</option>
+                        <option value="presencial">Presencial</option>
+                    </select>
+                    <input type="text" id="filtro-busca" placeholder="Buscar por nome..." oninput="filtrarAgendamentos()" style="padding: 8px 14px; border: 2px solid #e8edee; border-radius: 10px; font-family: 'Inter', sans-serif; flex: 1; min-width: 150px;" />
+                </div>
+                
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+                        <thead>
+                            <tr style="background: #2F5D62; color: #fff;">
+                                <th style="padding: 10px 12px; text-align: left;">#</th>
+                                <th style="padding: 10px 12px; text-align: left;">Paciente</th>
+                                <th style="padding: 10px 12px; text-align: left;">Telefone</th>
+                                <th style="padding: 10px 12px; text-align: left;">Serviço</th>
+                                <th style="padding: 10px 12px; text-align: left;">Tipo</th>
+                                <th style="padding: 10px 12px; text-align: left;">Data</th>
+                                <th style="padding: 10px 12px; text-align: left;">Horário</th>
+                                <th style="padding: 10px 12px; text-align: left;">Status</th>
+                                <th style="padding: 10px 12px; text-align: left;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-tbody">
+                            <tr><td colspan="9" style="text-align:center; padding:30px; color:#8a9ea3;"><i class="fas fa-spinner fa-spin"></i> Carregando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
-        <!-- RESUMO -->
-        <div class="resumo" id="admin-resumo">
-            <div class="card">
-                <div class="numero" id="total-count">0</div>
-                <div class="label">Total</div>
+        <!-- TAB 2: HORÁRIOS -->
+        <div class="tab-content" id="tab-horarios">
+            <div class="config-card">
+                <h3><i class="fas fa-plus-circle" style="color: #C9A227;"></i> Adicionar Horário</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Horário</label>
+                        <input type="time" id="novo-horario" value="08:00" />
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: flex-end;">
+                        <button class="btn btn-success" onclick="adicionarHorario()">
+                            <i class="fas fa-plus"></i> Adicionar
+                        </button>
+                    </div>
+                </div>
             </div>
-            <div class="card">
-                <div class="numero" id="pendente-count">0</div>
-                <div class="label">Pendentes</div>
-            </div>
-            <div class="card">
-                <div class="numero" id="confirmado-count">0</div>
-                <div class="label">Confirmados</div>
-            </div>
-            <div class="card">
-                <div class="numero" id="domicilio-count">0</div>
-                <div class="label">Domicílio</div>
-            </div>
-            <div class="card">
-                <div class="numero" id="presencial-count">0</div>
-                <div class="label">Presencial</div>
+            
+            <div class="config-card">
+                <h3><i class="fas fa-list"></i> Horários Disponíveis</h3>
+                <p class="sub">Estes horários estarão disponíveis para agendamento.</p>
+                <div class="items-grid" id="horarios-lista">
+                    <div class="vazio"><i class="fas fa-clock"></i> Carregando horários...</div>
+                </div>
             </div>
         </div>
 
-        <!-- FILTROS -->
-        <div class="filtros">
-            <select id="filtro-status" onchange="renderizarAdmin()">
-                <option value="todos">Todos os status</option>
-                <option value="pendente">Pendente</option>
-                <option value="confirmado">Confirmado</option>
-                <option value="cancelado">Cancelado</option>
-                <option value="atendido">Atendido</option>
-            </select>
-            <select id="filtro-tipo" onchange="renderizarAdmin()">
-                <option value="todos">Todos os tipos</option>
-                <option value="domicilio">Domiciliar</option>
-                <option value="presencial">Presencial</option>
-            </select>
-            <input type="text" id="filtro-busca" placeholder="Buscar por nome..." oninput="renderizarAdmin()" />
-            <button class="btn btn-success" onclick="exportarCSV()"><i class="fas fa-file-export"></i> CSV</button>
-            <button class="btn btn-primario" onclick="atualizarDados()"><i class="fas fa-sync"></i> Atualizar</button>
+        <!-- TAB 3: SERVIÇOS -->
+        <div class="tab-content" id="tab-servicos">
+            <div class="config-card">
+                <h3><i class="fas fa-plus-circle" style="color: #C9A227;"></i> Adicionar Serviço</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nome do Serviço</label>
+                        <input type="text" id="novo-servico" placeholder="Ex: Podologia Clínica" />
+                    </div>
+                    <div class="form-group">
+                        <label>Descrição (opcional)</label>
+                        <input type="text" id="nova-descricao" placeholder="Breve descrição do serviço" />
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: flex-end;">
+                        <button class="btn btn-success" onclick="adicionarServico()">
+                            <i class="fas fa-plus"></i> Adicionar
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="config-card">
+                <h3><i class="fas fa-list"></i> Serviços Disponíveis</h3>
+                <p class="sub">Estes serviços estarão disponíveis para seleção no agendamento.</p>
+                <div class="items-grid" id="servicos-lista">
+                    <div class="vazio"><i class="fas fa-stethoscope"></i> Carregando serviços...</div>
+                </div>
+            </div>
         </div>
 
-        <!-- TABELA -->
-        <div class="tabela-container">
-            <table class="tabela" id="admin-tabela">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Paciente</th>
-                        <th>Telefone</th>
-                        <th>Serviço</th>
-                        <th>Tipo</th>
-                        <th>Data</th>
-                        <th>Horário</th>
-                        <th>Status</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="admin-tbody">
-                    <tr>
-                        <td colspan="9" class="vazio">
-                            <i class="fas fa-spinner fa-spin"></i>
-                            Carregando agendamentos...
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+        <!-- TAB 4: DIAS DE FUNCIONAMENTO -->
+        <div class="tab-content" id="tab-dias">
+            <div class="config-card">
+                <h3><i class="fas fa-calendar-day" style="color: #C9A227;"></i> Dias de Funcionamento</h3>
+                <p class="sub">Ative os dias em que você atende.</p>
+                <div id="dias-lista">
+                    <div class="vazio"><i class="fas fa-spinner fa-spin"></i> Carregando...</div>
+                </div>
+            </div>
         </div>
-        
-        <p style="text-align:center; margin-top:16px; color:#4a5f64; font-size:0.85rem;">
-            <i class="fas fa-cloud" style="color: #2F5D62;"></i> Dados salvos no Supabase (PostgreSQL).
-        </p>
     </div>
 
     <!-- SUPABASE -->
@@ -374,12 +453,15 @@
         var SUPABASE_URL = 'https://euktsrczpxejezkeyqoh.supabase.co';
         var SUPABASE_ANON_KEY = 'sb_publishable_vH11tBYAWHlKNoCeQG-oMQ_r1fOxcRf';
         
-        // Inicializa Supabase
         var supabaseClient;
-        if (typeof supabaseJs !== 'undefined') {
-            supabaseClient = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        } else {
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        try {
+            if (typeof supabase !== 'undefined') {
+                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            } else if (typeof supabaseJs !== 'undefined') {
+                supabaseClient = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+        } catch(e) {
+            console.error('Erro ao criar cliente Supabase:', e);
         }
 
         // ============================================
@@ -423,56 +505,154 @@
         }
 
         // ============================================
-        // BUSCAR AGENDAMENTOS
+        // TABS
         // ============================================
-        function getAgendamentos() {
+        function abrirTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(function(el) {
+                el.classList.remove('ativo');
+            });
+            document.querySelectorAll('.tabs .tab').forEach(function(el) {
+                el.classList.remove('ativo');
+            });
+            document.getElementById('tab-' + tab).classList.add('ativo');
+            document.querySelector('.tabs .tab[data-tab="' + tab + '"]').classList.add('ativo');
+            
+            if (tab === 'horarios') carregarHorarios();
+            if (tab === 'servicos') carregarServicos();
+            if (tab === 'dias') carregarDias();
+            if (tab === 'agendamentos') carregarAgendamentos();
+        }
+
+        // ============================================
+        // TAB 1: AGENDAMENTOS
+        // ============================================
+        var todosAgendamentos = [];
+
+        function carregarAgendamentos() {
+            if (!supabaseClient) { mostrarToast('Erro de conexão.', 'erro'); return; }
+            
             mostrarLoading('Carregando agendamentos...');
-            return supabaseClient
+            supabaseClient
                 .from('agendamentos')
                 .select('*')
                 .order('data', { ascending: false })
                 .then(function(response) {
                     esconderLoading();
                     if (response.error) throw response.error;
-                    return response.data || [];
+                    todosAgendamentos = response.data || [];
+                    document.getElementById('total-agendamentos').textContent = todosAgendamentos.length;
+                    filtrarAgendamentos();
                 })
                 .catch(function(error) {
                     esconderLoading();
-                    console.error('Erro ao buscar agendamentos:', error);
+                    console.error('Erro:', error);
                     mostrarToast('Erro ao carregar agendamentos.', 'erro');
-                    return [];
                 });
         }
 
-        // ============================================
-        // ATUALIZAR STATUS
-        // ============================================
-        function atualizarStatus(id, novoStatus) {
-            mostrarLoading('Atualizando status...');
-            return supabaseClient
+        function filtrarAgendamentos() {
+            var filtroStatus = document.getElementById('filtro-status').value;
+            var filtroTipo = document.getElementById('filtro-tipo').value;
+            var filtroBusca = document.getElementById('filtro-busca').value.toLowerCase();
+            
+            var filtrados = todosAgendamentos;
+            
+            if (filtroStatus !== 'todos') {
+                filtrados = filtrados.filter(function(a) { return a.status === filtroStatus; });
+            }
+            if (filtroTipo !== 'todos') {
+                filtrados = filtrados.filter(function(a) { return a.tipo === filtroTipo; });
+            }
+            if (filtroBusca) {
+                filtrados = filtrados.filter(function(a) {
+                    return a.nome.toLowerCase().indexOf(filtroBusca) !== -1 ||
+                           a.telefone.indexOf(filtroBusca) !== -1;
+                });
+            }
+            
+            renderizarTabela(filtrados);
+        }
+
+        function renderizarTabela(dados) {
+            var tbody = document.getElementById('admin-tbody');
+            
+            if (!dados || dados.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:30px; color:#8a9ea3;"><i class="fas fa-inbox"></i> Nenhum agendamento encontrado.</td></tr>';
+                return;
+            }
+            
+            var html = '';
+            for (var i = 0; i < dados.length; i++) {
+                var a = dados[i];
+                var dataObj = new Date(a.data + 'T00:00:00');
+                var dataFormatada = String(dataObj.getDate()).padStart(2, '0') + '/' + String(dataObj.getMonth() + 1).padStart(2, '0') + '/' + dataObj.getFullYear();
+                var tipoLabel = a.tipo === 'domicilio' ? '🏠 Domiciliar' : '🏢 Presencial';
+                
+                var statusClass = 'status-pendente';
+                if (a.status === 'confirmado') statusClass = 'status-confirmado';
+                if (a.status === 'cancelado') statusClass = 'status-cancelado';
+                if (a.status === 'atendido') statusClass = 'status-atendido';
+                var statusLabel = a.status.charAt(0).toUpperCase() + a.status.slice(1);
+                
+                var acoes = '';
+                if (a.status === 'pendente') {
+                    acoes = 
+                        '<button class="btn btn-sm btn-success" onclick="mudarStatus(' + a.id + ', \'confirmado\')" title="Confirmar"><i class="fas fa-check"></i></button>' +
+                        '<button class="btn btn-sm btn-danger" onclick="mudarStatus(' + a.id + ', \'cancelado\')" title="Cancelar"><i class="fas fa-times"></i></button>';
+                } else if (a.status === 'confirmado') {
+                    acoes = 
+                        '<button class="btn btn-sm btn-warning" onclick="mudarStatus(' + a.id + ', \'atendido\')" title="Atendido"><i class="fas fa-user-check"></i></button>' +
+                        '<button class="btn btn-sm btn-danger" onclick="mudarStatus(' + a.id + ', \'cancelado\')" title="Cancelar"><i class="fas fa-times"></i></button>';
+                } else if (a.status === 'atendido') {
+                    acoes = 
+                        '<button class="btn btn-sm btn-primario" onclick="mudarStatus(' + a.id + ', \'confirmado\')" title="Reativar"><i class="fas fa-undo"></i></button>';
+                } else {
+                    acoes = 
+                        '<button class="btn btn-sm btn-primario" onclick="mudarStatus(' + a.id + ', \'pendente\')" title="Reativar"><i class="fas fa-undo"></i></button>';
+                }
+                acoes += '<button class="btn btn-sm btn-danger" onclick="deletarAgendamento(' + a.id + ')" title="Excluir"><i class="fas fa-trash"></i></button>';
+                
+                html += 
+                    '<tr style="border-bottom: 1px solid #e8edee;">' +
+                    '<td style="padding: 8px 12px;">' + (i + 1) + '</td>' +
+                    '<td style="padding: 8px 12px;"><strong>' + a.nome + '</strong></td>' +
+                    '<td style="padding: 8px 12px;">' + a.telefone + '</td>' +
+                    '<td style="padding: 8px 12px;">' + a.servico + '</td>' +
+                    '<td style="padding: 8px 12px;">' + tipoLabel + '</td>' +
+                    '<td style="padding: 8px 12px;">' + dataFormatada + '</td>' +
+                    '<td style="padding: 8px 12px;">' + a.horario + '</td>' +
+                    '<td style="padding: 8px 12px;"><span style="display:inline-block; padding: 2px 12px; border-radius: 30px; font-size: 0.7rem; font-weight: 600; background: ' + (a.status === 'confirmado' ? '#d4edda' : a.status === 'cancelado' ? '#f8d7da' : a.status === 'atendido' ? '#cce5ff' : '#fff3cd') + '; color: ' + (a.status === 'confirmado' ? '#155724' : a.status === 'cancelado' ? '#721c24' : a.status === 'atendido' ? '#004085' : '#856404') + ';">' + statusLabel + '</span></td>' +
+                    '<td style="padding: 8px 12px;"><div style="display:flex; gap:4px; flex-wrap:wrap;">' + acoes + '</div></td>' +
+                    '</tr>';
+            }
+            tbody.innerHTML = html;
+        }
+
+        function mudarStatus(id, novoStatus) {
+            if (!confirm('Alterar status para ' + novoStatus + '?')) return;
+            
+            mostrarLoading('Atualizando...');
+            supabaseClient
                 .from('agendamentos')
                 .update({ status: novoStatus })
                 .eq('id', id)
                 .then(function(response) {
                     esconderLoading();
                     if (response.error) throw response.error;
-                    return true;
+                    mostrarToast('Status atualizado!', 'sucesso');
+                    carregarAgendamentos();
                 })
                 .catch(function(error) {
                     esconderLoading();
-                    console.error('Erro ao atualizar status:', error);
+                    console.error('Erro:', error);
                     mostrarToast('Erro ao atualizar status.', 'erro');
-                    return false;
                 });
         }
 
-        // ============================================
-        // DELETAR AGENDAMENTO
-        // ============================================
         function deletarAgendamento(id) {
             if (!confirm('Tem certeza que deseja excluir este agendamento?')) return;
             
-            mostrarLoading('Excluindo agendamento...');
+            mostrarLoading('Excluindo...');
             supabaseClient
                 .from('agendamentos')
                 .delete()
@@ -480,142 +660,335 @@
                 .then(function(response) {
                     esconderLoading();
                     if (response.error) throw response.error;
-                    mostrarToast('Agendamento excluído com sucesso!', 'sucesso');
-                    renderizarAdmin();
+                    mostrarToast('Agendamento excluído!', 'sucesso');
+                    carregarAgendamentos();
                 })
                 .catch(function(error) {
                     esconderLoading();
-                    console.error('Erro ao excluir:', error);
-                    mostrarToast('Erro ao excluir agendamento.', 'erro');
+                    console.error('Erro:', error);
+                    mostrarToast('Erro ao excluir.', 'erro');
+                });
+        }
+
+        function exportarCSV() {
+            mostrarToast('Exportação em desenvolvimento.', 'info');
+        }
+
+        // ============================================
+        // TAB 2: HORÁRIOS
+        // ============================================
+        var horarios = [];
+
+        function carregarHorarios() {
+            if (!supabaseClient) { mostrarToast('Erro de conexão.', 'erro'); return; }
+            
+            supabaseClient
+                .from('config_horarios')
+                .select('*')
+                .order('horario', { ascending: true })
+                .then(function(response) {
+                    if (response.error) throw response.error;
+                    horarios = response.data || [];
+                    renderizarHorarios();
+                })
+                .catch(function(error) {
+                    console.error('Erro ao carregar horários:', error);
+                    // Se a tabela não existir, criar
+                    criarTabelaHorarios();
+                });
+        }
+
+        function criarTabelaHorarios() {
+            // Tenta criar a tabela via SQL (se o usuário tiver permissão)
+            // Ou apenas mostra um erro
+            document.getElementById('horarios-lista').innerHTML = 
+                '<div class="vazio"><i class="fas fa-exclamation-triangle" style="color: #dc3545;"></i> Tabela de horários não encontrada.<br><small>Execute o SQL para criar a tabela.</small></div>';
+        }
+
+        function renderizarHorarios() {
+            var container = document.getElementById('horarios-lista');
+            if (!horarios || horarios.length === 0) {
+                container.innerHTML = '<div class="vazio"><i class="fas fa-clock"></i> Nenhum horário cadastrado.<br><small>Adicione um horário acima.</small></div>';
+                return;
+            }
+            
+            var html = '';
+            for (var i = 0; i < horarios.length; i++) {
+                var h = horarios[i];
+                html += 
+                    '<div class="item-card">' +
+                    '<div class="info">' + h.horario + '</div>' +
+                    '<button class="btn btn-sm btn-danger" onclick="removerHorario(' + h.id + ')"><i class="fas fa-trash"></i></button>' +
+                    '</div>';
+            }
+            container.innerHTML = html;
+        }
+
+        function adicionarHorario() {
+            var horario = document.getElementById('novo-horario').value;
+            if (!horario) { mostrarToast('Selecione um horário.', 'erro'); return; }
+            
+            // Verifica se já existe
+            for (var i = 0; i < horarios.length; i++) {
+                if (horarios[i].horario === horario) {
+                    mostrarToast('Este horário já está cadastrado.', 'erro');
+                    return;
+                }
+            }
+            
+            mostrarLoading('Salvando...');
+            supabaseClient
+                .from('config_horarios')
+                .insert([{ horario: horario }])
+                .then(function(response) {
+                    esconderLoading();
+                    if (response.error) throw response.error;
+                    mostrarToast('Horário adicionado!', 'sucesso');
+                    document.getElementById('novo-horario').value = '';
+                    carregarHorarios();
+                })
+                .catch(function(error) {
+                    esconderLoading();
+                    console.error('Erro:', error);
+                    mostrarToast('Erro ao adicionar horário.', 'erro');
+                });
+        }
+
+        function removerHorario(id) {
+            if (!confirm('Remover este horário?')) return;
+            
+            mostrarLoading('Removendo...');
+            supabaseClient
+                .from('config_horarios')
+                .delete()
+                .eq('id', id)
+                .then(function(response) {
+                    esconderLoading();
+                    if (response.error) throw response.error;
+                    mostrarToast('Horário removido!', 'sucesso');
+                    carregarHorarios();
+                })
+                .catch(function(error) {
+                    esconderLoading();
+                    console.error('Erro:', error);
+                    mostrarToast('Erro ao remover horário.', 'erro');
                 });
         }
 
         // ============================================
-        // RENDERIZAR ADMIN
+        // TAB 3: SERVIÇOS
         // ============================================
-        function renderizarAdmin() {
-            getAgendamentos().then(function(agendamentos) {
-                var tbody = document.getElementById('admin-tbody');
-                var filtroStatus = document.getElementById('filtro-status').value;
-                var filtroTipo = document.getElementById('filtro-tipo').value;
-                var filtroBusca = document.getElementById('filtro-busca').value.toLowerCase();
+        var servicos = [];
 
-                var filtrados = agendamentos;
+        function carregarServicos() {
+            if (!supabaseClient) { mostrarToast('Erro de conexão.', 'erro'); return; }
+            
+            supabaseClient
+                .from('config_servicos')
+                .select('*')
+                .order('nome', { ascending: true })
+                .then(function(response) {
+                    if (response.error) throw response.error;
+                    servicos = response.data || [];
+                    renderizarServicos();
+                })
+                .catch(function(error) {
+                    console.error('Erro ao carregar serviços:', error);
+                });
+        }
 
-                if (filtroStatus !== 'todos') {
-                    filtrados = filtrados.filter(function(a) { return a.status === filtroStatus; });
-                }
-                if (filtroTipo !== 'todos') {
-                    filtrados = filtrados.filter(function(a) { return a.tipo === filtroTipo; });
-                }
-                if (filtroBusca) {
-                    filtrados = filtrados.filter(function(a) {
-                        return a.nome.toLowerCase().indexOf(filtroBusca) !== -1 ||
-                               a.telefone.indexOf(filtroBusca) !== -1;
-                    });
-                }
+        function renderizarServicos() {
+            var container = document.getElementById('servicos-lista');
+            if (!servicos || servicos.length === 0) {
+                container.innerHTML = '<div class="vazio"><i class="fas fa-stethoscope"></i> Nenhum serviço cadastrado.<br><small>Adicione um serviço acima.</small></div>';
+                return;
+            }
+            
+            var html = '';
+            for (var i = 0; i < servicos.length; i++) {
+                var s = servicos[i];
+                html += 
+                    '<div class="item-card">' +
+                    '<div class="info">' + s.nome + '<small>' + (s.descricao || '') + '</small></div>' +
+                    '<button class="btn btn-sm btn-danger" onclick="removerServico(' + s.id + ')"><i class="fas fa-trash"></i></button>' +
+                    '</div>';
+            }
+            container.innerHTML = html;
+        }
 
-                // Atualiza resumo
-                document.getElementById('total-count').textContent = agendamentos.length;
-                document.getElementById('pendente-count').textContent = agendamentos.filter(function(a) { return a.status === 'pendente'; }).length;
-                document.getElementById('confirmado-count').textContent = agendamentos.filter(function(a) { return a.status === 'confirmado'; }).length;
-                document.getElementById('domicilio-count').textContent = agendamentos.filter(function(a) { return a.tipo === 'domicilio'; }).length;
-                document.getElementById('presencial-count').textContent = agendamentos.filter(function(a) { return a.tipo === 'presencial'; }).length;
-                document.getElementById('total-agendamentos').textContent = agendamentos.length + ' agendamentos';
-
-                if (filtrados.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="9" class="vazio"><i class="fas fa-inbox"></i> Nenhum agendamento encontrado.</td></tr>';
+        function adicionarServico() {
+            var nome = document.getElementById('novo-servico').value.trim();
+            var descricao = document.getElementById('nova-descricao').value.trim();
+            
+            if (!nome) { mostrarToast('Digite o nome do serviço.', 'erro'); return; }
+            
+            // Verifica se já existe
+            for (var i = 0; i < servicos.length; i++) {
+                if (servicos[i].nome.toLowerCase() === nome.toLowerCase()) {
+                    mostrarToast('Este serviço já está cadastrado.', 'erro');
                     return;
                 }
+            }
+            
+            mostrarLoading('Salvando...');
+            supabaseClient
+                .from('config_servicos')
+                .insert([{ nome: nome, descricao: descricao || null }])
+                .then(function(response) {
+                    esconderLoading();
+                    if (response.error) throw response.error;
+                    mostrarToast('Serviço adicionado!', 'sucesso');
+                    document.getElementById('novo-servico').value = '';
+                    document.getElementById('nova-descricao').value = '';
+                    carregarServicos();
+                })
+                .catch(function(error) {
+                    esconderLoading();
+                    console.error('Erro:', error);
+                    mostrarToast('Erro ao adicionar serviço.', 'erro');
+                });
+        }
 
-                var html = '';
-                for (var i = 0; i < filtrados.length; i++) {
-                    var a = filtrados[i];
-                    var dataObj = new Date(a.data + 'T00:00:00');
-                    var dataFormatada = String(dataObj.getDate()).padStart(2, '0') + '/' + String(dataObj.getMonth() + 1).padStart(2, '0') + '/' + dataObj.getFullYear();
-                    var tipoLabel = a.tipo === 'domicilio' ? '🏠 Domiciliar' : '🏢 Presencial';
-                    var tipoClass = a.tipo === 'domicilio' ? 'tipo-domicilio' : 'tipo-presencial';
+        function removerServico(id) {
+            if (!confirm('Remover este serviço?')) return;
+            
+            mostrarLoading('Removendo...');
+            supabaseClient
+                .from('config_servicos')
+                .delete()
+                .eq('id', id)
+                .then(function(response) {
+                    esconderLoading();
+                    if (response.error) throw response.error;
+                    mostrarToast('Serviço removido!', 'sucesso');
+                    carregarServicos();
+                })
+                .catch(function(error) {
+                    esconderLoading();
+                    console.error('Erro:', error);
+                    mostrarToast('Erro ao remover serviço.', 'erro');
+                });
+        }
 
-                    var statusClass = 'status-pendente';
-                    if (a.status === 'confirmado') statusClass = 'status-confirmado';
-                    if (a.status === 'cancelado') statusClass = 'status-cancelado';
-                    if (a.status === 'atendido') statusClass = 'status-atendido';
+        // ============================================
+        // TAB 4: DIAS DE FUNCIONAMENTO
+        // ============================================
+        var diasSemana = [
+            { id: 1, nome: 'Domingo', valor: 'domingo', ativo: false },
+            { id: 2, nome: 'Segunda', valor: 'segunda', ativo: true },
+            { id: 3, nome: 'Terça', valor: 'terca', ativo: true },
+            { id: 4, nome: 'Quarta', valor: 'quarta', ativo: true },
+            { id: 5, nome: 'Quinta', valor: 'quinta', ativo: true },
+            { id: 6, nome: 'Sexta', valor: 'sexta', ativo: true },
+            { id: 7, nome: 'Sábado', valor: 'sabado', ativo: false }
+        ];
 
-                    var statusLabel = a.status.charAt(0).toUpperCase() + a.status.slice(1);
-                    var acoes = '';
-
-                    if (a.status === 'pendente') {
-                        acoes = 
-                            '<button class="btn btn-success btn-sm" onclick="mudarStatus(' + a.id + ', \'confirmado\')" title="Confirmar"><i class="fas fa-check"></i></button>' +
-                            '<button class="btn btn-danger btn-sm" onclick="mudarStatus(' + a.id + ', \'cancelado\')" title="Cancelar"><i class="fas fa-times"></i></button>';
-                    } else if (a.status === 'confirmado') {
-                        acoes = 
-                            '<button class="btn btn-warning btn-sm" onclick="mudarStatus(' + a.id + ', \'atendido\')" title="Atendido"><i class="fas fa-user-check"></i></button>' +
-                            '<button class="btn btn-danger btn-sm" onclick="mudarStatus(' + a.id + ', \'cancelado\')" title="Cancelar"><i class="fas fa-times"></i></button>';
-                    } else if (a.status === 'atendido') {
-                        acoes = 
-                            '<button class="btn btn-primario btn-sm" onclick="mudarStatus(' + a.id + ', \'confirmado\')" title="Reativar"><i class="fas fa-undo"></i></button>';
-                    } else {
-                        acoes = 
-                            '<button class="btn btn-primario btn-sm" onclick="mudarStatus(' + a.id + ', \'pendente\')" title="Reativar"><i class="fas fa-undo"></i></button>';
+        function carregarDias() {
+            if (!supabaseClient) { mostrarToast('Erro de conexão.', 'erro'); return; }
+            
+            supabaseClient
+                .from('config_dias')
+                .select('*')
+                .then(function(response) {
+                    if (response.error) throw response.error;
+                    var dados = response.data || [];
+                    
+                    // Atualiza os dias com os dados do banco
+                    if (dados.length > 0) {
+                        for (var i = 0; i < diasSemana.length; i++) {
+                            for (var j = 0; j < dados.length; j++) {
+                                if (diasSemana[i].valor === dados[j].dia) {
+                                    diasSemana[i].ativo = dados[j].ativo;
+                                    diasSemana[i].id = dados[j].id;
+                                    break;
+                                }
+                            }
+                        }
                     }
-                    acoes += '<button class="btn btn-danger btn-sm" onclick="deletarAgendamento(' + a.id + ')" title="Excluir"><i class="fas fa-trash"></i></button>';
-
-                    html += 
-                        '<tr>' +
-                        '<td>' + (i + 1) + '</td>' +
-                        '<td><strong>' + a.nome + '</strong></td>' +
-                        '<td>' + a.telefone + '</td>' +
-                        '<td>' + a.servico + '</td>' +
-                        '<td><span class="tipo-badge ' + tipoClass + '">' + tipoLabel + '</span></td>' +
-                        '<td>' + dataFormatada + '</td>' +
-                        '<td>' + a.horario + '</td>' +
-                        '<td><span class="status ' + statusClass + '">' + statusLabel + '</span></td>' +
-                        '<td><div class="actions">' + acoes + '</div></td>' +
-                        '</tr>';
-                }
-                tbody.innerHTML = html;
-            });
+                    renderizarDias();
+                })
+                .catch(function(error) {
+                    console.error('Erro ao carregar dias:', error);
+                    renderizarDias();
+                });
         }
 
-        // ============================================
-        // MUDAR STATUS (wrapper)
-        // ============================================
-        function mudarStatus(id, novoStatus) {
-            var statusLabels = {
-                'pendente': 'Pendente',
-                'confirmado': 'Confirmado',
-                'cancelado': 'Cancelado',
-                'atendido': 'Atendido'
+        function renderizarDias() {
+            var container = document.getElementById('dias-lista');
+            var html = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;">';
+            
+            for (var i = 0; i < diasSemana.length; i++) {
+                var d = diasSemana[i];
+                html += 
+                    '<div class="item-card" style="justify-content: space-between;">' +
+                    '<span style="font-weight: 500;">' + d.nome + '</span>' +
+                    '<div class="toggle ' + (d.ativo ? 'ativo' : '') + '" onclick="toggleDia(' + i + ')" title="' + (d.ativo ? 'Desativar' : 'Ativar') + '">' +
+                    '<div class="slider"></div>' +
+                    '</div>' +
+                    '</div>';
+            }
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function toggleDia(index) {
+            var dia = diasSemana[index];
+            dia.ativo = !dia.ativo;
+            
+            // Atualiza visual
+            renderizarDias();
+            
+            // Salva no Supabase
+            mostrarLoading('Salvando...');
+            
+            var dados = {
+                dia: dia.valor,
+                ativo: dia.ativo,
+                nome: dia.nome
             };
-            atualizarStatus(id, novoStatus).then(function(sucesso) {
-                if (sucesso) {
-                    mostrarToast('Status atualizado para ' + (statusLabels[novoStatus] || novoStatus) + '!', 'sucesso');
-                    renderizarAdmin();
-                }
-            });
+            
+            // Verifica se já existe no banco
+            supabaseClient
+                .from('config_dias')
+                .select('id')
+                .eq('dia', dia.valor)
+                .then(function(response) {
+                    if (response.error) throw response.error;
+                    
+                    var existing = response.data || [];
+                    if (existing.length > 0) {
+                        // Atualiza
+                        return supabaseClient
+                            .from('config_dias')
+                            .update({ ativo: dia.ativo })
+                            .eq('id', existing[0].id);
+                    } else {
+                        // Insere
+                        return supabaseClient
+                            .from('config_dias')
+                            .insert([dados]);
+                    }
+                })
+                .then(function(response) {
+                    esconderLoading();
+                    if (response && response.error) throw response.error;
+                    mostrarToast('Dia atualizado!', 'sucesso');
+                })
+                .catch(function(error) {
+                    esconderLoading();
+                    console.error('Erro:', error);
+                    mostrarToast('Erro ao salvar configuração.', 'erro');
+                });
         }
 
         // ============================================
-        // EXPORTAR CSV
-        // ============================================
-        function exportarCSV() {
-            mostrarToast('Função de exportação disponível em breve.', 'info');
-        }
-
-        // ============================================
-        // ATUALIZAR DADOS
-        // ============================================
-        function atualizarDados() {
-            renderizarAdmin();
-            mostrarToast('Dados atualizados!', 'sucesso');
-        }
-
-        // ============================================
-        // INICIALIZAR
+        // INICIALIZAÇÃO
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
-            renderizarAdmin();
+            carregarAgendamentos();
+            carregarHorarios();
+            carregarServicos();
+            carregarDias();
         });
     </script>
 </body>
