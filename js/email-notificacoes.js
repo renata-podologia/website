@@ -1,116 +1,33 @@
 // ============================================
-// SISTEMA DE NOTIFICAÇÕES POR E-MAIL
+// SISTEMA DE NOTIFICAÇÕES POR E-MAIL (EMAILJS)
 // ============================================
 
 // ============================================
-// CARREGAR CONFIGURAÇÕES DOS SECRETS
+// CONFIGURAÇÃO DO EMAILJS
 // ============================================
-
-let RESEND_KEY = '';
-let RESEND_FROM = 'contato@resend.dev';
-let RESEND_TO = 'contato@levitapodologia.com.br';
-
-try {
-    if (typeof CONFIG !== 'undefined') {
-        RESEND_KEY = CONFIG.RESEND_API_KEY || '';
-        console.log('✅ Configuração Resend carregada do GitHub Secrets!');
-    } else {
-        console.warn('⚠️ Arquivo config.js não encontrado. Usando fallback.');
-        RESEND_KEY = 'SUA_RESEND_API_KEY_AQUI';
-    }
-} catch(e) {
-    console.warn('⚠️ Erro ao carregar configuração:', e);
-    RESEND_KEY = 'SUA_RESEND_API_KEY_AQUI';
-}
-
-const EMAIL_CONFIG = {
-    apiKey: RESEND_KEY,
-    from: RESEND_FROM,
-    to: RESEND_TO,
-    nomeEmpresa: 'Levità Podologia',
-    telefone: '(11) 97830-3833'
+const EMAILJS_CONFIG = {
+    publicKey: 'rRmq87DuOwPzW-3Eo',
+    serviceID: 'service_4gybw6a',
+    templateID: 'template_levita'
 };
 
-console.log('📧 Resend API Key:', RESEND_KEY ? (RESEND_KEY === 'SUA_RESEND_API_KEY_AQUI' ? '⚠️ NÃO CONFIGURADO' : '✅ Configurado') : '❌ NÃO CONFIGURADO');
-
 // ============================================
-// GERAR E-MAIL PARA O CLIENTE (TEXTO)
+// CARREGAR EMAILJS
 // ============================================
-function gerarEmailCliente(dados) {
-    const dataObj = new Date(dados.data + 'T00:00:00');
-    const dataFormatada = dataObj.toLocaleDateString('pt-BR', {
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-    });
-    
-    const tipoLabel = dados.tipo === 'domicilio' ? '🏠 Domiciliar' : '🏢 Presencial';
-    const statusLabel = dados.status.charAt(0).toUpperCase() + dados.status.slice(1);
-    
-    return `
-✅ *Agendamento Confirmado - Levità Podologia*
-
-Olá *${dados.nome}*, seu agendamento foi realizado com sucesso! 🎉
-
-📋 *Serviço:* ${dados.servico}
-📅 *Data:* ${dataFormatada}
-⏰ *Horário:* ${dados.horario}
-📍 *Tipo:* ${tipoLabel}
-🏠 *Endereço:* ${dados.endereco || 'Presencial - Clínica'}
-📌 *Status:* ${statusLabel}
-🔑 *Protocolo:* #${String(dados.id).padStart(5, '0')}
-
-📌 *Próximos passos:*
-• Anote a data e horário
-• Em caso de imprevistos, entre em contato
-• Aguarde nossa confirmação
-
-📱 *Dúvidas?* Fale conosco: wa.me/5511978303833
-
-Agradecemos pela confiança! 🙏
-
-*Levitação Podologia - Podóloga Renata Kemp*
-`;
-}
-
-// ============================================
-// GERAR E-MAIL PARA A RENATA (TEXTO)
-// ============================================
-function gerarEmailRenata(dados) {
-    const dataObj = new Date(dados.data + 'T00:00:00');
-    const dataFormatada = dataObj.toLocaleDateString('pt-BR', {
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-    });
-    
-    const tipoLabel = dados.tipo === 'domicilio' ? '🏠 Domiciliar' : '🏢 Presencial';
-    const statusLabel = dados.status.charAt(0).toUpperCase() + dados.status.slice(1);
-    
-    return `
-🔔 *NOVO AGENDAMENTO!*
-
-👤 *Paciente:* ${dados.nome}
-📱 *Telefone:* ${dados.telefone}
-📧 *E-mail:* ${dados.email || 'Não informado'}
-📋 *Serviço:* ${dados.servico}
-📅 *Data:* ${dataFormatada}
-⏰ *Horário:* ${dados.horario}
-📍 *Tipo:* ${tipoLabel}
-🏠 *Endereço:* ${dados.endereco || 'Presencial - Clínica'}
-📌 *Status:* ${statusLabel}
-🔑 *Protocolo:* #${String(dados.id).padStart(5, '0')}
-
-📌 *Ações recomendadas:*
-✅ Confirmar o agendamento
-📱 Entrar em contato com o paciente
-📝 Verificar o endereço (se for domicílio)
-
-🔗 *Ver no painel:* https://renata-podologia.github.io/website/admin.html
-`;
-}
+(function() {
+    var script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
+    script.onload = function() {
+        emailjs.init(EMAILJS_CONFIG.publicKey);
+        console.log('✅ EmailJS carregado!');
+        console.log('📧 Service ID:', EMAILJS_CONFIG.serviceID);
+        console.log('📧 Template ID:', EMAILJS_CONFIG.templateID);
+    };
+    script.onerror = function() {
+        console.error('❌ Erro ao carregar EmailJS');
+    };
+    document.head.appendChild(script);
+})();
 
 // ============================================
 // GERAR E-MAIL EM HTML PARA O CLIENTE
@@ -289,43 +206,36 @@ function gerarEmailRenataHTML(dados) {
 }
 
 // ============================================
-// FUNÇÃO PARA ENVIAR E-MAIL
+// FUNÇÃO PARA ENVIAR E-MAIL VIA EMAILJS
 // ============================================
 async function enviarEmail(destinatario, assunto, html) {
     try {
         console.log('📧 Enviando e-mail para:', destinatario);
         console.log('📧 Assunto:', assunto);
         
-        if (!EMAIL_CONFIG.apiKey || EMAIL_CONFIG.apiKey === 'SUA_RESEND_API_KEY_AQUI') {
-            console.error('❌ Resend API Key não configurada!');
-            console.error('⚠️ Configure o secret RESEND_API_KEY no GitHub');
-            return { success: false, error: 'API Key não configurada' };
+        if (typeof emailjs === 'undefined') {
+            console.error('❌ EmailJS não carregado!');
+            return { success: false, error: 'EmailJS não carregado' };
         }
         
-        const response = await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: {
-                'Authorization': 'Bearer ' + EMAIL_CONFIG.apiKey,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                from: EMAIL_CONFIG.from,
-                to: [destinatario],
-                subject: assunto,
-                html: html
-            })
-        });
+        const templateParams = {
+            to_email: destinatario,
+            to_name: destinatario.split('@')[0] || 'Cliente',
+            subject: assunto,
+            message: html.replace(/<[^>]*>/g, '').substring(0, 500),
+            html_message: html
+        };
         
-        const data = await response.json();
+        console.log('📤 Enviando com parâmetros:', templateParams);
         
-        if (response.ok) {
-            console.log('✅ E-mail enviado com sucesso para:', destinatario);
-            console.log('📋 Resposta:', data);
-            return { success: true, data: data };
-        } else {
-            console.error('❌ Erro ao enviar e-mail:', data);
-            return { success: false, error: data };
-        }
+        const response = await emailjs.send(
+            EMAILJS_CONFIG.serviceID,
+            EMAILJS_CONFIG.templateID,
+            templateParams
+        );
+        
+        console.log('✅ E-mail enviado com sucesso!', response);
+        return { success: true, data: response };
         
     } catch (error) {
         console.error('❌ Erro ao enviar e-mail:', error);
@@ -339,31 +249,86 @@ async function enviarEmail(destinatario, assunto, html) {
 async function enviarNotificacoesEmail(dados) {
     try {
         console.log('📧 Enviando notificações por e-mail...');
-        console.log('📧 API Key configurada:', EMAIL_CONFIG.apiKey ? (EMAIL_CONFIG.apiKey === 'SUA_RESEND_API_KEY_AQUI' ? '❌ Não' : '✅ Sim') : '❌ Não');
+        console.log('📧 Public Key:', EMAILJS_CONFIG.publicKey ? '✅ Configurado' : '❌ NÃO CONFIGURADO');
+        console.log('📧 Service ID:', EMAILJS_CONFIG.serviceID);
+        console.log('📧 Template ID:', EMAILJS_CONFIG.templateID);
         
-        if (!dados.email || dados.email === '') {
-            console.warn('⚠️ Cliente sem e-mail. Pulando e-mail para o cliente.');
-        } else {
-            const emailCliente = gerarEmailClienteHTML(dados);
-            const clienteResult = await enviarEmail(
-                dados.email,
-                '✅ Agendamento Confirmado - Levità Podologia',
-                emailCliente
-            );
+        const emailClienteHTML = gerarEmailClienteHTML(dados);
+        const emailRenataHTML = gerarEmailRenataHTML(dados);
+        
+        // Extrair variáveis para o template
+        const dataObj = new Date(dados.data + 'T00:00:00');
+        const dataFormatada = dataObj.toLocaleDateString('pt-BR', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+        const tipoLabel = dados.tipo === 'domicilio' ? '🏠 Domiciliar' : '🏢 Presencial';
+        const statusLabel = dados.status.charAt(0).toUpperCase() + dados.status.slice(1);
+        
+        // Enviar para o cliente
+        let clienteResult = { success: false };
+        if (dados.email && dados.email !== '') {
+            const templateParamsCliente = {
+                to_email: dados.email,
+                to_name: dados.nome,
+                subject: '✅ Agendamento Confirmado - Levità Podologia',
+                servico: dados.servico,
+                data: dataFormatada,
+                horario: dados.horario,
+                tipo: tipoLabel,
+                endereco: dados.endereco || 'Presencial - Clínica',
+                status: statusLabel,
+                protocolo: '#' + String(dados.id).padStart(5, '0')
+            };
+            
+            clienteResult = await emailjs.send(
+                EMAILJS_CONFIG.serviceID,
+                EMAILJS_CONFIG.templateID,
+                templateParamsCliente
+            ).then(function(response) {
+                console.log('✅ E-mail para o cliente enviado!', response);
+                return { success: true, data: response };
+            }).catch(function(error) {
+                console.error('❌ Erro ao enviar e-mail para o cliente:', error);
+                return { success: false, error: error };
+            });
             console.log('📧 E-mail para o cliente:', clienteResult.success ? '✅ Enviado' : '❌ Falhou');
+        } else {
+            console.warn('⚠️ Cliente sem e-mail.');
         }
         
-        const emailRenata = gerarEmailRenataHTML(dados);
-        const renataResult = await enviarEmail(
-            EMAIL_CONFIG.to,
-            '🔔 NOVO AGENDAMENTO - ' + dados.nome,
-            emailRenata
-        );
+        // Enviar para a Renata
+        const templateParamsRenata = {
+            to_email: 'contato@levitapodologia.com.br',
+            to_name: 'Renata Kemp',
+            subject: '🔔 NOVO AGENDAMENTO - ' + dados.nome,
+            servico: dados.servico,
+            data: dataFormatada,
+            horario: dados.horario,
+            tipo: tipoLabel,
+            endereco: dados.endereco || 'Presencial - Clínica',
+            status: statusLabel,
+            protocolo: '#' + String(dados.id).padStart(5, '0')
+        };
+        
+        const renataResult = await emailjs.send(
+            EMAILJS_CONFIG.serviceID,
+            EMAILJS_CONFIG.templateID,
+            templateParamsRenata
+        ).then(function(response) {
+            console.log('✅ E-mail para a Renata enviado!', response);
+            return { success: true, data: response };
+        }).catch(function(error) {
+            console.error('❌ Erro ao enviar e-mail para a Renata:', error);
+            return { success: false, error: error };
+        });
         console.log('📧 E-mail para a Renata:', renataResult.success ? '✅ Enviado' : '❌ Falhou');
         
         return {
             sucesso: true,
-            cliente: dados.email ? (clienteResult.success ? 'enviado' : 'falhou') : 'pulado',
+            cliente: clienteResult.success ? 'enviado' : 'falhou',
             renata: renataResult.success ? 'enviado' : 'falhou'
         };
         
@@ -378,16 +343,36 @@ async function enviarNotificacoesEmail(dados) {
 // ============================================
 async function enviarEmailRenata(dados) {
     try {
-        console.log('📧 Enviando e-mail para a Renata...');
+        const dataObj = new Date(dados.data + 'T00:00:00');
+        const dataFormatada = dataObj.toLocaleDateString('pt-BR', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+        const tipoLabel = dados.tipo === 'domicilio' ? '🏠 Domiciliar' : '🏢 Presencial';
+        const statusLabel = dados.status.charAt(0).toUpperCase() + dados.status.slice(1);
         
-        const emailRenata = gerarEmailRenataHTML(dados);
-        const result = await enviarEmail(
-            EMAIL_CONFIG.to,
-            '🔔 NOVO AGENDAMENTO - ' + dados.nome,
-            emailRenata
+        const templateParams = {
+            to_email: 'contato@levitapodologia.com.br',
+            to_name: 'Renata Kemp',
+            subject: '🔔 NOVO AGENDAMENTO - ' + dados.nome,
+            servico: dados.servico,
+            data: dataFormatada,
+            horario: dados.horario,
+            tipo: tipoLabel,
+            endereco: dados.endereco || 'Presencial - Clínica',
+            status: statusLabel,
+            protocolo: '#' + String(dados.id).padStart(5, '0')
+        };
+        
+        const response = await emailjs.send(
+            EMAILJS_CONFIG.serviceID,
+            EMAILJS_CONFIG.templateID,
+            templateParams
         );
-        
-        return result;
+        console.log('✅ E-mail para a Renata enviado!', response);
+        return { success: true, data: response };
         
     } catch (error) {
         console.error('❌ Erro ao enviar e-mail para a Renata:', error);
@@ -402,4 +387,4 @@ window.enviarNotificacoesEmail = enviarNotificacoesEmail;
 window.enviarEmailRenata = enviarEmailRenata;
 window.enviarEmail = enviarEmail;
 
-console.log('✅ Sistema de e-mail carregado!');
+console.log('✅ Sistema de e-mail carregado (EmailJS)!');

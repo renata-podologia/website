@@ -1,4 +1,3 @@
-@"
 // ============================================
 // CONFIGURAÇÕES DO SISTEMA
 // ============================================
@@ -10,4 +9,3 @@ const CONFIG = {
 };
 
 console.log('✅ Configuração carregada!');
-"@ | Out-File -FilePath js/config.js -Encoding UTF8
