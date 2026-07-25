@@ -552,6 +552,15 @@
                     <input type="tel" id="telefone" placeholder="(11) 99999-9999" />
                 </div>
             </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>E-mail <span class="obrigatorio">*</span></label>
+                    <input type="email" id="email" placeholder="Digite seu e-mail" />
+                </div>
+                <div class="form-group">
+                    <!-- Espaço vazio para alinhamento -->
+                </div>
+            </div>
             <div class="form-actions">
                 <a href="index.html" class="btn btn-outline">
                     <i class="fas fa-home"></i> Início
@@ -741,7 +750,10 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <!-- SISTEMA DE NOTIFICAÇÕES POR E-MAIL -->
-    <script src="email-notificacoes.js"></script>
+    <script src="js/email-notificacoes.js"></script>
+    
+    <!-- GOOGLE CALENDAR -->
+    <script src="js/google-calendar.js"></script>
 
     <script>
         // ============================================
@@ -779,6 +791,7 @@
         var agendamento = {
             nome: '',
             telefone: '',
+            email: '',
             tipo: '',
             endereco: '',
             numero: '',
@@ -872,6 +885,8 @@
         function validarPasso1() {
             var nome = document.getElementById('nome').value.trim();
             var telefone = document.getElementById('telefone').value.trim();
+            var email = document.getElementById('email').value.trim();
+            
             if (!nome) {
                 mostrarToast('Digite seu nome completo.', 'erro');
                 document.getElementById('nome').focus();
@@ -882,8 +897,20 @@
                 document.getElementById('telefone').focus();
                 return false;
             }
+            if (!email) {
+                mostrarToast('Digite seu e-mail.', 'erro');
+                document.getElementById('email').focus();
+                return false;
+            }
+            if (!email.includes('@') || !email.includes('.')) {
+                mostrarToast('Digite um e-mail válido.', 'erro');
+                document.getElementById('email').focus();
+                return false;
+            }
+            
             agendamento.nome = nome;
             agendamento.telefone = telefone;
+            agendamento.email = email;
             return true;
         }
 
@@ -1027,7 +1054,7 @@
         });
 
         // ============================================
-        // DATAS E HORÁRIOS - COM FILTRO DE HORÁRIOS FUTUROS
+        // DATAS E HORÁRIOS
         // ============================================
         function gerarHorarios(dataStr) {
             var grid = document.getElementById('horarios-grid');
@@ -1050,22 +1077,18 @@
             var diaSemana = data.getDay();
             var hoje = new Date();
             
-            // Verifica se a data selecionada é HOJE
             var ehHoje = dataStr === hoje.toISOString().split('T')[0];
             console.log('📅 É hoje?', ehHoje);
             
-            // Hora atual (para filtrar horários que já passaram)
             var horaAtual = hoje.getHours();
             var minutoAtual = hoje.getMinutes();
             console.log('🕐 Hora atual:', horaAtual + ':' + String(minutoAtual).padStart(2, '0'));
             
-            // Verifica se é domingo
             if (diaSemana === 0) {
                 grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; padding: 20px; color: #dc3545;">⚠️ Não atendemos aos domingos.</p>';
                 return;
             }
             
-            // Filtra horários base
             var horariosFiltrados = HORARIOS_BASE.slice();
             
             if (horariosFiltrados.length === 0) {
@@ -1121,9 +1144,6 @@
                         btn.textContent = horario;
                         btn.dataset.horario = horario;
                         
-                        // ============================================
-                        // VERIFICA SE O HORÁRIO JÁ PASSOU (hoje)
-                        // ============================================
                         var estaPassado = false;
                         if (ehHoje) {
                             var horaHorario = parseInt(horario.split(':')[0]);
@@ -1134,7 +1154,6 @@
                             }
                         }
                         
-                        // Verifica se está ocupado
                         var estaOcupado = horariosOcupados.indexOf(horario) !== -1;
                         
                         if (estaPassado) {
@@ -1173,7 +1192,6 @@
                     console.log('📊 [CONSULTA] Total bloqueados:', totalBloqueados, 'de', horariosFiltrados.length);
                     console.log('📊 [CONSULTA] Total passados:', totalPassados, 'de', horariosFiltrados.length);
                     
-                    // Verifica se todos estão bloqueados
                     var totalIndisponiveis = totalBloqueados + totalPassados;
                     if (totalIndisponiveis === horariosFiltrados.length && horariosFiltrados.length > 0) {
                         var msg = document.createElement('p');
@@ -1190,25 +1208,20 @@
         }
 
         // ============================================
-        // INICIALIZAÇÃO DA DATA - SEMPRE HOJE
+        // INICIALIZAÇÃO DA DATA
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
             var dataInput = document.getElementById('data-agendamento');
             var hoje = new Date();
             
-            // Data mínima = hoje (não pode selecionar datas passadas)
             dataInput.min = hoje.getFullYear() + '-' + String(hoje.getMonth() + 1).padStart(2, '0') + '-' + String(hoje.getDate()).padStart(2, '0');
             
-            // ============================================
-            // DATA PADRÃO = HOJE (data atual)
-            // ============================================
             var ano = hoje.getFullYear();
             var mes = String(hoje.getMonth() + 1).padStart(2, '0');
             var dia = String(hoje.getDate()).padStart(2, '0');
             dataInput.value = ano + '-' + mes + '-' + dia;
             agendamento.data = dataInput.value;
             
-            // Quando a data mudar, consulta novamente
             dataInput.addEventListener('change', function() {
                 if (this.value) {
                     agendamento.data = this.value;
@@ -1220,7 +1233,6 @@
                 }
             });
             
-            // Carrega os horários
             setTimeout(function() {
                 if (dataInput.value) {
                     agendamento.data = dataInput.value;
@@ -1243,6 +1255,7 @@
                 .insert([{
                     nome: dados.nome,
                     telefone: dados.telefone,
+                    email: dados.email,
                     tipo: dados.tipo,
                     endereco: dados.endereco,
                     numero: dados.numero || null,
@@ -1276,6 +1289,7 @@
             resumo.innerHTML = 
                 '<div class="linha"><span class="rotulo">Nome</span><span class="valor">' + agendamento.nome + '</span></div>' +
                 '<div class="linha"><span class="rotulo">Telefone</span><span class="valor">' + agendamento.telefone + '</span></div>' +
+                '<div class="linha"><span class="rotulo">E-mail</span><span class="valor">' + agendamento.email + '</span></div>' +
                 '<div class="linha"><span class="rotulo">Tipo</span><span class="valor">' + tipoLabel + '</span></div>' +
                 '<div class="linha"><span class="rotulo">Endereço</span><span class="valor">' + agendamento.endereco + '</span></div>' +
                 '<div class="linha"><span class="rotulo">Serviço</span><span class="valor"><strong>' + agendamento.servico + '</strong></span></div>' +
@@ -1284,7 +1298,7 @@
         }
 
         // ============================================
-        // CONFIRMAR - COM E-MAIL
+        // CONFIRMAR
         // ============================================
         function confirmarAgendamento() {
             if (!validarPasso1()) return;
@@ -1340,29 +1354,49 @@
                             // ============================================
                             // 📧 ENVIAR NOTIFICAÇÃO POR E-MAIL
                             // ============================================
-                            if (typeof enviarEmailRenata === 'function') {
+                            if (typeof enviarNotificacoesEmail === 'function') {
                                 try {
-                                    enviarEmailRenata(salvo)
+                                    enviarNotificacoesEmail(salvo)
                                         .then(function(resultado) {
-                                            if (resultado && resultado.success) {
-                                                console.log('✅ E-mail enviado para a Renata!');
-                                                console.log('📧 Para:', 'contato@levitapodologia.com.br');
+                                            if (resultado && resultado.sucesso) {
+                                                console.log('✅ E-mails enviados com sucesso!');
                                             } else {
-                                                console.warn('⚠️ Erro ao enviar e-mail:', resultado);
+                                                console.warn('⚠️ Erro ao enviar e-mails:', resultado);
                                             }
                                         })
                                         .catch(function(err) {
-                                            console.warn('⚠️ Erro ao enviar e-mail:', err);
+                                            console.warn('⚠️ Erro ao enviar e-mails:', err);
                                         });
-                                    mostrarToast('📧 E-mail enviado para a Renata!', 'sucesso');
+                                    mostrarToast('📧 E-mails enviados!', 'sucesso');
                                 } catch(err) {
                                     console.warn('⚠️ Erro ao enviar e-mail:', err);
                                 }
                             } else {
-                                console.warn('⚠️ Função enviarEmailRenata não encontrada');
+                                console.warn('⚠️ Função enviarNotificacoesEmail não encontrada');
                             }
 
-                            // Mostra a confirmação
+                            // ============================================
+                            // 📅 PROCESSAR AGENDAMENTO NO GOOGLE CALENDAR
+                            // ============================================
+                            if (typeof processarAgendamento === 'function') {
+                                try {
+                                    processarAgendamento(salvo)
+                                        .then(function(resultado) {
+                                            if (resultado && resultado.sucesso) {
+                                                console.log('✅ Evento criado no Google Calendar!');
+                                                console.log('🔗 Link:', resultado.evento ? resultado.evento.htmlLink : 'N/A');
+                                            } else {
+                                                console.warn('⚠️ Erro ao criar evento:', resultado);
+                                            }
+                                        })
+                                        .catch(function(err) {
+                                            console.warn('⚠️ Erro ao processar agendamento:', err);
+                                        });
+                                } catch(err) {
+                                    console.warn('⚠️ Erro ao processar agendamento:', err);
+                                }
+                            }
+
                             mostrarConfirmacao(salvo);
                             mostrarToast('Agendamento salvo com sucesso!', 'sucesso');
                             
@@ -1404,6 +1438,7 @@
             detalhes.innerHTML = 
                 '<div><span>Nome:</span> <strong>' + dados.nome + '</strong></div>' +
                 '<div><span>Telefone:</span> <strong>' + dados.telefone + '</strong></div>' +
+                '<div><span>E-mail:</span> <strong>' + dados.email + '</strong></div>' +
                 '<div><span>Tipo:</span> <strong>' + tipoLabel + '</strong></div>' +
                 '<div><span>Endereço:</span> <strong>' + dados.endereco + '</strong></div>' +
                 '<div><span>Serviço:</span> <strong>' + dados.servico + '</strong></div>' +
@@ -1421,6 +1456,7 @@
             agendamento = {
                 nome: '',
                 telefone: '',
+                email: '',
                 tipo: '',
                 endereco: '',
                 numero: '',
@@ -1434,6 +1470,7 @@
             
             document.getElementById('nome').value = '';
             document.getElementById('telefone').value = '';
+            document.getElementById('email').value = '';
             document.getElementById('cep').value = '';
             document.getElementById('numero-endereco').value = '';
             document.getElementById('complemento-endereco').value = '';
