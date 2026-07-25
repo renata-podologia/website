@@ -172,6 +172,13 @@
         .btn-warning:hover {
             background: #e0a800;
         }
+        .btn-voltar {
+            background: var(--cinza-claro);
+            color: var(--texto);
+        }
+        .btn-voltar:hover {
+            background: #e8edee;
+        }
 
         /* ============================================
            HEADER
@@ -497,16 +504,6 @@
             min-width: 120px;
         }
 
-        .btn-voltar {
-            background: var(--cinza-claro);
-            color: var(--texto);
-        }
-
-        .btn-voltar:hover {
-            background: #e8edee;
-        }
-
-        /* TIPO DE ATENDIMENTO */
         .tipo-atendimento-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -554,7 +551,6 @@
             opacity: 1;
         }
 
-        /* Busca CEP */
         .cep-busca-group {
             display: flex;
             gap: 12px;
@@ -595,7 +591,6 @@
             color: var(--petroleo);
         }
 
-        /* Horários disponíveis */
         .horarios-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
@@ -634,7 +629,6 @@
             background: #f0f0f0;
         }
 
-        /* Serviços em grid */
         .servicos-escolha {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -682,7 +676,6 @@
             opacity: 1;
         }
 
-        /* Resumo do agendamento */
         .resumo-agendamento {
             background: var(--bege);
             border-radius: 16px;
@@ -713,7 +706,6 @@
             text-align: right;
         }
 
-        /* Mensagem de confirmação */
         .confirmacao-box {
             text-align: center;
             padding: 30px 20px;
@@ -948,7 +940,6 @@
             border: 1px solid #e8edee;
         }
 
-        /* Loading */
         .loading-overlay {
             position: fixed;
             top: 0;
@@ -983,7 +974,6 @@
             font-weight: 500;
         }
 
-        /* Toast */
         .toast {
             position: fixed;
             top: 90px;
@@ -1014,7 +1004,6 @@
             margin-right: 10px;
         }
 
-        /* Back to Top */
         .back-top {
             position: fixed;
             bottom: 100px;
@@ -1044,7 +1033,6 @@
             transform: translateY(-4px);
         }
 
-        /* WhatsApp Float */
         .whatsapp-float {
             position: fixed;
             bottom: 28px;
@@ -1803,7 +1791,7 @@
                     <h3 style="font-family: 'Poppins', sans-serif; color: var(--petroleo); margin-bottom: 20px;">
                         <i class="fas fa-user" style="color: var(--dourado);"></i> Seus dados
                     </h3>
-                    <form id="form-passo1">
+                    <form id="form-passo1" onsubmit="return false;">
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Nome completo <span class="obrigatorio">*</span></label>
@@ -2401,11 +2389,26 @@
         }
 
         function proximoPasso(passo) {
-            if (passo === 2 && !validarPasso1()) return;
-            if (passo === 3 && !validarPasso2()) return;
-            if (passo === 4 && !validarPasso3()) return;
-            if (passo === 5 && !validarPasso4()) return;
+            console.log('Proximo passo chamado:', passo);
+            
+            if (passo === 2 && !validarPasso1()) {
+                console.log('Validação passo 1 falhou');
+                return;
+            }
+            if (passo === 3 && !validarPasso2()) {
+                console.log('Validação passo 2 falhou');
+                return;
+            }
+            if (passo === 4 && !validarPasso3()) {
+                console.log('Validação passo 3 falhou');
+                return;
+            }
+            if (passo === 5 && !validarPasso4()) {
+                console.log('Validação passo 4 falhou');
+                return;
+            }
 
+            console.log('Indo para o passo:', passo);
             irParaPasso(passo);
 
             if (passo === 5) {
@@ -2421,6 +2424,7 @@
         // VALIDAÇÕES
         // ============================================
         function validarPasso1() {
+            console.log('Validando passo 1');
             const nome = document.getElementById('nome').value.trim();
             const telefone = document.getElementById('telefone').value.trim();
 
@@ -2438,11 +2442,12 @@
 
             agendamento.nome = nome;
             agendamento.telefone = telefone;
-
+            console.log('Passo 1 validado:', agendamento);
             return true;
         }
 
         function validarPasso2() {
+            console.log('Validando passo 2');
             const tipoSelecionado = document.querySelector('.tipo-btn.selecionado');
             if (!tipoSelecionado) {
                 mostrarToast('Por favor, selecione o tipo de atendimento.', 'erro');
@@ -2484,18 +2489,22 @@
                 agendamento.complemento = '';
             }
 
+            console.log('Passo 2 validado:', agendamento);
             return true;
         }
 
         function validarPasso3() {
+            console.log('Validando passo 3');
             if (!agendamento.servico) {
                 mostrarToast('Por favor, selecione um serviço.', 'erro');
                 return false;
             }
+            console.log('Passo 3 validado:', agendamento.servico);
             return true;
         }
 
         function validarPasso4() {
+            console.log('Validando passo 4');
             if (!agendamento.data) {
                 mostrarToast('Por favor, selecione uma data.', 'erro');
                 return false;
@@ -2504,6 +2513,7 @@
                 mostrarToast('Por favor, selecione um horário.', 'erro');
                 return false;
             }
+            console.log('Passo 4 validado:', agendamento.data, agendamento.horario);
             return true;
         }
 
@@ -2597,6 +2607,7 @@
                     servicosBtns.forEach(b => b.classList.remove('selecionado'));
                     this.classList.add('selecionado');
                     agendamento.servico = this.dataset.servico;
+                    console.log('Serviço selecionado:', agendamento.servico);
                 });
             });
         });
@@ -2661,6 +2672,7 @@
                         document.querySelectorAll('.horario-btn').forEach(b => b.classList.remove('selecionado'));
                         this.classList.add('selecionado');
                         agendamento.horario = this.dataset.horario;
+                        console.log('Horário selecionado:', agendamento.horario);
                     });
 
                     grid.appendChild(btn);
@@ -3049,12 +3061,9 @@
             }
         }
 
-        async function deletarAgendamento(id) {
-            if (await deletarAgendamento(id)) {
-                renderizarAdmin();
-            }
-        }
-
+        // ============================================
+        // EXPORTAR CSV
+        // ============================================
         function exportarCSV() {
             mostrarToast('Função de exportação disponível em breve.', 'info');
         }
