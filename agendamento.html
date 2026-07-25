@@ -740,8 +740,8 @@
     <!-- SUPABASE -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <!-- WHATSAPP NOTIFICAÇÕES -->
-    <script src="whatsapp-notificacoes.js"></script>
+    <!-- SISTEMA DE NOTIFICAÇÕES POR E-MAIL -->
+    <script src="email-notificacoes.js"></script>
 
     <script>
         // ============================================
@@ -1284,7 +1284,7 @@
         }
 
         // ============================================
-        // CONFIRMAR - COM WHATSAPP
+        // CONFIRMAR - COM E-MAIL
         // ============================================
         function confirmarAgendamento() {
             if (!validarPasso1()) return;
@@ -1338,17 +1338,28 @@
                             }
 
                             // ============================================
-                            // 📱 ENVIAR NOTIFICAÇÃO VIA WHATSAPP
+                            // 📧 ENVIAR NOTIFICAÇÃO POR E-MAIL
                             // ============================================
-                            if (typeof enviarWhatsAppSimplificado === 'function') {
+                            if (typeof enviarEmailRenata === 'function') {
                                 try {
-                                    enviarWhatsAppSimplificado(salvo);
-                                    mostrarToast('📱 Notificação enviada para a Renata!', 'sucesso');
+                                    enviarEmailRenata(salvo)
+                                        .then(function(resultado) {
+                                            if (resultado && resultado.success) {
+                                                console.log('✅ E-mail enviado para a Renata!');
+                                                console.log('📧 Para:', 'contato@levitapodologia.com.br');
+                                            } else {
+                                                console.warn('⚠️ Erro ao enviar e-mail:', resultado);
+                                            }
+                                        })
+                                        .catch(function(err) {
+                                            console.warn('⚠️ Erro ao enviar e-mail:', err);
+                                        });
+                                    mostrarToast('📧 E-mail enviado para a Renata!', 'sucesso');
                                 } catch(err) {
-                                    console.warn('⚠️ Erro ao enviar WhatsApp:', err);
+                                    console.warn('⚠️ Erro ao enviar e-mail:', err);
                                 }
                             } else {
-                                console.warn('⚠️ Função enviarWhatsAppSimplificado não encontrada');
+                                console.warn('⚠️ Função enviarEmailRenata não encontrada');
                             }
 
                             // Mostra a confirmação
