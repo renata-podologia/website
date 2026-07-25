@@ -1541,7 +1541,7 @@
             margin-top: 30px;
         }
 
-        /* Responsividade - mantida do código original */
+        /* Responsividade */
         @media (max-width: 1200px) {
             .container { padding: 0 20px; }
             .hero-content h1 { font-size: 3rem; }
@@ -1813,10 +1813,6 @@
                                 <label>Telefone <span class="obrigatorio">*</span></label>
                                 <input type="tel" id="telefone" placeholder="(11) 99999-9999" required />
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <label>E-mail</label>
-                            <input type="email" id="email" placeholder="seu@email.com" />
                         </div>
                         <div class="form-actions">
                             <span></span>
@@ -2207,12 +2203,12 @@
             <p class="section-subtitle">Conheça um pouco mais sobre o trabalho de Renata e veja depoimentos de quem já confiou em seu cuidado.</p>
             <div class="videos-grid">
                 <div class="video-card">
-                    <div class="video-wrapper"><video controls preload="metadata" playsinline><source src="https://raw.githubusercontent.com/renata-podologia//website/main/videos/video1.mp4" type="video/mp4">Seu navegador não suporta a reprodução de vídeos.</video></div>
+                    <div class="video-wrapper"><video controls preload="metadata" playsinline><source src="https://raw.githubusercontent.com/renata-podologia/website/main/videos/video1.mp4" type="video/mp4">Seu navegador não suporta a reprodução de vídeos.</video></div>
                     <h3><i class="fas fa-star" style="color: var(--dourado);"></i> Relato de Experiência</h3>
                     <p>Depoimento emocionante de uma paciente sobre o atendimento da <strong>Podóloga Renata Kemp</strong> e os resultados transformadores do tratamento.</p>
                 </div>
                 <div class="video-card">
-                    <div class="video-wrapper"><video controls preload="metadata" playsinline><source src="https://raw.githubusercontent.com/renata-podologia//website/main/videos/video2.mp4" type="video/mp4">Seu navegador não suporta a reprodução de vídeos.</video></div>
+                    <div class="video-wrapper"><video controls preload="metadata" playsinline><source src="https://raw.githubusercontent.com/renata-podologia/website/main/videos/video2.mp4" type="video/mp4">Seu navegador não suporta a reprodução de vídeos.</video></div>
                     <h3><i class="fas fa-play-circle" style="color: var(--dourado);"></i> Nosso Trabalho</h3>
                     <p>Veja a <strong>Podóloga Renata Kemp</strong> em ação, realizando atendimentos com cuidado, dedicação e profissionalismo.</p>
                 </div>
@@ -2325,7 +2321,6 @@
         let agendamento = {
             nome: '',
             telefone: '',
-            email: '',
             tipo: '',
             endereco: '',
             numero: '',
@@ -2443,7 +2438,6 @@
 
             agendamento.nome = nome;
             agendamento.telefone = telefone;
-            agendamento.email = document.getElementById('email').value.trim();
 
             return true;
         }
@@ -2638,7 +2632,6 @@
                 return;
             }
 
-            // Busca horários ocupados no Supabase
             try {
                 const { data: ocupados, error } = await supabase
                     .from('agendamentos')
@@ -2752,7 +2745,6 @@
                     .insert([{
                         nome: dados.nome,
                         telefone: dados.telefone,
-                        email: dados.email || null,
                         tipo: dados.tipo,
                         endereco: dados.endereco,
                         numero: dados.numero || null,
@@ -2836,7 +2828,6 @@
             resumo.innerHTML = `
                 <div class="linha"><span class="rotulo">Nome</span><span class="valor">${agendamento.nome}</span></div>
                 <div class="linha"><span class="rotulo">Telefone</span><span class="valor">${agendamento.telefone}</span></div>
-                <div class="linha"><span class="rotulo">E-mail</span><span class="valor">${agendamento.email || 'Não informado'}</span></div>
                 <div class="linha"><span class="rotulo">Tipo de Atendimento</span><span class="valor">${tipoLabel}</span></div>
                 <div class="linha"><span class="rotulo">Endereço</span><span class="valor">${agendamento.endereco}</span></div>
                 <div class="linha"><span class="rotulo">Serviço</span><span class="valor"><strong>${agendamento.servico}</strong></span></div>
@@ -2893,6 +2884,7 @@
 
                 detalhes.innerHTML = `
                     <div><span>Nome:</span> <strong>${dados.nome}</strong></div>
+                    <div><span>Telefone:</span> <strong>${dados.telefone}</strong></div>
                     <div><span>Tipo:</span> <strong>${tipoLabel}</strong></div>
                     <div><span>Endereço:</span> <strong>${dados.endereco}</strong></div>
                     <div><span>Serviço:</span> <strong>${dados.servico}</strong></div>
@@ -2912,7 +2904,6 @@
             agendamento = {
                 nome: '',
                 telefone: '',
-                email: '',
                 tipo: '',
                 endereco: '',
                 numero: '',
@@ -2926,7 +2917,6 @@
 
             document.getElementById('nome').value = '';
             document.getElementById('telefone').value = '';
-            document.getElementById('email').value = '';
             document.getElementById('cep').value = '';
             document.getElementById('numero-endereco').value = '';
             document.getElementById('complemento-endereco').value = '';
@@ -3066,15 +3056,13 @@
         }
 
         function exportarCSV() {
-            // Implementação simplificada - busca dados e exporta
             mostrarToast('Função de exportação disponível em breve.', 'info');
         }
 
         // ============================================
-        // SINCronizar dados locais com Supabase
+        // SINCRONIZAR dados locais com Supabase
         // ============================================
         async function syncLocalToSupabase() {
-            // Esta função pode ser usada para migrar dados do localStorage para o Supabase
             mostrarToast('Sincronização iniciada...', 'info');
             try {
                 const localData = JSON.parse(localStorage.getItem('agendamentos_levita') || '[]');
@@ -3091,7 +3079,6 @@
                         .insert([{
                             nome: item.nome,
                             telefone: item.telefone,
-                            email: item.email || null,
                             tipo: item.tipo,
                             endereco: item.endereco,
                             numero: item.numero || null,
@@ -3259,7 +3246,6 @@
                 }, 200);
             }
 
-            // Carrega os agendamentos
             renderizarAdmin();
         });
 
