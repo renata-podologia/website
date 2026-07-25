@@ -52,15 +52,54 @@
         .btn-success:hover { background: #1e7e34; transform: translateY(-3px); }
         .btn-voltar { background: #F7F8FA; color: #1e2b2f; }
         .btn-voltar:hover { background: #e8edee; }
+        .btn-outline { 
+            background: transparent; 
+            color: #2F5D62; 
+            border: 2px solid #2F5D62;
+        }
+        .btn-outline:hover { 
+            background: #2F5D62; 
+            color: #fff; 
+            transform: translateY(-3px);
+        }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #F7F8FA;
+        }
+        .header .back-link {
+            color: #2F5D62;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 20px;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            border: 2px solid #2F5D62;
+        }
+        .header .back-link:hover {
+            background: #2F5D62;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(47, 93, 98, 0.25);
+        }
+        .header .back-link i { font-size: 1rem; }
         
         .header-title {
             font-family: 'Poppins', sans-serif;
             font-weight: 700;
             font-size: 2rem;
             color: #2F5D62;
-            text-align: center;
-            margin-bottom: 4px;
         }
         .header-title span { color: #C9A227; }
         .header-subtitle {
@@ -428,6 +467,8 @@
         @media (max-width: 768px) {
             body { padding: 10px; }
             .container { padding: 20px 16px; }
+            .header { flex-direction: column; text-align: center; }
+            .header .back-link { align-self: center; }
             .form-row { grid-template-columns: 1fr; gap: 0; }
             .form-actions { flex-direction: column; }
             .form-actions .btn { width: 100%; text-align: center; }
@@ -464,7 +505,16 @@
     </div>
 
     <div class="container">
-        <h1 class="header-title">Levità <span>.</span></h1>
+        <!-- HEADER COM BOTÃO VOLTAR -->
+        <div class="header">
+            <div>
+                <h1 class="header-title">Levità <span>.</span></h1>
+            </div>
+            <a href="index.html" class="back-link">
+                <i class="fas fa-arrow-left"></i> Voltar para o site
+            </a>
+        </div>
+        
         <p class="header-subtitle">Agende sua consulta com a <strong>Podóloga Renata Kemp</strong></p>
 
         <!-- Indicador de Passos -->
@@ -500,7 +550,9 @@
                 </div>
             </div>
             <div class="form-actions">
-                <span></span>
+                <a href="index.html" class="btn btn-outline">
+                    <i class="fas fa-home"></i> Início
+                </a>
                 <button type="button" class="btn btn-primario" onclick="proximoPasso(2)">
                     Próximo <i class="fas fa-arrow-right"></i>
                 </button>
@@ -669,12 +721,15 @@
                     <button type="button" class="btn btn-primario" onclick="novoAgendamento()">
                         <i class="fas fa-plus"></i> Novo Agendamento
                     </button>
+                    <a href="index.html" class="btn btn-outline">
+                        <i class="fas fa-home"></i> Voltar ao site
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- SUPABASE - CARREGAR PRIMEIRO -->
+    <!-- SUPABASE -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
@@ -684,7 +739,6 @@
         var SUPABASE_URL = 'https://euktsrczpxejezkeyqoh.supabase.co';
         var SUPABASE_ANON_KEY = 'sb_publishable_vH11tBYAWHlKNoCeQG-oMQ_r1fOxcRf';
         
-        // Cria o cliente Supabase de forma segura
         var supabaseClient;
         try {
             if (typeof supabase !== 'undefined') {
@@ -962,7 +1016,7 @@
         });
 
         // ============================================
-        // DATAS E HORÁRIOS - VERSÃO CORRIGIDA
+        // DATAS E HORÁRIOS
         // ============================================
         function gerarHorarios(dataStr) {
             var grid = document.getElementById('horarios-grid');
@@ -998,7 +1052,6 @@
 
             mostrarLoading('Verificando horários disponíveis...');
 
-            // Buscar TODOS os agendamentos para esta data
             supabaseClient
                 .from('agendamentos')
                 .select('horario, status')
@@ -1015,7 +1068,6 @@
                     var ocupados = response.data || [];
                     console.log('📋 Agendamentos encontrados:', ocupados.length);
                     
-                    // Separa por status
                     var horariosPendentes = [];
                     var horariosConfirmados = [];
                     
@@ -1039,7 +1091,6 @@
                     console.log('  ✅ Confirmados:', horariosConfirmados);
                     console.log('  ⏳ Pendentes:', horariosPendentes);
                     
-                    // Cria os botões
                     for (var j = 0; j < horariosFiltrados.length; j++) {
                         var horario = horariosFiltrados[j];
                         var btn = document.createElement('button');
@@ -1048,14 +1099,12 @@
                         btn.textContent = horario;
                         btn.dataset.horario = horario;
                         
-                        // Verifica se está confirmado
                         if (horariosConfirmados.indexOf(horario) !== -1) {
                             btn.classList.add('confirmado');
                             btn.disabled = true;
                             btn.title = 'Horário já confirmado';
                             console.log('  🔴 ' + horario + ' - BLOQUEADO (confirmado)');
                         }
-                        // Verifica se está pendente
                         else if (horariosPendentes.indexOf(horario) !== -1) {
                             btn.classList.add('indisponivel');
                             btn.disabled = true;
