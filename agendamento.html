@@ -626,7 +626,6 @@
                 <div class="form-group">
                     <label>Horário <span class="obrigatorio">*</span></label>
                     <div class="horarios-grid" id="horarios-grid"></div>
-                    <!-- Legenda -->
                     <div class="legenda-horarios">
                         <span class="item"><span class="bola disponivel"></span> Disponível</span>
                         <span class="item"><span class="bola pendente"></span> Já agendado (pendente)</span>
@@ -675,7 +674,7 @@
         </div>
     </div>
 
-    <!-- SUPABASE -->
+    <!-- SUPABASE - CARREGAR PRIMEIRO -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
@@ -685,12 +684,21 @@
         var SUPABASE_URL = 'https://euktsrczpxejezkeyqoh.supabase.co';
         var SUPABASE_ANON_KEY = 'sb_publishable_vH11tBYAWHlKNoCeQG-oMQ_r1fOxcRf';
         
+        // Cria o cliente Supabase de forma segura
         var supabaseClient;
-        if (typeof supabaseJs !== 'undefined') {
-            supabaseClient = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        } else {
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        try {
+            if (typeof supabase !== 'undefined') {
+                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            } else if (typeof supabaseJs !== 'undefined') {
+                supabaseClient = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            } else {
+                console.error('⚠️ Supabase não carregou!');
+            }
+        } catch(e) {
+            console.error('❌ Erro ao criar cliente Supabase:', e);
         }
+
+        console.log('✅ Supabase inicializado:', supabaseClient ? 'OK' : 'FALHOU');
 
         // ============================================
         // CONFIGURAÇÕES
@@ -954,13 +962,19 @@
         });
 
         // ============================================
-        // DATAS E HORÁRIOS - CORRIGIDO COM LOGS
+        // DATAS E HORÁRIOS - VERSÃO CORRIGIDA
         // ============================================
         function gerarHorarios(dataStr) {
             var grid = document.getElementById('horarios-grid');
             grid.innerHTML = '';
             
             console.log('🔍 Buscando horários para a data:', dataStr);
+            
+            if (!supabaseClient) {
+                console.error('❌ Supabase não disponível!');
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; padding: 20px; color: #dc3545;">⚠️ Erro de conexão. Tente recarregar.</p>';
+                return;
+            }
             
             var data = new Date(dataStr + 'T00:00:00');
             var diaSemana = data.getDay();
@@ -978,22 +992,28 @@
             }
             
             if (horariosFiltrados.length === 0) {
-                grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; padding: 20px; color: #dc3545;">⚠️ Nenhum horário disponível.</p>';
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; padding: 20px; color: #dc3545;">⚠️ Nenhum horário disponível para sábado.</p>';
                 return;
             }
 
             mostrarLoading('Verificando horários disponíveis...');
 
-            // Buscar TODOS os agendamentos para esta data (com status)
+            // Buscar TODOS os agendamentos para esta data
             supabaseClient
                 .from('agendamentos')
                 .select('horario, status')
                 .eq('data', dataStr)
                 .then(function(response) {
                     esconderLoading();
-                    console.log('📋 Agendamentos encontrados:', response.data);
+                    
+                    if (response.error) {
+                        console.error('❌ Erro na consulta:', response.error);
+                        mostrarToast('Erro ao carregar horários.', 'erro');
+                        return;
+                    }
                     
                     var ocupados = response.data || [];
+                    console.log('📋 Agendamentos encontrados:', ocupados.length);
                     
                     // Separa por status
                     var horariosPendentes = [];
@@ -1009,7 +1029,7 @@
                         }
                         if (item.status === 'confirmado' || item.status === 'atendido') {
                             horariosConfirmados.push(item.horario);
-                            console.log('    🔴 Confirmado!');
+                            console.log('    🔴 Confirmado/Atendido!');
                         } else if (item.status === 'pendente') {
                             horariosPendentes.push(item.horario);
                             console.log('    🟡 Pendente!');
@@ -1019,6 +1039,7 @@
                     console.log('  ✅ Confirmados:', horariosConfirmados);
                     console.log('  ⏳ Pendentes:', horariosPendentes);
                     
+                    // Cria os botões
                     for (var j = 0; j < horariosFiltrados.length; j++) {
                         var horario = horariosFiltrados[j];
                         var btn = document.createElement('button');
@@ -1027,7 +1048,7 @@
                         btn.textContent = horario;
                         btn.dataset.horario = horario;
                         
-                        // Verifica se está confirmado (prioridade máxima)
+                        // Verifica se está confirmado
                         if (horariosConfirmados.indexOf(horario) !== -1) {
                             btn.classList.add('confirmado');
                             btn.disabled = true;
@@ -1062,6 +1083,7 @@
                     esconderLoading();
                     console.error('❌ Erro ao buscar horários:', error);
                     mostrarToast('Erro ao carregar horários.', 'erro');
+                    grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; padding: 20px; color: #dc3545;">⚠️ Erro ao carregar horários. Tente novamente.</p>';
                 });
         }
 
@@ -1095,13 +1117,18 @@
                     agendamento.data = dataInput.value;
                     gerarHorarios(dataInput.value);
                 }
-            }, 100);
+            }, 500);
         });
 
         // ============================================
         // SUPABASE - SALVAR
         // ============================================
         function salvarAgendamento(dados) {
+            if (!supabaseClient) {
+                mostrarToast('Erro de conexão com o banco de dados.', 'erro');
+                return Promise.reject('Supabase não disponível');
+            }
+            
             return supabaseClient
                 .from('agendamentos')
                 .insert([{
@@ -1156,6 +1183,11 @@
             if (!validarPasso3()) return;
             if (!validarPasso4()) return;
 
+            if (!supabaseClient) {
+                mostrarToast('Erro de conexão com o banco de dados.', 'erro');
+                return;
+            }
+
             mostrarLoading('Verificando disponibilidade...');
             
             supabaseClient
@@ -1166,6 +1198,13 @@
                 .neq('status', 'cancelado')
                 .then(function(response) {
                     esconderLoading();
+                    
+                    if (response.error) {
+                        console.error('❌ Erro na verificação:', response.error);
+                        mostrarToast('Erro ao verificar disponibilidade.', 'erro');
+                        return;
+                    }
+                    
                     var existentes = response.data || [];
                     
                     var bloqueado = false;
