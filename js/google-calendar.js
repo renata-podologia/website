@@ -6,7 +6,6 @@
 // CARREGAR CONFIGURAÇÕES DOS SECRETS
 // ============================================
 
-// Tenta carregar do arquivo config.js
 let CLIENT_ID = '';
 
 try {
@@ -80,22 +79,15 @@ function getAccessToken() {
 // CALCULAR HORA DE FIM (1 hora depois)
 // ============================================
 function calcularHoraFim(horario) {
-    // Remove segundos se houver
     var horarioLimpo = horario;
     if (horarioLimpo.length > 5) {
         horarioLimpo = horarioLimpo.substring(0, 5);
     }
-    
     var partes = horarioLimpo.split(':');
     var hora = parseInt(partes[0]);
     var minuto = parseInt(partes[1]);
-    
     hora = hora + 1;
-    
-    if (hora >= 24) {
-        hora = hora - 24;
-    }
-    
+    if (hora >= 24) hora = hora - 24;
     return String(hora).padStart(2, '0') + ':' + String(minuto).padStart(2, '0');
 }
 
@@ -110,19 +102,19 @@ async function criarEventoCalendar(dados, accessToken) {
         console.log('⏰ Horário:', dados.horario);
         console.log('📧 E-mail:', dados.email);
         
-        // Limpa o horário (remove segundos)
+        // Limpa o horário
         var horarioLimpo = dados.horario;
         if (horarioLimpo.length > 5) {
             horarioLimpo = horarioLimpo.substring(0, 5);
         }
         
-        // Constrói as datas no formato ISO
+        // Data e hora no formato ISO (sem segundos)
         var dataHoraInicio = dados.data + 'T' + horarioLimpo + ':00-03:00';
         var horaFim = calcularHoraFim(horarioLimpo);
         var dataHoraFim = dados.data + 'T' + horaFim + ':00-03:00';
         
-        console.log('📅 Início:', dataHoraInicio);
-        console.log('📅 Fim:', dataHoraFim);
+        console.log('📅 Início (ISO):', dataHoraInicio);
+        console.log('📅 Fim (ISO):', dataHoraFim);
         
         var tipoLabel = dados.tipo === 'domicilio' ? '🏠 Domiciliar' : '🏢 Presencial';
         
@@ -151,9 +143,9 @@ async function criarEventoCalendar(dados, accessToken) {
             }
         };
         
-        console.log('📤 Enviando evento:', JSON.stringify(evento, null, 2));
+        console.log('📤 Payload:', JSON.stringify(evento, null, 2));
         
-        // Faz a requisição para a API do Google Calendar
+        // Faz a requisição
         var response = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
             method: 'POST',
             headers: {
@@ -171,7 +163,8 @@ async function criarEventoCalendar(dados, accessToken) {
             return data;
         } else {
             console.error('❌ Erro ao criar evento:', data);
-            console.error('❌ Detalhes do erro:', data.error);
+            console.error('❌ Código do erro:', response.status);
+            console.error('❌ Mensagem:', data.error ? data.error.message : 'Sem mensagem');
             return null;
         }
         
@@ -182,7 +175,7 @@ async function criarEventoCalendar(dados, accessToken) {
 }
 
 // ============================================
-// FUNÇÃO PRINCIPAL - PROCESSAR AGENDAMENTO
+// FUNÇÃO PRINCIPAL
 // ============================================
 async function processarAgendamento(dados) {
     try {
@@ -196,13 +189,8 @@ async function processarAgendamento(dados) {
             };
         }
         
-        // 1. Carregar a nova API
         await carregarGoogleAPI();
-        
-        // 2. Obter token de acesso
         var accessToken = await getAccessToken();
-        
-        // 3. Criar evento no Google Calendar
         var evento = await criarEventoCalendar(dados, accessToken);
         
         if (evento) {
@@ -229,7 +217,7 @@ async function processarAgendamento(dados) {
 }
 
 // ============================================
-// EXPORTA AS FUNÇÕES
+// EXPORTA
 // ============================================
 window.processarAgendamento = processarAgendamento;
 window.criarEventoCalendar = criarEventoCalendar;
