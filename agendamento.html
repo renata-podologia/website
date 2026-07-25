@@ -505,7 +505,7 @@
     </div>
 
     <div class="container">
-        <!-- HEADER COM BOTÃO VOLTAR -->
+        <!-- HEADER -->
         <div class="header">
             <div>
                 <h1 class="header-title">Levità <span>.</span></h1>
@@ -677,7 +677,11 @@
                 </div>
                 <div class="form-group">
                     <label>Horário <span class="obrigatorio">*</span></label>
-                    <div class="horarios-grid" id="horarios-grid"></div>
+                    <div class="horarios-grid" id="horarios-grid">
+                        <p style="grid-column: 1/-1; text-align:center; padding: 20px; color: #8a9ea3;">
+                            <i class="fas fa-spinner fa-spin"></i> Carregando horários...
+                        </p>
+                    </div>
                     <div class="legenda-horarios">
                         <span class="item"><span class="bola disponivel"></span> Disponível</span>
                         <span class="item"><span class="bola pendente"></span> Já agendado (pendente)</span>
@@ -1016,13 +1020,13 @@
         });
 
         // ============================================
-        // DATAS E HORÁRIOS
+        // DATAS E HORÁRIOS - CONSULTA SEMPRE ATUALIZADA
         // ============================================
         function gerarHorarios(dataStr) {
             var grid = document.getElementById('horarios-grid');
-            grid.innerHTML = '';
+            grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; padding: 20px; color: #8a9ea3;"><i class="fas fa-spinner fa-spin"></i> Carregando horários...</p>';
             
-            console.log('🔍 Buscando horários para a data:', dataStr);
+            console.log('🔍 [CONSULTA] Buscando horários para a data:', dataStr);
             
             if (!supabaseClient) {
                 console.error('❌ Supabase não disponível!');
@@ -1030,14 +1034,22 @@
                 return;
             }
             
+            // Valida a data
+            if (!dataStr) {
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; padding: 20px; color: #8a9ea3;">Selecione uma data.</p>';
+                return;
+            }
+            
             var data = new Date(dataStr + 'T00:00:00');
             var diaSemana = data.getDay();
             
+            // Verifica se é domingo
             if (diaSemana === 0) {
                 grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; padding: 20px; color: #dc3545;">⚠️ Não atendemos aos domingos.</p>';
                 return;
             }
             
+            // Filtra horários para sábado (apenas até 13h)
             var horariosFiltrados = HORARIOS_DISPONIVEIS.slice();
             if (diaSemana === 6) {
                 horariosFiltrados = horariosFiltrados.filter(function(h) {
@@ -1050,14 +1062,16 @@
                 return;
             }
 
-            mostrarLoading('Verificando horários disponíveis...');
-
+            // ============================================
+            // CONSULTA AO SUPABASE - SEMPRE ATUALIZADA
+            // ============================================
             supabaseClient
                 .from('agendamentos')
                 .select('horario, status')
                 .eq('data', dataStr)
+                .neq('status', 'cancelado')
                 .then(function(response) {
-                    esconderLoading();
+                    console.log('📋 [CONSULTA] Agendamentos encontrados:', response.data ? response.data.length : 0);
                     
                     if (response.error) {
                         console.error('❌ Erro na consulta:', response.error);
@@ -1066,8 +1080,8 @@
                     }
                     
                     var ocupados = response.data || [];
-                    console.log('📋 Agendamentos encontrados:', ocupados.length);
                     
+                    // Separa por status
                     var horariosPendentes = [];
                     var horariosConfirmados = [];
                     
@@ -1081,16 +1095,20 @@
                         }
                         if (item.status === 'confirmado' || item.status === 'atendido') {
                             horariosConfirmados.push(item.horario);
-                            console.log('    🔴 Confirmado/Atendido!');
+                            console.log('    🔴 CONFIRMADO/ATENDIDO!');
                         } else if (item.status === 'pendente') {
                             horariosPendentes.push(item.horario);
-                            console.log('    🟡 Pendente!');
+                            console.log('    🟡 PENDENTE!');
                         }
                     }
                     
-                    console.log('  ✅ Confirmados:', horariosConfirmados);
+                    console.log('  ✅ Confirmados/Atendidos:', horariosConfirmados);
                     console.log('  ⏳ Pendentes:', horariosPendentes);
                     
+                    // Limpa o grid
+                    grid.innerHTML = '';
+                    
+                    // Cria os botões de horário
                     for (var j = 0; j < horariosFiltrados.length; j++) {
                         var horario = horariosFiltrados[j];
                         var btn = document.createElement('button');
@@ -1099,23 +1117,28 @@
                         btn.textContent = horario;
                         btn.dataset.horario = horario;
                         
+                        // VERIFICAÇÃO: Se o horário está confirmado - BLOQUEIA
                         if (horariosConfirmados.indexOf(horario) !== -1) {
                             btn.classList.add('confirmado');
                             btn.disabled = true;
-                            btn.title = 'Horário já confirmado';
+                            btn.title = '❌ Horário já confirmado!';
                             console.log('  🔴 ' + horario + ' - BLOQUEADO (confirmado)');
                         }
+                        // VERIFICAÇÃO: Se o horário está pendente - BLOQUEIA
                         else if (horariosPendentes.indexOf(horario) !== -1) {
                             btn.classList.add('indisponivel');
                             btn.disabled = true;
-                            btn.title = 'Horário já agendado (pendente)';
+                            btn.title = '⏳ Horário já agendado (pendente)';
                             console.log('  🟡 ' + horario + ' - BLOQUEADO (pendente)');
                         } else {
                             console.log('  🟢 ' + horario + ' - DISPONÍVEL');
                         }
                         
                         btn.addEventListener('click', function() {
-                            if (this.disabled) return;
+                            if (this.disabled) {
+                                mostrarToast(this.title, 'erro');
+                                return;
+                            }
                             var botoes = document.querySelectorAll('.horario-btn');
                             for (var k = 0; k < botoes.length; k++) {
                                 botoes[k].classList.remove('selecionado');
@@ -1127,20 +1150,39 @@
                         
                         grid.appendChild(btn);
                     }
+                    
+                    // Se todos os horários estiverem bloqueados, mostra mensagem
+                    var botoes = grid.querySelectorAll('.horario-btn');
+                    var todosBloqueados = true;
+                    for (var l = 0; l < botoes.length; l++) {
+                        if (!botoes[l].disabled) {
+                            todosBloqueados = false;
+                            break;
+                        }
+                    }
+                    if (todosBloqueados && botoes.length > 0) {
+                        var msg = document.createElement('p');
+                        msg.style.cssText = 'grid-column: 1/-1; text-align:center; padding: 20px; color: #dc3545;';
+                        msg.innerHTML = '⚠️ Todos os horários deste dia já estão ocupados. Escolha outra data.';
+                        grid.appendChild(msg);
+                    }
                 })
                 .catch(function(error) {
-                    esconderLoading();
                     console.error('❌ Erro ao buscar horários:', error);
                     mostrarToast('Erro ao carregar horários.', 'erro');
                     grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; padding: 20px; color: #dc3545;">⚠️ Erro ao carregar horários. Tente novamente.</p>';
                 });
         }
 
+        // ============================================
+        // INICIALIZAÇÃO DA DATA E CONSULTA
+        // ============================================
         document.addEventListener('DOMContentLoaded', function() {
             var dataInput = document.getElementById('data-agendamento');
             var hoje = new Date();
             dataInput.min = hoje.getFullYear() + '-' + String(hoje.getMonth() + 1).padStart(2, '0') + '-' + String(hoje.getDate()).padStart(2, '0');
             
+            // Define a data padrão (próximo dia útil)
             var diasAdicionar = 1;
             while (new Date(hoje.getTime() + diasAdicionar * 86400000).getDay() === 0 || 
                    new Date(hoje.getTime() + diasAdicionar * 86400000).getDay() === 6) {
@@ -1150,6 +1192,7 @@
             dataPadrao.setDate(dataPadrao.getDate() + diasAdicionar);
             dataInput.value = dataPadrao.getFullYear() + '-' + String(dataPadrao.getMonth() + 1).padStart(2, '0') + '-' + String(dataPadrao.getDate()).padStart(2, '0');
             
+            // Quando a data mudar, consulta novamente
             dataInput.addEventListener('change', function() {
                 if (this.value) {
                     agendamento.data = this.value;
@@ -1157,13 +1200,16 @@
                     document.querySelectorAll('.horario-btn').forEach(function(b) {
                         b.classList.remove('selecionado');
                     });
+                    // CONSULTA SEMPRE ATUALIZADA AO MUDAR A DATA
                     gerarHorarios(this.value);
                 }
             });
             
+            // Carrega os horários com um pequeno delay para garantir que o Supabase foi carregado
             setTimeout(function() {
                 if (dataInput.value) {
                     agendamento.data = dataInput.value;
+                    // CONSULTA INICIAL
                     gerarHorarios(dataInput.value);
                 }
             }, 500);
@@ -1224,7 +1270,7 @@
         }
 
         // ============================================
-        // CONFIRMAR
+        // CONFIRMAR - COM VERIFICAÇÃO DUPLA
         // ============================================
         function confirmarAgendamento() {
             if (!validarPasso1()) return;
@@ -1239,6 +1285,7 @@
 
             mostrarLoading('Verificando disponibilidade...');
             
+            // VERIFICAÇÃO DUPLA: Consulta novamente antes de salvar
             supabaseClient
                 .from('agendamentos')
                 .select('status')
@@ -1256,20 +1303,29 @@
                     
                     var existentes = response.data || [];
                     
+                    // Verifica se há algum confirmado ou atendido
                     var bloqueado = false;
                     for (var i = 0; i < existentes.length; i++) {
                         if (existentes[i].status === 'confirmado' || existentes[i].status === 'atendido') {
                             bloqueado = true;
+                            console.log('🔴 Horário já confirmado! Bloqueando...');
+                            break;
+                        }
+                        if (existentes[i].status === 'pendente') {
+                            bloqueado = true;
+                            console.log('🟡 Horário já pendente! Bloqueando...');
                             break;
                         }
                     }
                     
                     if (bloqueado) {
-                        mostrarToast('Este horário já foi confirmado. Escolha outro.', 'erro');
+                        mostrarToast('Este horário não está mais disponível. Escolha outro.', 'erro');
+                        // Recarrega os horários
                         gerarHorarios(agendamento.data);
                         return;
                     }
                     
+                    // Se passou, prossegue com o salvamento
                     var btn = document.getElementById('btn-confirmar');
                     var originalText = btn.innerHTML;
                     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
