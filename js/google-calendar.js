@@ -1,127 +1,78 @@
 // ============================================
-// GOOGLE CALENDAR API - INTEGRAÇÃO
+// GOOGLE CALENDAR API - NOVA VERSÃO (GIS)
 // ============================================
 
 // ============================================
 // CARREGAR CONFIGURAÇÕES DOS SECRETS
 // ============================================
 
-// Tenta carregar do arquivo config.js (gerado pelo GitHub Actions)
+// Tenta carregar do arquivo config.js
 let CLIENT_ID = '';
-let CLIENT_SECRET = '';
 
 try {
     if (typeof CONFIG !== 'undefined') {
         CLIENT_ID = CONFIG.GOOGLE_CLIENT_ID || '';
-        CLIENT_SECRET = CONFIG.GOOGLE_CLIENT_SECRET || '';
         console.log('✅ Configuração carregada do GitHub Secrets!');
     } else {
-        console.warn('⚠️ Arquivo config.js não encontrado. Usando fallback.');
-        CLIENT_ID = 'SEU_CLIENT_ID_AQUI';
-        CLIENT_SECRET = 'SUA_CLIENT_SECRET_AQUI';
+        console.warn('⚠️ Arquivo config.js não encontrado.');
+        CLIENT_ID = '852872185034-k70n79v6pusp0jasp1jfcch4t1q2j40i.apps.googleusercontent.com';
     }
 } catch(e) {
     console.warn('⚠️ Erro ao carregar configuração:', e);
-    CLIENT_ID = 'SEU_CLIENT_ID_AQUI';
-    CLIENT_SECRET = 'SUA_CLIENT_SECRET_AQUI';
+    CLIENT_ID = '852872185034-k70n79v6pusp0jasp1jfcch4t1q2j40i.apps.googleusercontent.com';
 }
 
-// ============================================
-// CONFIGURAÇÃO DO GOOGLE CALENDAR
-// ============================================
-
-const CALENDAR_CONFIG = {
-    clientId: CLIENT_ID,
-    clientSecret: CLIENT_SECRET,
-    scope: 'https://www.googleapis.com/auth/calendar.events',
-    calendarId: 'primary'
-};
-
-console.log('📅 Google Calendar Client ID:', CLIENT_ID ? (CLIENT_ID === 'SEU_CLIENT_ID_AQUI' ? '⚠️ NÃO CONFIGURADO' : '✅ Configurado') : '❌ NÃO CONFIGURADO');
+console.log('📅 Google Calendar Client ID:', CLIENT_ID ? '✅ Configurado' : '❌ NÃO CONFIGURADO');
 
 // ============================================
-// CARREGAR A BIBLIOTECA DO GOOGLE
+// CARREGAR A NOVA BIBLIOTECA DO GOOGLE (GIS)
 // ============================================
 function carregarGoogleAPI() {
     return new Promise(function(resolve, reject) {
-        if (typeof gapi !== 'undefined' && gapi.client) {
-            console.log('✅ Google API já carregada!');
+        if (typeof google !== 'undefined' && google.accounts) {
+            console.log('✅ Google Identity Services já carregado!');
             resolve();
             return;
         }
         
         var script = document.createElement('script');
-        script.src = 'https://apis.google.com/js/api.js';
+        script.src = 'https://accounts.google.com/gsi/client';
         script.onload = function() {
-            console.log('✅ Google API carregada!');
+            console.log('✅ Google Identity Services carregado!');
             resolve();
         };
         script.onerror = function() {
-            reject('❌ Erro ao carregar Google API');
+            reject('❌ Erro ao carregar Google Identity Services');
         };
         document.head.appendChild(script);
     });
 }
 
 // ============================================
-// INICIALIZAR O CLIENTE
+// OBTER TOKEN DE ACESSO
 // ============================================
-function initGoogleClient() {
+function getAccessToken() {
     return new Promise(function(resolve, reject) {
-        if (typeof gapi === 'undefined') {
-            reject('❌ Google API não carregada');
+        if (typeof google === 'undefined' || typeof google.accounts === 'undefined') {
+            reject('❌ Google Identity Services não carregado');
             return;
         }
         
-        gapi.load('client:auth2', function() {
-            gapi.client.init({
-                apiKey: '',
-                clientId: CALENDAR_CONFIG.clientId,
-                discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'],
-                scope: CALENDAR_CONFIG.scope
-            }).then(function() {
-                console.log('✅ Google Calendar inicializado!');
-                resolve();
-            }).catch(function(error) {
-                console.error('❌ Erro ao inicializar:', error);
-                reject(error);
-            });
+        var tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: CLIENT_ID,
+            scope: 'https://www.googleapis.com/auth/calendar.events',
+            callback: function(tokenResponse) {
+                if (tokenResponse.error) {
+                    console.error('❌ Erro ao obter token:', tokenResponse);
+                    reject(tokenResponse);
+                    return;
+                }
+                console.log('✅ Token obtido com sucesso!');
+                resolve(tokenResponse.access_token);
+            }
         });
-    });
-}
-
-// ============================================
-// VERIFICAR SE ESTÁ LOGADO
-// ============================================
-function isLogado() {
-    try {
-        var auth = gapi.auth2.getAuthInstance();
-        return auth && auth.isSignedIn.get();
-    } catch (e) {
-        return false;
-    }
-}
-
-// ============================================
-// LOGIN NO GOOGLE
-// ============================================
-function loginGoogle() {
-    return new Promise(function(resolve, reject) {
-        try {
-            var auth = gapi.auth2.getAuthInstance();
-            auth.signIn({
-                prompt: 'consent'
-            }).then(function() {
-                console.log('✅ Login realizado com sucesso!');
-                resolve(true);
-            }).catch(function(error) {
-                console.error('❌ Erro ao fazer login:', error);
-                reject(error);
-            });
-        } catch (error) {
-            console.error('❌ Erro ao fazer login:', error);
-            reject(error);
-        }
+        
+        tokenClient.requestAccessToken();
     });
 }
 
@@ -132,20 +83,15 @@ function calcularHoraFim(horario) {
     var partes = horario.split(':');
     var hora = parseInt(partes[0]);
     var minuto = parseInt(partes[1]);
-    
     hora = hora + 1;
-    
-    if (hora >= 24) {
-        hora = hora - 24;
-    }
-    
+    if (hora >= 24) hora = hora - 24;
     return String(hora).padStart(2, '0') + ':' + String(minuto).padStart(2, '0');
 }
 
 // ============================================
 // CRIAR EVENTO NO GOOGLE CALENDAR
 // ============================================
-async function criarEventoCalendar(dados) {
+async function criarEventoCalendar(dados, accessToken) {
     try {
         console.log('📅 Criando evento no Google Calendar...');
         console.log('👤 Paciente:', dados.nome);
@@ -153,43 +99,14 @@ async function criarEventoCalendar(dados) {
         console.log('⏰ Horário:', dados.horario);
         console.log('📧 E-mail:', dados.email);
         
-        if (!CALENDAR_CONFIG.clientId || CALENDAR_CONFIG.clientId === 'SEU_CLIENT_ID_AQUI') {
-            console.error('❌ Google Calendar não configurado!');
-            console.error('⚠️ Configure os secrets no GitHub:');
-            console.error('   GOOGLE_CLIENT_ID');
-            console.error('   GOOGLE_CLIENT_SECRET');
-            return null;
-        }
-        
-        var dataObj = new Date(dados.data + 'T00:00:00');
-        var dataFormatada = dataObj.toLocaleDateString('pt-BR', {
-            weekday: 'long',
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric'
-        });
-        
         var dataHoraInicio = dados.data + 'T' + dados.horario + ':00-03:00';
         var dataHoraFim = dados.data + 'T' + calcularHoraFim(dados.horario) + ':00-03:00';
-        
         var tipoLabel = dados.tipo === 'domicilio' ? '🏠 Domiciliar' : '🏢 Presencial';
         
-        // Verifica se está logado
-        if (!isLogado()) {
-            console.log('🔑 Usuário não logado. Solicitando login...');
-            try {
-                await loginGoogle();
-            } catch (error) {
-                console.error('❌ Erro ao fazer login:', error);
-                return null;
-            }
-        }
-        
-        // Cria o evento
         var evento = {
             'summary': dados.servico + ' - ' + dados.nome,
             'location': dados.endereco || 'Clínica - Guarulhos',
-            'description': '\n🔔 NOVO AGENDAMENTO\n\n👤 Paciente: ' + dados.nome + '\n📱 Telefone: ' + dados.telefone + '\n📧 E-mail: ' + dados.email + '\n📋 Serviço: ' + dados.servico + '\n📍 Tipo: ' + tipoLabel + '\n🏠 Endereço: ' + (dados.endereco || 'Presencial - Clínica') + '\n📌 Status: Pendente\n🔑 Protocolo: #' + String(dados.id).padStart(5, '0') + '\n\n🔗 Ver no painel: https://renata-podologia.github.io/website/admin.html',
+            'description': '🔔 NOVO AGENDAMENTO\n\n👤 Paciente: ' + dados.nome + '\n📱 Telefone: ' + dados.telefone + '\n📧 E-mail: ' + dados.email + '\n📋 Serviço: ' + dados.servico + '\n📍 Tipo: ' + tipoLabel + '\n🏠 Endereço: ' + (dados.endereco || 'Presencial - Clínica') + '\n📌 Status: Pendente\n🔑 Protocolo: #' + String(dados.id).padStart(5, '0') + '\n\n🔗 Ver no painel: https://renata-podologia.github.io/website/admin.html',
             'start': {
                 'dateTime': dataHoraInicio,
                 'timeZone': 'America/Sao_Paulo'
@@ -205,32 +122,32 @@ async function criarEventoCalendar(dados) {
             'reminders': {
                 'useDefault': false,
                 'overrides': [
-                    {'method': 'email', 'minutes': 24 * 60},  // 1 dia antes
-                    {'method': 'popup', 'minutes': 30}         // 30 minutos antes
+                    {'method': 'email', 'minutes': 24 * 60},
+                    {'method': 'popup', 'minutes': 30}
                 ]
             }
         };
         
-        // Envia para o Google Calendar
-        var request = gapi.client.calendar.events.insert({
-            'calendarId': CALENDAR_CONFIG.calendarId,
-            'resource': evento
+        // Faz a requisição para a API do Google Calendar
+        var response = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + accessToken,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(evento)
         });
         
-        var response = await request.execute();
+        var data = await response.json();
         
-        if (response.error) {
-            console.error('❌ Erro ao criar evento:', response.error);
-            console.log('❌ Detalhes do erro:', response.error.message);
+        if (response.ok) {
+            console.log('✅ Evento criado com sucesso!');
+            console.log('🔗 Link do evento:', data.htmlLink);
+            return data;
+        } else {
+            console.error('❌ Erro ao criar evento:', data);
             return null;
         }
-        
-        console.log('✅ Evento criado com sucesso!');
-        console.log('🔗 Link do evento:', response.htmlLink);
-        console.log('📧 Convite enviado para:', dados.email);
-        console.log('📧 Convite enviado para: contato@levitapodologia.com.br');
-        
-        return response;
         
     } catch (error) {
         console.error('❌ Erro ao criar evento:', error);
@@ -245,26 +162,22 @@ async function processarAgendamento(dados) {
     try {
         console.log('📅 Processando agendamento no Google Calendar...');
         
-        // Verifica se o Client ID está configurado
-        if (!CALENDAR_CONFIG.clientId || CALENDAR_CONFIG.clientId === 'SEU_CLIENT_ID_AQUI') {
+        if (!CLIENT_ID || CLIENT_ID === '') {
             console.error('❌ Google Calendar não configurado!');
-            console.error('⚠️ Configure os secrets no GitHub:');
-            console.error('   GOOGLE_CLIENT_ID');
-            console.error('   GOOGLE_CLIENT_SECRET');
             return {
                 sucesso: false,
-                mensagem: 'Google Calendar não configurado. Configure os secrets no GitHub.'
+                mensagem: 'Google Calendar não configurado.'
             };
         }
         
-        // 1. Carregar Google API
+        // 1. Carregar a nova API
         await carregarGoogleAPI();
         
-        // 2. Inicializar cliente
-        await initGoogleClient();
+        // 2. Obter token de acesso
+        var accessToken = await getAccessToken();
         
         // 3. Criar evento no Google Calendar
-        var evento = await criarEventoCalendar(dados);
+        var evento = await criarEventoCalendar(dados, accessToken);
         
         if (evento) {
             return {
@@ -295,5 +208,4 @@ async function processarAgendamento(dados) {
 window.processarAgendamento = processarAgendamento;
 window.criarEventoCalendar = criarEventoCalendar;
 
-console.log('✅ Google Calendar integrado!');
-console.log('📅 Client ID:', CALENDAR_CONFIG.clientId ? (CALENDAR_CONFIG.clientId === 'SEU_CLIENT_ID_AQUI' ? '⚠️ NÃO CONFIGURADO' : '✅ Configurado') : '❌ NÃO CONFIGURADO');
+console.log('✅ Google Calendar integrado (GIS)!');
