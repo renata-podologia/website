@@ -30,6 +30,44 @@ const EMAILJS_CONFIG = {
 })();
 
 // ============================================
+// FUNÇÃO PARA ENVIAR E-MAIL VIA EMAILJS
+// ============================================
+async function enviarEmail(destinatario, assunto, html) {
+    try {
+        console.log('📧 Enviando e-mail para:', destinatario);
+        console.log('📧 Assunto:', assunto);
+        
+        if (typeof emailjs === 'undefined') {
+            console.error('❌ EmailJS não carregado!');
+            return { success: false, error: 'EmailJS não carregado' };
+        }
+        
+        const templateParams = {
+            to_email: destinatario,
+            to_name: destinatario.split('@')[0] || 'Cliente',
+            subject: assunto,
+            message: html.replace(/<[^>]*>/g, '').substring(0, 500),
+            html_message: html
+        };
+        
+        console.log('📤 Enviando com parâmetros:', templateParams);
+        
+        const response = await emailjs.send(
+            EMAILJS_CONFIG.serviceID,
+            EMAILJS_CONFIG.templateID,
+            templateParams
+        );
+        
+        console.log('✅ E-mail enviado com sucesso!', response);
+        return { success: true, data: response };
+        
+    } catch (error) {
+        console.error('❌ Erro ao enviar e-mail:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// ============================================
 // GERAR E-MAIL EM HTML PARA O CLIENTE
 // ============================================
 function gerarEmailClienteHTML(dados) {
@@ -206,44 +244,6 @@ function gerarEmailRenataHTML(dados) {
 }
 
 // ============================================
-// FUNÇÃO PARA ENVIAR E-MAIL VIA EMAILJS
-// ============================================
-async function enviarEmail(destinatario, assunto, html) {
-    try {
-        console.log('📧 Enviando e-mail para:', destinatario);
-        console.log('📧 Assunto:', assunto);
-        
-        if (typeof emailjs === 'undefined') {
-            console.error('❌ EmailJS não carregado!');
-            return { success: false, error: 'EmailJS não carregado' };
-        }
-        
-        const templateParams = {
-            to_email: destinatario,
-            to_name: destinatario.split('@')[0] || 'Cliente',
-            subject: assunto,
-            message: html.replace(/<[^>]*>/g, '').substring(0, 500),
-            html_message: html
-        };
-        
-        console.log('📤 Enviando com parâmetros:', templateParams);
-        
-        const response = await emailjs.send(
-            EMAILJS_CONFIG.serviceID,
-            EMAILJS_CONFIG.templateID,
-            templateParams
-        );
-        
-        console.log('✅ E-mail enviado com sucesso!', response);
-        return { success: true, data: response };
-        
-    } catch (error) {
-        console.error('❌ Erro ao enviar e-mail:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-// ============================================
 // FUNÇÃO PRINCIPAL - ENVIAR NOTIFICAÇÕES
 // ============================================
 async function enviarNotificacoesEmail(dados) {
@@ -253,10 +253,6 @@ async function enviarNotificacoesEmail(dados) {
         console.log('📧 Service ID:', EMAILJS_CONFIG.serviceID);
         console.log('📧 Template ID:', EMAILJS_CONFIG.templateID);
         
-        const emailClienteHTML = gerarEmailClienteHTML(dados);
-        const emailRenataHTML = gerarEmailRenataHTML(dados);
-        
-        // Extrair variáveis para o template
         const dataObj = new Date(dados.data + 'T00:00:00');
         const dataFormatada = dataObj.toLocaleDateString('pt-BR', {
             weekday: 'long',
@@ -339,52 +335,9 @@ async function enviarNotificacoesEmail(dados) {
 }
 
 // ============================================
-// FUNÇÃO SIMPLIFICADA - APENAS PARA RENATA
-// ============================================
-async function enviarEmailRenata(dados) {
-    try {
-        const dataObj = new Date(dados.data + 'T00:00:00');
-        const dataFormatada = dataObj.toLocaleDateString('pt-BR', {
-            weekday: 'long',
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric'
-        });
-        const tipoLabel = dados.tipo === 'domicilio' ? '🏠 Domiciliar' : '🏢 Presencial';
-        const statusLabel = dados.status.charAt(0).toUpperCase() + dados.status.slice(1);
-        
-        const templateParams = {
-            to_email: 'contato@levitapodologia.com.br',
-            to_name: 'Renata Kemp',
-            subject: '🔔 NOVO AGENDAMENTO - ' + dados.nome,
-            servico: dados.servico,
-            data: dataFormatada,
-            horario: dados.horario,
-            tipo: tipoLabel,
-            endereco: dados.endereco || 'Presencial - Clínica',
-            status: statusLabel,
-            protocolo: '#' + String(dados.id).padStart(5, '0')
-        };
-        
-        const response = await emailjs.send(
-            EMAILJS_CONFIG.serviceID,
-            EMAILJS_CONFIG.templateID,
-            templateParams
-        );
-        console.log('✅ E-mail para a Renata enviado!', response);
-        return { success: true, data: response };
-        
-    } catch (error) {
-        console.error('❌ Erro ao enviar e-mail para a Renata:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-// ============================================
 // EXPORTA AS FUNÇÕES
 // ============================================
 window.enviarNotificacoesEmail = enviarNotificacoesEmail;
-window.enviarEmailRenata = enviarEmailRenata;
 window.enviarEmail = enviarEmail;
 
 console.log('✅ Sistema de e-mail carregado (EmailJS)!');
