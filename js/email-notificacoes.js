@@ -8,7 +8,7 @@
 const EMAILJS_CONFIG = {
     publicKey: 'rRmq87DuOwPzW-3Eo',
     serviceID: 'service_4gybw6a',
-    templateID: 'template_levita'
+    templateID: 'template_zjwgg1g'  // ← SEU TEMPLATE ID CORRETO
 };
 
 // ============================================
@@ -91,7 +91,7 @@ function gerarEmailClienteHTML(dados) {
         body { font-family: Arial, sans-serif; background: #f7f8fa; padding: 20px; }
         .container { max-width: 600px; margin: 0 auto; background: #fff; border-radius: 16px; padding: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
         .header { text-align: center; border-bottom: 2px solid #C9A227; padding-bottom: 20px; margin-bottom: 20px; }
-        .header h1 { color: #2F5D62; font-family: 'Poppins', sans-serif; }
+        .header h1 { color: #2F5D62; }
         .header h1 span { color: #C9A227; }
         .info { background: #F4EFE8; padding: 20px; border-radius: 12px; margin: 20px 0; border-left: 4px solid #C9A227; }
         .info p { margin: 8px 0; }
@@ -178,7 +178,7 @@ function gerarEmailRenataHTML(dados) {
         body { font-family: Arial, sans-serif; background: #f7f8fa; padding: 20px; }
         .container { max-width: 600px; margin: 0 auto; background: #fff; border-radius: 16px; padding: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
         .header { text-align: center; border-bottom: 2px solid #C9A227; padding-bottom: 20px; margin-bottom: 20px; }
-        .header h1 { color: #2F5D62; font-family: 'Poppins', sans-serif; }
+        .header h1 { color: #2F5D62; }
         .header h1 span { color: #C9A227; }
         .destaque { background: #F4EFE8; padding: 20px; border-radius: 12px; margin: 20px 0; border-left: 4px solid #C9A227; }
         .destaque p { margin: 6px 0; }
@@ -341,3 +341,4 @@ window.enviarNotificacoesEmail = enviarNotificacoesEmail;
 window.enviarEmail = enviarEmail;
 
 console.log('✅ Sistema de e-mail carregado (EmailJS)!');
+console.log('📧 Template ID:', EMAILJS_CONFIG.templateID);
