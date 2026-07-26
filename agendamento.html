@@ -810,6 +810,25 @@
         }
 
         // ============================================
+        // FUNÇÃO PARA DESABILITAR/REABILITAR BOTÃO
+        // ============================================
+        function desabilitarBotao(mensagem) {
+            var btn = document.getElementById('btn-confirmar');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + (mensagem || 'Salvando...');
+            btn.style.opacity = '0.7';
+            btn.style.cursor = 'not-allowed';
+        }
+
+        function habilitarBotao() {
+            var btn = document.getElementById('btn-confirmar');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save"></i> Confirmar e Salvar';
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+        }
+
+        // ============================================
         // NAVEGAÇÃO
         // ============================================
         function irParaPasso(passo) {
@@ -1633,6 +1652,12 @@
                 return;
             }
 
+            // ============================================
+            // 🔒 DESABILITAR BOTÃO
+            // ============================================
+            desabilitarBotao('Verificando disponibilidade...');
+            addLog('🔒 Botão desabilitado', 'info');
+
             logEtapa('2', '⏳ VERIFICANDO DISPONIBILIDADE NO SUPABASE', 'info');
             addLog('⏳ Verificando disponibilidade no Supabase...', 'info');
             
@@ -1647,6 +1672,7 @@
                         addLog('❌ Erro na verificação: ' + response.error.message, 'erro');
                         mostrarToast('Erro ao verificar disponibilidade.', 'erro');
                         logEtapa('2', '❌ ERRO NA VERIFICAÇÃO', 'erro');
+                        habilitarBotao();
                         return;
                     }
                     
@@ -1658,28 +1684,23 @@
                         mostrarToast('Este horário não está mais disponível.', 'erro');
                         gerarHorarios(agendamento.data);
                         logEtapa('2', '❌ HORÁRIO JÁ OCUPADO!', 'erro');
+                        habilitarBotao();
                         return;
                     }
                     
                     addLog('✅ Horário disponível!', 'sucesso');
                     logEtapa('2', '✅ HORÁRIO DISPONÍVEL!', 'sucesso');
                     
-                    var btn = document.getElementById('btn-confirmar');
-                    var originalText = btn.innerHTML;
-                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
-                    btn.disabled = true;
-
+                    desabilitarBotao('Salvando no Supabase...');
                     logEtapa('3', '💾 SALVANDO NO SUPABASE', 'info');
 
                     salvarAgendamento(agendamento)
                         .then(async function(salvo) {
-                            btn.innerHTML = originalText;
-                            btn.disabled = false;
-
                             if (!salvo) {
                                 addLog('❌ Falha ao salvar no Supabase', 'erro');
                                 mostrarToast('Erro ao salvar. Tente novamente.', 'erro');
                                 logEtapa('3', '❌ FALHA AO SALVAR', 'erro');
+                                habilitarBotao();
                                 return;
                             }
 
@@ -1690,6 +1711,7 @@
                             // ============================================
                             // 📧 ENVIAR E-MAILS COM EMAILJS
                             // ============================================
+                            desabilitarBotao('Enviando e-mails...');
                             addLog('📧 Preparando envio de e-mails...', 'info');
 
                             var dataFormatada = formatarData(salvo.data);
@@ -1721,10 +1743,8 @@
 
                             // Enviar e-mails
                             try {
-                                // Enviar para o CLIENTE
                                 await enviarEmail(salvo.email, templateParamsCliente);
                                 
-                                // Enviar para a PROFISSIONAL (se for diferente)
                                 if (salvo.email !== 'kemp.ricardo@gmail.com') {
                                     await enviarEmail('kemp.ricardo@gmail.com', templateParamsProfissional);
                                 } else {
@@ -1737,6 +1757,7 @@
                             // ============================================
                             // 📅 GOOGLE CALENDAR
                             // ============================================
+                            desabilitarBotao('Criando evento no Google Calendar...');
                             await criarEventoCalendar(salvo);
 
                             // ============================================
@@ -1755,28 +1776,28 @@
                             
                             mostrarToast('✅ Agendamento realizado com sucesso!', 'sucesso');
                             
-                            // Salvar dados no sessionStorage para a página obrigado.html
                             sessionStorage.setItem('agendamento_confirmado', JSON.stringify(salvo));
                             addLog('💾 Dados salvos no sessionStorage', 'sucesso');
+                            
+                            desabilitarBotao('Redirecionando...');
                             addLog('🔄 Redirecionando para obrigado.html...', 'info');
                             
-                            // Redirecionar após 500 ms
                             setTimeout(function() {
                                 window.location.href = 'obrigado.html';
-                            }, 500);
+                            }, 2000);
                         })
                         .catch(function(error) {
-                            btn.innerHTML = originalText;
-                            btn.disabled = false;
                             addLog('❌ Erro no processo: ' + error.message, 'erro');
                             mostrarToast('Erro ao salvar agendamento.', 'erro');
                             logEtapa('3', '❌ ERRO NO PROCESSO: ' + error.message, 'erro');
+                            habilitarBotao();
                         });
                 })
                 .catch(function(error) {
                     addLog('❌ Erro na verificação: ' + error.message, 'erro');
                     mostrarToast('Erro ao verificar disponibilidade.', 'erro');
                     logEtapa('2', '❌ ERRO NA VERIFICAÇÃO: ' + error.message, 'erro');
+                    habilitarBotao();
                 });
         }
 
