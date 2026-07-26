@@ -324,36 +324,6 @@
         .resumo-agendamento .rotulo { font-weight: 500; color: #4a5f64; }
         .resumo-agendamento .valor { font-weight: 600; color: #2F5D62; text-align: right; }
         
-        /* LOG CONTAINER */
-        #log-container {
-            margin-top: 20px;
-            padding: 16px;
-            background: #1a1a2e;
-            color: #00ff41;
-            border-radius: 12px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.8rem;
-            max-height: 400px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            border: 2px solid #2F5D62;
-            line-height: 1.6;
-            display: none;
-        }
-        #log-container.visivel { display: block; }
-        .btn-limpar-logs {
-            background: #dc3545;
-            color: #fff;
-            border: none;
-            padding: 6px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            margin-top: 8px;
-        }
-        .btn-limpar-logs:hover { background: #c82333; }
-        
         .toast {
             position: fixed;
             top: 20px;
@@ -681,15 +651,6 @@
             <h3 class="passo-title"><i class="fas fa-check-circle"></i> Confirme seus dados</h3>
             <div class="resumo-agendamento" id="resumo-agendamento"></div>
             
-            <!-- LOG CONTAINER -->
-            <div id="log-container">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; border-bottom:1px solid #333; padding-bottom:8px;">
-                    <span style="color:#fff; font-weight:bold;">📋 LOGS DO SISTEMA</span>
-                    <button class="btn-limpar-logs" onclick="limparLogs()">Limpar</button>
-                </div>
-                <div id="log-messages"></div>
-            </div>
-            
             <div class="form-actions">
                 <button type="button" class="btn btn-voltar" onclick="passoAnterior(4)">
                     <i class="fas fa-arrow-left"></i> Voltar
@@ -806,36 +767,26 @@
         }
 
         // ============================================
-        // LOGS
+        // LOGS APENAS NO CONSOLE
         // ============================================
         function addLog(mensagem, tipo) {
             tipo = tipo || 'info';
-            var container = document.getElementById('log-container');
-            var messages = document.getElementById('log-messages');
-            
-            container.classList.add('visivel');
-            
-            var cores = {
-                'info': '#00ff41',
-                'erro': '#ff4444',
-                'sucesso': '#00ff88',
-                'warning': '#ffaa00'
-            };
-            var cor = cores[tipo] || '#00ff41';
             var timestamp = new Date().toLocaleTimeString('pt-BR');
+            var prefixo = '[' + timestamp + ']';
             
-            var linha = document.createElement('div');
-            linha.style.cssText = 'color: ' + cor + '; padding: 2px 0; font-family: "Courier New", monospace; font-size: 0.8rem;';
-            linha.innerHTML = '<span style="color: #8888aa;">[' + timestamp + ']</span> ' + mensagem;
-            messages.appendChild(linha);
-            container.scrollTop = container.scrollHeight;
-            
-            console.log('[' + timestamp + '] ' + mensagem);
-        }
-
-        function limparLogs() {
-            document.getElementById('log-messages').innerHTML = '';
-            document.getElementById('log-container').classList.remove('visivel');
+            switch(tipo) {
+                case 'sucesso':
+                    console.log('%c' + prefixo + ' ✅ ' + mensagem, 'color: #00ff88; font-weight: bold;');
+                    break;
+                case 'erro':
+                    console.log('%c' + prefixo + ' ❌ ' + mensagem, 'color: #ff4444; font-weight: bold;');
+                    break;
+                case 'warning':
+                    console.log('%c' + prefixo + ' ⚠️ ' + mensagem, 'color: #ffaa00; font-weight: bold;');
+                    break;
+                default:
+                    console.log(prefixo + ' ℹ️ ' + mensagem);
+            }
         }
 
         // ============================================
@@ -1389,6 +1340,9 @@
                 }
             } catch (error) {
                 addLog('❌ Erro ao enviar e-mail para ' + para + ': ' + error.message, 'erro');
+                if (error.text) {
+                    addLog('   Detalhe: ' + error.text, 'erro');
+                }
                 return { sucesso: false, erro: error.message };
             }
         }
@@ -1476,9 +1430,8 @@
         // CONFIRMAR AGENDAMENTO
         // ============================================
         function confirmarAgendamento() {
-            limparLogs();
-            addLog('🚀 INICIANDO CONFIRMAÇÃO DE AGENDAMENTO', 'info');
-            addLog('═══════════════════════════════════════════', 'info');
+            console.log('%c🚀 INICIANDO CONFIRMAÇÃO DE AGENDAMENTO', 'color: #00ff88; font-weight: bold; font-size: 16px;');
+            console.log('%c═══════════════════════════════════════════', 'color: #888;');
             
             if (!validarPasso1()) {
                 addLog('❌ Validação do Passo 1 falhou', 'erro');
@@ -1545,7 +1498,7 @@
                     btn.disabled = true;
 
                     salvarAgendamento(agendamento)
-                        .then(function(salvo) {
+                        .then(async function(salvo) {
                             btn.innerHTML = originalText;
                             btn.disabled = false;
 
@@ -1566,11 +1519,11 @@
                             var dataFormatada = formatarData(salvo.data);
                             var protocolo = 'LEV-' + salvo.id.toString().slice(-6);
 
-                            // 1. Template para o CLIENTE
+                            // Template para o CLIENTE
                             var templateParamsCliente = {
                                 to_name: salvo.nome || 'Cliente',
                                 servico: salvo.servico || 'Não informado',
-                                data: dataFormatada,
+                                data: dataFormatada || 'Não informada',
                                 horario: salvo.horario || 'Não informado',
                                 tipo: salvo.tipo === 'domicilio' ? '🏠 Domiciliar' : '🏢 Presencial',
                                 endereco: salvo.endereco || 'Não informado',
@@ -1578,11 +1531,11 @@
                                 protocolo: protocolo
                             };
 
-                            // 2. Template para a PROFISSIONAL
+                            // Template para a PROFISSIONAL
                             var templateParamsProfissional = {
                                 to_name: 'Renata Kemp - Nova Consulta',
                                 servico: salvo.servico || 'Não informado',
-                                data: dataFormatada,
+                                data: dataFormatada || 'Não informada',
                                 horario: salvo.horario || 'Não informado',
                                 tipo: salvo.tipo === 'domicilio' ? '🏠 Domiciliar' : '🏢 Presencial',
                                 endereco: salvo.endereco || 'Não informado',
@@ -1590,11 +1543,14 @@
                                 protocolo: protocolo
                             };
 
-                            // Enviar para o CLIENTE (e-mail que ele preencheu no formulário)
-                            enviarEmail(salvo.email, templateParamsCliente);
-
-                            // Enviar para a PROFISSIONAL (kemp.ricardo@gmail.com)
-                            enviarEmail('kemp.ricardo@gmail.com', templateParamsProfissional);
+                            // Enviar para o CLIENTE
+                            if (salvo.email === 'kemp.ricardo@gmail.com') {
+                                addLog('⚠️ Cliente e Profissional têm o mesmo e-mail. Enviando apenas um.', 'warning');
+                                await enviarEmail(salvo.email, templateParamsCliente);
+                            } else {
+                                await enviarEmail(salvo.email, templateParamsCliente);
+                                await enviarEmail('kemp.ricardo@gmail.com', templateParamsProfissional);
+                            }
 
                             // ============================================
                             // 📅 GOOGLE CALENDAR
@@ -1604,13 +1560,15 @@
                             // ============================================
                             // ✅ FINALIZAR
                             // ============================================
-                            addLog('═══════════════════════════════════════════', 'info');
+                            console.log('%c═══════════════════════════════════════════', 'color: #888;');
                             addLog('🎉 AGENDAMENTO CONCLUÍDO COM SUCESSO!', 'sucesso');
                             addLog('📋 Verifique:', 'info');
                             addLog('   ✅ Dados salvos no Supabase', 'sucesso');
                             addLog('   📧 E-mail enviado para: ' + salvo.email, 'info');
-                            addLog('   📧 E-mail enviado para: kemp.ricardo@gmail.com', 'info');
-                            addLog('═══════════════════════════════════════════', 'info');
+                            if (salvo.email !== 'kemp.ricardo@gmail.com') {
+                                addLog('   📧 E-mail enviado para: kemp.ricardo@gmail.com', 'info');
+                            }
+                            console.log('%c═══════════════════════════════════════════', 'color: #888;');
                             
                             mostrarToast('✅ Agendamento realizado com sucesso!', 'sucesso');
                         })
@@ -1679,7 +1637,6 @@
             gerarHorarios(dataInput.value);
             irParaPasso(1);
             
-            limparLogs();
             mostrarToast('Novo agendamento iniciado!', 'info');
         }
     </script>
