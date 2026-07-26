@@ -1,21 +1,13 @@
-name: Deploy to GitHub Pages
+name: Deploy Website
 
 on:
   push:
     branches: [ main ]
   workflow_dispatch:
 
-permissions:
-  contents: write
-  pages: write
-  id-token: write
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     
     steps:
     - name: Checkout
@@ -38,18 +30,14 @@ jobs:
         echo "export const GOOGLE_CLIENT_SECRET = '${{ secrets.GOOGLE_CLIENT_SECRET }}';" >> js/config.js
         echo "export const RESEND_API_KEY = '${{ secrets.RESEND_API_KEY }}';" >> js/config.js
         echo "export const CALENDAR_ID = 'renatakemp@gmail.com';" >> js/config.js
-        echo "" >> js/config.js
-        echo "// Configurações fixas" >> js/config.js
-        echo "export const API_URL = 'https://euktsrczpxejezkeyqoh.supabase.co';" >> js/config.js
-    
-    - name: Setup Pages
-      uses: actions/configure-pages@v4
-    
-    - name: Upload artifact
-      uses: actions/upload-pages-artifact@v3
-      with:
-        path: '.'
     
     - name: Deploy to GitHub Pages
-      id: deployment
-      uses: actions/deploy-pages@v4
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.PAT_TOKEN }}
+        publish_dir: ./
+        publish_branch: gh-pages
+        force_orphan: true
+        user_name: 'github-actions[bot]'
+        user_email: 'github-actions[bot]@users.noreply.github.com'
+        commit_message: 'Deploy: ${{ github.event.head_commit.message }}'
