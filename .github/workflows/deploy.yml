@@ -18,18 +18,28 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '24'
     
-    - name: Create config.js
+    - name: Create config.js from secrets
       run: |
         mkdir -p js
         echo "// Configurações do Supabase" > js/config.js
         echo "export const SUPABASE_URL = '${{ secrets.SUPABASE_URL }}';" >> js/config.js
         echo "export const SUPABASE_ANON_KEY = '${{ secrets.SUPABASE_ANON_KEY }}';" >> js/config.js
+        echo "" >> js/config.js
+        echo "// Configurações do Google" >> js/config.js
         echo "export const GOOGLE_CLIENT_ID = '${{ secrets.GOOGLE_CLIENT_ID }}';" >> js/config.js
         echo "export const GOOGLE_CLIENT_SECRET = '${{ secrets.GOOGLE_CLIENT_SECRET }}';" >> js/config.js
+        echo "export const GOOGLE_API_KEY = '${{ secrets.GOOGLE_API_KEY }}';" >> js/config.js
+        echo "" >> js/config.js
+        echo "// Configurações do Resend (Email)" >> js/config.js
         echo "export const RESEND_API_KEY = '${{ secrets.RESEND_API_KEY }}';" >> js/config.js
+        echo "" >> js/config.js
+        echo "// Configurações Fixas" >> js/config.js
         echo "export const CALENDAR_ID = 'renatakemp@gmail.com';" >> js/config.js
+        
+        # Mostra o arquivo gerado (sem expor as secrets)
+        echo "✅ config.js criado com sucesso!"
     
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
