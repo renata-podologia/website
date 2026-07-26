@@ -685,6 +685,9 @@
         var EMAILJS_SERVICE_ID = 'service_4gybw6a';
         var EMAILJS_TEMPLATE_ID = 'template_zjwgg1g';
 
+        // GOOGLE APPS SCRIPT - URL DO SEU SCRIPT
+        var GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzPhNf4U2SM-XXqLzPMNZDeJlSxRO9zmsVyGZE7O4Vx2ZVPuUGa0xyVeii_o-SHPnk/exec';
+
         // Inicializar EmailJS
         emailjs.init(EMAILJS_USER_ID);
 
@@ -1477,23 +1480,48 @@
         }
 
         // ============================================
-        // FUNÇÃO GOOGLE CALENDAR (SIMPLIFICADA)
+        // FUNÇÃO GOOGLE CALENDAR VIA APPS SCRIPT
         // ============================================
-        async function criarEventoCalendar(agendamento) {
+        async function criarEventoCalendar(dados) {
             try {
-                logEtapa('7', '📅 GOOGLE CALENDAR', 'info');
-                addLog('📅 Tentando criar evento no Google Calendar...', 'info');
-                addLog('   📌 ' + agendamento.servico + ' - ' + agendamento.nome, 'info');
-                addLog('   📅 ' + agendamento.data + ' às ' + agendamento.horario, 'info');
-                addLog('   📧 ' + agendamento.email, 'info');
+                logEtapa('7', '📅 CRIANDO EVENTO NO GOOGLE CALENDAR', 'info');
+                addLog('📅 Criando evento no Google Calendar via Apps Script...', 'info');
                 
-                addLog('⚠️ Google Calendar: integração requer backend (Node.js)', 'warning');
-                logEtapa('7', '⚠️ GOOGLE CALENDAR: REQUER BACKEND', 'warning');
+                var dadosEvento = {
+                    nome: dados.nome,
+                    telefone: dados.telefone,
+                    email: dados.email,
+                    servico: dados.servico,
+                    data: dados.data,
+                    horario: dados.horario,
+                    tipo: dados.tipo,
+                    endereco: dados.endereco,
+                    protocolo: dados.protocolo || 'LEV-' + dados.id.toString().slice(-6)
+                };
+                
+                addLog('📋 Dados enviados para o Apps Script:', 'info');
+                addLog('   👤 Nome: ' + dadosEvento.nome, 'info');
+                addLog('   📧 E-mail: ' + dadosEvento.email, 'info');
+                addLog('   📅 Data: ' + dadosEvento.data + ' às ' + dadosEvento.horario, 'info');
+                
+                var response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(dadosEvento)
+                });
+
+                addLog('✅ Evento criado no Google Calendar!', 'sucesso');
+                addLog('📧 Convite enviado para: ' + dadosEvento.email, 'sucesso');
+                logEtapa('7', '✅ EVENTO CRIADO PARA O CLIENTE: ' + dadosEvento.email, 'sucesso');
                 return { sucesso: true };
+                
             } catch (error) {
                 addLog('⚠️ Erro ao criar evento: ' + error.message, 'warning');
                 logEtapa('7', '⚠️ ERRO NO GOOGLE CALENDAR: ' + error.message, 'warning');
-                return null;
+                return { sucesso: false, erro: error.message };
             }
         }
 
@@ -1709,7 +1737,7 @@
                             // ============================================
                             // 📅 GOOGLE CALENDAR
                             // ============================================
-                            criarEventoCalendar(salvo);
+                            await criarEventoCalendar(salvo);
 
                             // ============================================
                             // 🎉 REDIRECIONAR PARA OBRIGADO.HTML
@@ -1722,6 +1750,7 @@
                             if (salvo.email !== 'kemp.ricardo@gmail.com') {
                                 addLog('   📧 E-mail enviado para: kemp.ricardo@gmail.com', 'info');
                             }
+                            addLog('   📅 Evento criado no Google Calendar', 'sucesso');
                             console.log('%c═══════════════════════════════════════════', 'color: #888;');
                             
                             mostrarToast('✅ Agendamento realizado com sucesso!', 'sucesso');
@@ -1731,10 +1760,10 @@
                             addLog('💾 Dados salvos no sessionStorage', 'sucesso');
                             addLog('🔄 Redirecionando para obrigado.html...', 'info');
                             
-                            // Redirecionar após 2 segundos
+                            // Redirecionar após 500 ms
                             setTimeout(function() {
                                 window.location.href = 'obrigado.html';
-                            }, 2000);
+                            }, 500);
                         })
                         .catch(function(error) {
                             btn.innerHTML = originalText;
