@@ -767,7 +767,7 @@
         }
 
         // ============================================
-        // LOGS APENAS NO CONSOLE
+        // LOGS APENAS NO CONSOLE (COLORIDOS)
         // ============================================
         function addLog(mensagem, tipo) {
             tipo = tipo || 'info';
@@ -784,8 +784,11 @@
                 case 'warning':
                     console.log('%c' + prefixo + ' ⚠️ ' + mensagem, 'color: #ffaa00; font-weight: bold;');
                     break;
+                case 'info':
+                    console.log('%c' + prefixo + ' ℹ️ ' + mensagem, 'color: #00aaff;');
+                    break;
                 default:
-                    console.log(prefixo + ' ℹ️ ' + mensagem);
+                    console.log(prefixo + ' ' + mensagem);
             }
         }
 
@@ -811,6 +814,7 @@
         }
 
         function proximoPasso(passo) {
+            addLog('➡️ Navegando para o passo ' + passo, 'info');
             if (passo === 2 && !validarPasso1()) return;
             if (passo === 3 && !validarPasso2()) return;
             if (passo === 4 && !validarPasso3()) return;
@@ -820,6 +824,7 @@
         }
 
         function passoAnterior(passo) {
+            addLog('⬅️ Voltando para o passo ' + passo, 'info');
             irParaPasso(passo);
         }
 
@@ -827,26 +832,31 @@
         // VALIDAÇÕES
         // ============================================
         function validarPasso1() {
+            addLog('🔍 Validando dados do cliente...', 'info');
             var nome = document.getElementById('nome').value.trim();
             var telefone = document.getElementById('telefone').value.trim();
             var email = document.getElementById('email').value.trim();
             
             if (!nome) {
+                addLog('❌ Nome não preenchido', 'erro');
                 mostrarToast('Digite seu nome completo.', 'erro');
                 document.getElementById('nome').focus();
                 return false;
             }
             if (!telefone || telefone.length < 10) {
+                addLog('❌ Telefone inválido: ' + telefone, 'erro');
                 mostrarToast('Digite um telefone válido (com DDD).', 'erro');
                 document.getElementById('telefone').focus();
                 return false;
             }
             if (!email) {
+                addLog('❌ E-mail não preenchido', 'erro');
                 mostrarToast('Digite seu e-mail.', 'erro');
                 document.getElementById('email').focus();
                 return false;
             }
             if (!email.includes('@') || !email.includes('.')) {
+                addLog('❌ E-mail inválido: ' + email, 'erro');
                 mostrarToast('Digite um e-mail válido.', 'erro');
                 document.getElementById('email').focus();
                 return false;
@@ -855,31 +865,39 @@
             agendamento.nome = nome;
             agendamento.telefone = telefone;
             agendamento.email = email;
+            addLog('✅ Dados do cliente validados: ' + nome + ' (' + email + ')', 'sucesso');
             return true;
         }
 
         function validarPasso2() {
+            addLog('🔍 Validando tipo de atendimento...', 'info');
             var tipoSelecionado = document.querySelector('.tipo-btn.selecionado');
             if (!tipoSelecionado) {
+                addLog('❌ Tipo de atendimento não selecionado', 'erro');
                 mostrarToast('Selecione o tipo de atendimento.', 'erro');
                 return false;
             }
             agendamento.tipo = tipoSelecionado.dataset.tipo;
+            addLog('✅ Tipo selecionado: ' + agendamento.tipo, 'sucesso');
+            
             if (agendamento.tipo === 'domicilio') {
                 var cep = document.getElementById('cep').value.replace(/\D/g, '');
                 var numero = document.getElementById('numero-endereco').value.trim();
                 if (!cep || cep.length < 8) {
+                    addLog('❌ CEP inválido: ' + cep, 'erro');
                     mostrarToast('Informe um CEP válido.', 'erro');
                     document.getElementById('cep').focus();
                     return false;
                 }
                 if (!numero) {
+                    addLog('❌ Número do endereço não informado', 'erro');
                     mostrarToast('Informe o número do endereço.', 'erro');
                     document.getElementById('numero-endereco').focus();
                     return false;
                 }
                 var logradouro = document.getElementById('end-logradouro').textContent;
                 if (logradouro === '-' || logradouro === 'Não encontrado') {
+                    addLog('❌ CEP não encontrado: ' + cep, 'erro');
                     mostrarToast('CEP não encontrado.', 'erro');
                     return false;
                 }
@@ -887,32 +905,41 @@
                 agendamento.numero = numero;
                 agendamento.complemento = document.getElementById('complemento-endereco').value.trim();
                 agendamento.endereco = logradouro + ', ' + numero + (agendamento.complemento ? ', ' + agendamento.complemento : '') + ' - ' + document.getElementById('end-bairro').textContent + ', ' + document.getElementById('end-cidade').textContent + ' - ' + document.getElementById('end-estado').textContent;
+                addLog('✅ Endereço validado: ' + agendamento.endereco, 'sucesso');
             } else {
                 agendamento.endereco = 'Rua da Clínica, 123 - Centro, Guarulhos - SP';
                 agendamento.cep = '';
                 agendamento.numero = '';
                 agendamento.complemento = '';
+                addLog('✅ Atendimento presencial - endereço da clínica', 'sucesso');
             }
             return true;
         }
 
         function validarPasso3() {
+            addLog('🔍 Validando serviço selecionado...', 'info');
             if (!agendamento.servico) {
+                addLog('❌ Nenhum serviço selecionado', 'erro');
                 mostrarToast('Selecione um serviço.', 'erro');
                 return false;
             }
+            addLog('✅ Serviço selecionado: ' + agendamento.servico, 'sucesso');
             return true;
         }
 
         function validarPasso4() {
+            addLog('🔍 Validando data e horário...', 'info');
             if (!agendamento.data) {
+                addLog('❌ Data não selecionada', 'erro');
                 mostrarToast('Selecione uma data.', 'erro');
                 return false;
             }
             if (!agendamento.horario) {
+                addLog('❌ Horário não selecionado', 'erro');
                 mostrarToast('Selecione um horário.', 'erro');
                 return false;
             }
+            addLog('✅ Data: ' + agendamento.data + ' às ' + agendamento.horario, 'sucesso');
             return true;
         }
 
@@ -1067,6 +1094,7 @@
                     var tipo = this.dataset.tipo;
                     document.getElementById('endereco-domicilio').style.display = tipo === 'domicilio' ? 'block' : 'none';
                     document.getElementById('endereco-presencial').style.display = tipo === 'presencial' ? 'block' : 'none';
+                    addLog('📌 Tipo de atendimento selecionado: ' + tipo, 'info');
                 });
             }
         });
@@ -1080,12 +1108,14 @@
                 mostrarToast('Digite um CEP válido com 8 dígitos.', 'erro');
                 return;
             }
+            addLog('🔍 Buscando CEP: ' + cep, 'info');
             mostrarLoading('Buscando CEP...');
             fetch(API_CEP_URL + cep + '/json/')
                 .then(function(response) { return response.json(); })
                 .then(function(data) {
                     esconderLoading();
                     if (data.erro) {
+                        addLog('❌ CEP não encontrado: ' + cep, 'erro');
                         mostrarToast('CEP não encontrado.', 'erro');
                         return;
                     }
@@ -1094,10 +1124,12 @@
                     document.getElementById('end-cidade').textContent = data.localidade || 'Não informado';
                     document.getElementById('end-estado').textContent = data.uf || 'Não informado';
                     document.getElementById('endereco-completo').classList.add('visivel');
+                    addLog('✅ CEP encontrado: ' + data.logradouro + ', ' + data.bairro + ' - ' + data.localidade, 'sucesso');
                     mostrarToast('CEP encontrado!', 'sucesso');
                 })
                 .catch(function() {
                     esconderLoading();
+                    addLog('❌ Erro ao buscar CEP: ' + cep, 'erro');
                     mostrarToast('Erro ao buscar CEP.', 'erro');
                 });
         }
@@ -1129,6 +1161,7 @@
                     }
                     this.classList.add('selecionado');
                     agendamento.servico = this.dataset.servico;
+                    addLog('📌 Serviço selecionado: ' + agendamento.servico, 'info');
                 });
             }
         });
@@ -1137,10 +1170,12 @@
         // DATAS E HORÁRIOS
         // ============================================
         function gerarHorarios(dataStr) {
+            addLog('🕐 Carregando horários para: ' + dataStr, 'info');
             var grid = document.getElementById('horarios-grid');
             grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; padding: 20px; color: #8a9ea3;"><i class="fas fa-spinner fa-spin"></i> Carregando horários...</p>';
             
             if (!supabaseClient) {
+                addLog('❌ Supabase não disponível!', 'erro');
                 grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; padding: 20px; color: #dc3545;">⚠️ Erro de conexão. Tente recarregar.</p>';
                 return;
             }
@@ -1158,6 +1193,7 @@
             var minutoAtual = hoje.getMinutes();
             
             if (diaSemana === 0) {
+                addLog('⛔ Domingo - não atendemos', 'warning');
                 grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; padding: 20px; color: #dc3545;">⚠️ Não atendemos aos domingos.</p>';
                 return;
             }
@@ -1169,6 +1205,7 @@
                     var hora = parseInt(h.split(':')[0]);
                     return hora >= 8 && hora < 13;
                 });
+                addLog('📌 Sábado - horários até 12:00', 'info');
             }
             
             if (horariosFiltrados.length === 0) {
@@ -1183,6 +1220,7 @@
                 .neq('status', 'cancelado')
                 .then(function(response) {
                     if (response.error) {
+                        addLog('❌ Erro ao carregar horários: ' + response.error.message, 'erro');
                         mostrarToast('Erro ao carregar horários.', 'erro');
                         return;
                     }
@@ -1201,7 +1239,11 @@
                         horariosOcupados.push(horarioLimpo);
                     }
                     
+                    addLog('📋 Horários ocupados: ' + horariosOcupados.length + ' de ' + horariosFiltrados.length, 'info');
+                    
                     grid.innerHTML = '';
+                    
+                    var totalDisponiveis = 0;
                     
                     for (var k = 0; k < horariosFiltrados.length; k++) {
                         var horario = horariosFiltrados[k];
@@ -1230,6 +1272,8 @@
                             btn.classList.add('confirmado');
                             btn.disabled = true;
                             btn.title = '❌ Horário já ocupado!';
+                        } else {
+                            totalDisponiveis++;
                         }
                         
                         btn.addEventListener('click', function() {
@@ -1243,12 +1287,23 @@
                             }
                             this.classList.add('selecionado');
                             agendamento.horario = this.dataset.horario;
+                            addLog('✅ Horário selecionado: ' + agendamento.horario, 'sucesso');
                         });
                         
                         grid.appendChild(btn);
                     }
+                    
+                    addLog('📊 Horários disponíveis: ' + totalDisponiveis + ' de ' + horariosFiltrados.length, 'info');
+                    
+                    if (totalDisponiveis === 0) {
+                        var msg = document.createElement('p');
+                        msg.style.cssText = 'grid-column: 1/-1; text-align:center; padding: 20px; color: #dc3545; font-weight: 600;';
+                        msg.innerHTML = '⚠️ Nenhum horário disponível para esta data. Escolha outra data.';
+                        grid.appendChild(msg);
+                    }
                 })
                 .catch(function(error) {
+                    addLog('❌ Erro na consulta: ' + error.message, 'erro');
                     mostrarToast('Erro ao carregar horários.', 'erro');
                     grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; padding: 20px; color: #dc3545;">⚠️ Erro ao carregar horários. Tente novamente.</p>';
                 });
@@ -1258,6 +1313,7 @@
         // INICIALIZAÇÃO DA DATA
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
+            addLog('🚀 Inicializando sistema de agendamento...', 'info');
             var dataInput = document.getElementById('data-agendamento');
             var hoje = new Date();
             
@@ -1296,6 +1352,7 @@
                 })
                 .catch(function(error) {
                     esconderLoading();
+                    addLog('❌ Erro na inicialização: ' + error.message, 'erro');
                     var amanha = new Date(hoje);
                     amanha.setDate(amanha.getDate() + 1);
                     var ano = amanha.getFullYear();
@@ -1313,34 +1370,63 @@
                     document.querySelectorAll('.horario-btn').forEach(function(b) {
                         b.classList.remove('selecionado');
                     });
+                    addLog('📅 Data alterada para: ' + this.value, 'info');
                     gerarHorarios(this.value);
                 }
             });
         });
 
         // ============================================
-        // FUNÇÃO DE E-MAIL COM EMAILJS
+        // FUNÇÃO DE E-MAIL COM EMAILJS (CORRIGIDA)
         // ============================================
         async function enviarEmail(para, templateParams) {
             try {
                 addLog('📧 Enviando e-mail para: ' + para, 'info');
                 
+                // Parâmetros OBRIGATÓRIOS para seu template
+                var params = {
+                    // CAMPOS DO EMAIL (OBRIGATÓRIOS)
+                    to_email: para,                    // ← Destinatário
+                    email: para,                       // ← Reply To
+                    
+                    // CAMPOS DO HTML
+                    to_name: templateParams.to_name || 'Cliente',
+                    servico: templateParams.servico || 'Não informado',
+                    data: templateParams.data || 'Não informada',
+                    horario: templateParams.horario || 'Não informado',
+                    tipo: templateParams.tipo || 'Não informado',
+                    endereco: templateParams.endereco || 'Não informado',
+                    status: templateParams.status || 'Confirmado',
+                    protocolo: templateParams.protocolo || 'LEV-000000'
+                };
+                
+                // Log para debug
+                console.log('📋 Parâmetros enviados:');
+                console.log('   to_email:', params.to_email);
+                console.log('   email (reply-to):', params.email);
+                console.log('   to_name:', params.to_name);
+                console.log('   servico:', params.servico);
+                console.log('   data:', params.data);
+                console.log('   horario:', params.horario);
+                console.log('   protocolo:', params.protocolo);
+                
                 var response = await emailjs.send(
                     EMAILJS_SERVICE_ID,
                     EMAILJS_TEMPLATE_ID,
-                    templateParams
+                    params
                 );
 
                 if (response.status === 200) {
                     addLog('✅ E-mail enviado com sucesso para: ' + para, 'sucesso');
                     return { sucesso: true };
                 } else {
-                    addLog('❌ Erro ao enviar e-mail para ' + para + ': ' + response.text, 'erro');
+                    addLog('❌ Erro ao enviar e-mail: ' + response.text, 'erro');
                     return { sucesso: false };
                 }
             } catch (error) {
                 addLog('❌ Erro ao enviar e-mail para ' + para + ': ' + error.message, 'erro');
                 if (error.text) {
+                    console.error('Detalhe do erro:', error.text);
                     addLog('   Detalhe: ' + error.text, 'erro');
                 }
                 return { sucesso: false, erro: error.message };
@@ -1424,6 +1510,7 @@
                 '<div class="linha"><span class="rotulo">Serviço</span><span class="valor"><strong>' + agendamento.servico + '</strong></span></div>' +
                 '<div class="linha"><span class="rotulo">Data</span><span class="valor">' + dataFormatada + '</span></div>' +
                 '<div class="linha"><span class="rotulo">Horário</span><span class="valor">' + agendamento.horario + '</span></div>';
+            addLog('📋 Resumo do agendamento gerado', 'info');
         }
 
         // ============================================
@@ -1543,13 +1630,19 @@
                                 protocolo: protocolo
                             };
 
-                            // Enviar para o CLIENTE
-                            if (salvo.email === 'kemp.ricardo@gmail.com') {
-                                addLog('⚠️ Cliente e Profissional têm o mesmo e-mail. Enviando apenas um.', 'warning');
+                            // Enviar e-mails
+                            try {
+                                // Enviar para o CLIENTE
                                 await enviarEmail(salvo.email, templateParamsCliente);
-                            } else {
-                                await enviarEmail(salvo.email, templateParamsCliente);
-                                await enviarEmail('kemp.ricardo@gmail.com', templateParamsProfissional);
+                                
+                                // Enviar para a PROFISSIONAL (se for diferente)
+                                if (salvo.email !== 'kemp.ricardo@gmail.com') {
+                                    await enviarEmail('kemp.ricardo@gmail.com', templateParamsProfissional);
+                                } else {
+                                    addLog('⚠️ Cliente e Profissional têm o mesmo e-mail. Pulando duplicata.', 'warning');
+                                }
+                            } catch (error) {
+                                addLog('❌ Erro no envio de e-mails: ' + error.message, 'erro');
                             }
 
                             // ============================================
@@ -1586,6 +1679,7 @@
         }
 
         function novoAgendamento() {
+            addLog('🔄 Iniciando novo agendamento...', 'info');
             agendamento = {
                 nome: '',
                 telefone: '',
@@ -1638,6 +1732,7 @@
             irParaPasso(1);
             
             mostrarToast('Novo agendamento iniciado!', 'info');
+            addLog('✅ Novo agendamento iniciado', 'sucesso');
         }
     </script>
 </body>
