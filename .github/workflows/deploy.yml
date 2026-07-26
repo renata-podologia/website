@@ -1,4 +1,4 @@
-name: Deploy Website
+name: Deploy to GitHub Pages
 
 on:
   push:
@@ -11,11 +11,14 @@ permissions:
   id-token: write
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     
     steps:
-    - name: Checkout code
+    - name: Checkout
       uses: actions/checkout@v4
       with:
         token: ${{ secrets.PAT_TOKEN }}
@@ -25,7 +28,7 @@ jobs:
       with:
         node-version: '18'
     
-    - name: Create config.js from secrets
+    - name: Create config.js
       run: |
         mkdir -p js
         echo "// Configurações do Supabase" > js/config.js
@@ -34,17 +37,19 @@ jobs:
         echo "export const GOOGLE_CLIENT_ID = '${{ secrets.GOOGLE_CLIENT_ID }}';" >> js/config.js
         echo "export const GOOGLE_CLIENT_SECRET = '${{ secrets.GOOGLE_CLIENT_SECRET }}';" >> js/config.js
         echo "export const RESEND_API_KEY = '${{ secrets.RESEND_API_KEY }}';" >> js/config.js
+        echo "export const CALENDAR_ID = 'renatakemp@gmail.com';" >> js/config.js
         echo "" >> js/config.js
         echo "// Configurações fixas" >> js/config.js
-        echo "export const CALENDAR_ID = 'renatakemp@gmail.com';" >> js/config.js
+        echo "export const API_URL = 'https://euktsrczpxejezkeyqoh.supabase.co';" >> js/config.js
+    
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+    
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: '.'
     
     - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.PAT_TOKEN }}
-        publish_dir: ./
-        publish_branch: gh-pages
-        force_orphan: true
-        user_name: 'github-actions[bot]'
-        user_email: 'github-actions[bot]@users.noreply.github.com'
-        commit_message: 'Deploy: ${{ github.event.head_commit.message }}'
+      id: deployment
+      uses: actions/deploy-pages@v4
