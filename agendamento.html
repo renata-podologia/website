@@ -22,7 +22,6 @@
             align-items: center;
             justify-content: center;
         }
-        
         .container {
             max-width: 900px;
             width: 100%;
@@ -33,7 +32,6 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
             border: 1px solid rgba(168, 195, 160, 0.15);
         }
-        
         .btn {
             display: inline-block;
             padding: 14px 34px;
@@ -52,16 +50,8 @@
         .btn-success:hover { background: #1e7e34; transform: translateY(-3px); }
         .btn-voltar { background: #F7F8FA; color: #1e2b2f; }
         .btn-voltar:hover { background: #e8edee; }
-        .btn-outline { 
-            background: transparent; 
-            color: #2F5D62; 
-            border: 2px solid #2F5D62;
-        }
-        .btn-outline:hover { 
-            background: #2F5D62; 
-            color: #fff; 
-            transform: translateY(-3px);
-        }
+        .btn-outline { background: transparent; color: #2F5D62; border: 2px solid #2F5D62; }
+        .btn-outline:hover { background: #2F5D62; color: #fff; transform: translateY(-3px); }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
         
         .header {
@@ -93,8 +83,6 @@
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(47, 93, 98, 0.25);
         }
-        .header .back-link i { font-size: 1rem; }
-        
         .header-title {
             font-family: 'Poppins', sans-serif;
             font-weight: 700;
@@ -272,13 +260,6 @@
         }
         .horario-btn:hover:not(.indisponivel):not(.confirmado):not(.passado) { border-color: #2F5D62; background: #F4EFE8; }
         .horario-btn.selecionado { border-color: #C9A227; background: #C9A227; color: #fff; }
-        .horario-btn.indisponivel { 
-            opacity: 0.5; 
-            cursor: not-allowed; 
-            background: #f0f0f0;
-            text-decoration: line-through;
-            border-color: #ccc;
-        }
         .horario-btn.confirmado {
             opacity: 0.7;
             cursor: not-allowed;
@@ -361,11 +342,17 @@
             display: none;
         }
         #log-container.visivel { display: block; }
-        #log-container .log-info { color: #00ff41; }
-        #log-container .log-erro { color: #ff4444; }
-        #log-container .log-sucesso { color: #00ff88; }
-        #log-container .log-warning { color: #ffaa00; }
-        #log-container .log-timestamp { color: #8888aa; }
+        .btn-limpar-logs {
+            background: #dc3545;
+            color: #fff;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-top: 8px;
+        }
+        .btn-limpar-logs:hover { background: #c82333; }
         
         .toast {
             position: fixed;
@@ -443,18 +430,6 @@
         .legenda-horarios .bola.pendente { background: #f0ad4e; }
         .legenda-horarios .bola.confirmado { background: #dc3545; }
         .legenda-horarios .bola.passado { background: #8a9ea3; }
-
-        .btn-limpar-logs {
-            background: #dc3545;
-            color: #fff;
-            border: none;
-            padding: 6px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            margin-top: 8px;
-        }
-        .btn-limpar-logs:hover { background: #c82333; }
         
         @media (max-width: 768px) {
             body { padding: 10px; }
@@ -731,20 +706,31 @@
          ============================================ -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+    <!-- ============================================
+         EMAILJS
+         ============================================ -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
     <script>
         // ============================================
-        // CONFIGURAÇÃO SUPABASE
+        // CONFIGURAÇÕES
         // ============================================
         var SUPABASE_URL = 'https://euktsrczpxejezkeyqoh.supabase.co';
         var SUPABASE_ANON_KEY = 'sb_publishable_vH11tBYAWHlKNoCeQG-oMQ_r1fOxcRf';
-        var RESEND_API_KEY = 're_123456789'; // Sua chave do Resend
-        
+        var GOOGLE_API_KEY = 'AIzaSyCdPP0zCV9j79OWHTV2cF539ME2f6Sz8JM';
+
+        // EMAILJS - SUAS CONFIGURAÇÕES
+        var EMAILJS_USER_ID = 'rRmq87DuOwPzW-3Eo';
+        var EMAILJS_SERVICE_ID = 'service_4gybw6a';
+        var EMAILJS_TEMPLATE_ID = 'template_zjwgg1g';
+
+        // Inicializar EmailJS
+        emailjs.init(EMAILJS_USER_ID);
+
         var supabaseClient;
         try {
             if (typeof supabase !== 'undefined') {
                 supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            } else {
-                console.error('⚠️ Supabase não carregou!');
             }
         } catch(e) {
             console.error('❌ Erro ao criar cliente Supabase:', e);
@@ -839,12 +825,12 @@
             var timestamp = new Date().toLocaleTimeString('pt-BR');
             
             var linha = document.createElement('div');
-            linha.style.cssText = `color: ${cor}; padding: 2px 0; font-family: 'Courier New', monospace; font-size: 0.8rem;`;
-            linha.innerHTML = `<span style="color: #8888aa;">[${timestamp}]</span> ${mensagem}`;
+            linha.style.cssText = 'color: ' + cor + '; padding: 2px 0; font-family: "Courier New", monospace; font-size: 0.8rem;';
+            linha.innerHTML = '<span style="color: #8888aa;">[' + timestamp + ']</span> ' + mensagem;
             messages.appendChild(linha);
             container.scrollTop = container.scrollHeight;
             
-            console.log(`[${timestamp}] ${mensagem}`);
+            console.log('[' + timestamp + '] ' + mensagem);
         }
 
         function limparLogs() {
@@ -874,7 +860,6 @@
         }
 
         function proximoPasso(passo) {
-            console.log('➡️ Proximo passo:', passo);
             if (passo === 2 && !validarPasso1()) return;
             if (passo === 3 && !validarPasso2()) return;
             if (passo === 4 && !validarPasso3()) return;
@@ -981,7 +966,7 @@
         }
 
         // ============================================
-        // FUNÇÃO - BUSCAR PRÓXIMA DATA DISPONÍVEL
+        // BUSCAR PRÓXIMA DATA DISPONÍVEL
         // ============================================
         async function buscarProximaDataDisponivel() {
             try {
@@ -1002,7 +987,7 @@
                 const hojeStr = dataAtual.toISOString().split('T')[0];
                 const limiteStr = dataLimite.toISOString().split('T')[0];
                 
-                addLog(`📅 Período de busca: ${hojeStr} até ${limiteStr}`, 'info');
+                addLog('📅 Período de busca: ' + hojeStr + ' até ' + limiteStr, 'info');
 
                 const { data: agendamentos, error } = await supabaseClient
                     .from('agendamentos')
@@ -1013,11 +998,11 @@
                     .order('data', { ascending: true });
 
                 if (error) {
-                    addLog(`❌ Erro na consulta: ${error.message}`, 'erro');
+                    addLog('❌ Erro na consulta: ' + error.message, 'erro');
                     return null;
                 }
 
-                addLog(`📋 Encontrados ${agendamentos?.length || 0} agendamentos no período`, 'info');
+                addLog('📋 Encontrados ' + (agendamentos?.length || 0) + ' agendamentos no período', 'info');
 
                 const ocupadosPorData = {};
                 
@@ -1042,7 +1027,7 @@
                     }
                 }
 
-                addLog(`📊 Datas com agendamentos: ${Object.keys(ocupadosPorData).length}`, 'info');
+                addLog('📊 Datas com agendamentos: ' + Object.keys(ocupadosPorData).length, 'info');
 
                 const horaAtual = hoje.getHours();
                 const minutoAtual = hoje.getMinutes();
@@ -1056,14 +1041,12 @@
                     const dataStr = dataTeste.toISOString().split('T')[0];
                     const ehHoje = i === 0;
                     
-                    if (diaSemana === 0) {
-                        continue;
-                    }
+                    if (diaSemana === 0) continue;
                     
                     let horariosDisponiveis = [...HORARIOS_BASE];
                     
                     if (diaSemana === 6) {
-                        horariosDisponiveis = horariosDisponiveis.filter(h => {
+                        horariosDisponiveis = horariosDisponiveis.filter(function(h) {
                             const hora = parseInt(h.split(':')[0]);
                             return hora >= 8 && hora < 13;
                         });
@@ -1089,7 +1072,7 @@
                     }
                     
                     if (temHorarioDisponivel) {
-                        addLog(`✅ Data encontrada: ${dataStr}`, 'sucesso');
+                        addLog('✅ Data encontrada: ' + dataStr, 'sucesso');
                         return dataTeste;
                     }
                 }
@@ -1098,7 +1081,7 @@
                 return null;
                 
             } catch (error) {
-                addLog(`❌ Erro ao buscar próxima data: ${error.message}`, 'erro');
+                addLog('❌ Erro ao buscar próxima data: ' + error.message, 'erro');
                 return null;
             }
         }
@@ -1191,10 +1174,7 @@
             var grid = document.getElementById('horarios-grid');
             grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; padding: 20px; color: #8a9ea3;"><i class="fas fa-spinner fa-spin"></i> Carregando horários...</p>';
             
-            console.log('🔍 [CONSULTA] Data selecionada:', dataStr);
-            
             if (!supabaseClient) {
-                console.error('❌ Supabase não disponível!');
                 grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; padding: 20px; color: #dc3545;">⚠️ Erro de conexão. Tente recarregar.</p>';
                 return;
             }
@@ -1207,9 +1187,7 @@
             var data = new Date(dataStr + 'T00:00:00');
             var diaSemana = data.getDay();
             var hoje = new Date();
-            
             var ehHoje = dataStr === hoje.toISOString().split('T')[0];
-            
             var horaAtual = hoje.getHours();
             var minutoAtual = hoje.getMinutes();
             
@@ -1238,36 +1216,26 @@
                 .eq('data', dataStr)
                 .neq('status', 'cancelado')
                 .then(function(response) {
-                    console.log('📋 [CONSULTA] Resposta do Supabase:', response);
-                    
                     if (response.error) {
-                        console.error('❌ Erro na consulta:', response.error);
                         mostrarToast('Erro ao carregar horários.', 'erro');
                         return;
                     }
                     
                     var ocupados = response.data || [];
-                    
                     var horariosOcupados = [];
                     for (var j = 0; j < ocupados.length; j++) {
                         var item = ocupados[j];
                         var horarioLimpo = item.horario;
-                        
                         if (typeof horarioLimpo === 'string' && horarioLimpo.length > 5) {
                             horarioLimpo = horarioLimpo.substring(0, 5);
                         }
                         if (typeof horarioLimpo === 'object') {
                             horarioLimpo = horarioLimpo.toString().substring(0, 5);
                         }
-                        
                         horariosOcupados.push(horarioLimpo);
                     }
                     
                     grid.innerHTML = '';
-                    
-                    var totalBloqueados = 0;
-                    var totalPassados = 0;
-                    var totalDisponiveis = 0;
                     
                     for (var k = 0; k < horariosFiltrados.length; k++) {
                         var horario = horariosFiltrados[k];
@@ -1281,7 +1249,6 @@
                         if (ehHoje) {
                             var horaHorario = parseInt(horario.split(':')[0]);
                             var minutoHorario = parseInt(horario.split(':')[1]);
-                            
                             if (horaHorario < horaAtual || (horaHorario === horaAtual && minutoHorario <= minutoAtual)) {
                                 estaPassado = true;
                             }
@@ -1293,14 +1260,10 @@
                             btn.classList.add('passado');
                             btn.disabled = true;
                             btn.title = '⏰ Horário já passou!';
-                            totalPassados++;
                         } else if (estaOcupado) {
                             btn.classList.add('confirmado');
                             btn.disabled = true;
                             btn.title = '❌ Horário já ocupado!';
-                            totalBloqueados++;
-                        } else {
-                            totalDisponiveis++;
                         }
                         
                         btn.addEventListener('click', function() {
@@ -1314,22 +1277,12 @@
                             }
                             this.classList.add('selecionado');
                             agendamento.horario = this.dataset.horario;
-                            console.log('✅ Horário selecionado:', agendamento.horario);
                         });
                         
                         grid.appendChild(btn);
                     }
-                    
-                    var totalIndisponiveis = totalBloqueados + totalPassados;
-                    if (totalIndisponiveis === horariosFiltrados.length && horariosFiltrados.length > 0) {
-                        var msg = document.createElement('p');
-                        msg.style.cssText = 'grid-column: 1/-1; text-align:center; padding: 20px; color: #dc3545; font-weight: 600;';
-                        msg.innerHTML = '⚠️ Nenhum horário disponível para esta data. Escolha outra data.';
-                        grid.appendChild(msg);
-                    }
                 })
                 .catch(function(error) {
-                    console.error('❌ Erro na consulta:', error);
                     mostrarToast('Erro ao carregar horários.', 'erro');
                     grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; padding: 20px; color: #dc3545;">⚠️ Erro ao carregar horários. Tente novamente.</p>';
                 });
@@ -1359,7 +1312,7 @@
                         var mes = String(dataParaUsar.getMonth() + 1).padStart(2, '0');
                         var dia = String(dataParaUsar.getDate()).padStart(2, '0');
                         dataStr = ano + '-' + mes + '-' + dia;
-                        addLog(`📅 Próxima data disponível encontrada: ${dataStr}`, 'sucesso');
+                        addLog('📅 Próxima data disponível encontrada: ' + dataStr, 'sucesso');
                     } else {
                         var amanha = new Date(hoje);
                         amanha.setDate(amanha.getDate() + 1);
@@ -1368,7 +1321,7 @@
                         var mes = String(dataParaUsar.getMonth() + 1).padStart(2, '0');
                         var dia = String(dataParaUsar.getDate()).padStart(2, '0');
                         dataStr = ano + '-' + mes + '-' + dia;
-                        addLog(`📅 Nenhuma data disponível encontrada, usando amanhã: ${dataStr}`, 'warning');
+                        addLog('📅 Nenhuma data disponível encontrada, usando amanhã: ' + dataStr, 'warning');
                     }
                     
                     dataInput.value = dataStr;
@@ -1377,7 +1330,6 @@
                 })
                 .catch(function(error) {
                     esconderLoading();
-                    console.error('❌ Erro na inicialização:', error);
                     var amanha = new Date(hoje);
                     amanha.setDate(amanha.getDate() + 1);
                     var ano = amanha.getFullYear();
@@ -1401,38 +1353,55 @@
         });
 
         // ============================================
-        // FUNÇÕES DE E-MAIL
+        // FUNÇÃO DE E-MAIL COM EMAILJS
         // ============================================
         async function enviarEmail(para, assunto, corpo) {
             try {
-                addLog(`📧 Enviando e-mail para: ${para}`, 'info');
+                addLog('📧 Enviando e-mail para: ' + para, 'info');
                 
-                const response = await fetch('https://api.resend.com/emails', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': 'Bearer ' + RESEND_API_KEY,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        from: 'Levità Podologia <contato@levita.com.br>',
-                        to: para,
-                        subject: assunto,
-                        html: corpo
-                    })
-                });
+                var templateParams = {
+                    to_email: para,
+                    subject: assunto,
+                    message: corpo,
+                    from_name: 'Levità Podologia',
+                    to_name: para === 'kemp.ricardo@gmail.com' ? 'Profissional' : 'Cliente'
+                };
 
-                const data = await response.json();
-                
-                if (response.ok) {
-                    addLog(`✅ E-mail enviado com sucesso para: ${para}`, 'sucesso');
+                var response = await emailjs.send(
+                    EMAILJS_SERVICE_ID,
+                    EMAILJS_TEMPLATE_ID,
+                    templateParams
+                );
+
+                if (response.status === 200) {
+                    addLog('✅ E-mail enviado com sucesso para: ' + para, 'sucesso');
+                    return { sucesso: true };
                 } else {
-                    addLog(`❌ Erro ao enviar e-mail para ${para}: ${data.message || 'Erro desconhecido'}`, 'erro');
+                    addLog('❌ Erro ao enviar e-mail para ' + para + ': ' + response.text, 'erro');
+                    return { sucesso: false };
                 }
-                
-                return { sucesso: response.ok, data: data };
             } catch (error) {
-                addLog(`❌ Erro ao enviar e-mail para ${para}: ${error.message}`, 'erro');
+                addLog('❌ Erro ao enviar e-mail para ' + para + ': ' + error.message, 'erro');
                 return { sucesso: false, erro: error.message };
+            }
+        }
+
+        // ============================================
+        // FUNÇÃO GOOGLE CALENDAR (SIMPLIFICADA)
+        // ============================================
+        async function criarEventoCalendar(agendamento) {
+            try {
+                addLog('📅 Tentando criar evento no Google Calendar...', 'info');
+                addLog('   📌 ' + agendamento.servico + ' - ' + agendamento.nome, 'info');
+                addLog('   📅 ' + agendamento.data + ' às ' + agendamento.horario, 'info');
+                addLog('   📧 ' + agendamento.email, 'info');
+                
+                // Simular sucesso (Google Calendar precisa de backend)
+                addLog('⚠️ Google Calendar: integração requer backend (Node.js)', 'warning');
+                return { sucesso: true };
+            } catch (error) {
+                addLog('⚠️ Erro ao criar evento: ' + error.message, 'warning');
+                return null;
             }
         }
 
@@ -1466,14 +1435,14 @@
                 .select()
                 .then(function(response) {
                     if (response.error) {
-                        addLog(`❌ Erro ao salvar: ${response.error.message}`, 'erro');
+                        addLog('❌ Erro ao salvar: ' + response.error.message, 'erro');
                         throw response.error;
                     }
-                    addLog(`✅ Agendamento salvo! ID: ${response.data[0].id}`, 'sucesso');
+                    addLog('✅ Agendamento salvo! ID: ' + response.data[0].id, 'sucesso');
                     return response.data ? response.data[0] : null;
                 })
                 .catch(function(error) {
-                    addLog(`❌ Erro ao salvar: ${error.message}`, 'erro');
+                    addLog('❌ Erro ao salvar: ' + error.message, 'erro');
                     return null;
                 });
         }
@@ -1498,12 +1467,10 @@
         }
 
         // ============================================
-        // CONFIRMAR AGENDAMENTO COM LOGS
+        // CONFIRMAR AGENDAMENTO
         // ============================================
         function confirmarAgendamento() {
-            // Limpar logs anteriores
             limparLogs();
-            
             addLog('🚀 INICIANDO CONFIRMAÇÃO DE AGENDAMENTO', 'info');
             addLog('═══════════════════════════════════════════', 'info');
             
@@ -1525,14 +1492,13 @@
             }
 
             addLog('✅ Todas as validações OK', 'sucesso');
-            addLog(`📋 Dados do agendamento:`, 'info');
-            addLog(`   👤 Nome: ${agendamento.nome}`, 'info');
-            addLog(`   📞 Telefone: ${agendamento.telefone}`, 'info');
-            addLog(`   📧 E-mail: ${agendamento.email}`, 'info');
-            addLog(`   🏥 Serviço: ${agendamento.servico}`, 'info');
-            addLog(`   📅 Data: ${agendamento.data}`, 'info');
-            addLog(`   ⏰ Horário: ${agendamento.horario}`, 'info');
-            addLog(`   📍 Tipo: ${agendamento.tipo}`, 'info');
+            addLog('📋 Dados do agendamento:', 'info');
+            addLog('   👤 Nome: ' + agendamento.nome, 'info');
+            addLog('   📞 Telefone: ' + agendamento.telefone, 'info');
+            addLog('   📧 E-mail: ' + agendamento.email, 'info');
+            addLog('   🏥 Serviço: ' + agendamento.servico, 'info');
+            addLog('   📅 Data: ' + agendamento.data, 'info');
+            addLog('   ⏰ Horário: ' + agendamento.horario, 'info');
 
             if (!supabaseClient) {
                 addLog('❌ Erro de conexão com o Supabase!', 'erro');
@@ -1550,13 +1516,13 @@
                 .neq('status', 'cancelado')
                 .then(function(response) {
                     if (response.error) {
-                        addLog(`❌ Erro na verificação: ${response.error.message}`, 'erro');
+                        addLog('❌ Erro na verificação: ' + response.error.message, 'erro');
                         mostrarToast('Erro ao verificar disponibilidade.', 'erro');
                         return;
                     }
                     
                     var existentes = response.data || [];
-                    addLog(`📊 Encontrados ${existentes.length} agendamentos para este horário`, 'info');
+                    addLog('📊 Encontrados ' + existentes.length + ' agendamentos para este horário', 'info');
                     
                     if (existentes.length > 0) {
                         addLog('❌ Horário já ocupado!', 'erro');
@@ -1584,10 +1550,10 @@
                             }
 
                             addLog('✅ Agendamento SALVO no Supabase!', 'sucesso');
-                            addLog(`🆔 ID: ${salvo.id}`, 'info');
+                            addLog('🆔 ID: ' + salvo.id, 'info');
 
                             // ============================================
-                            // 📧 ENVIAR E-MAILS
+                            // 📧 ENVIAR E-MAILS COM EMAILJS
                             // ============================================
                             addLog('📧 Preparando envio de e-mails...', 'info');
                             
@@ -1599,89 +1565,72 @@
                                 year: 'numeric'
                             });
 
-                            // E-mail para o cliente
-                            var emailCliente = `
-                                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f9f9f9; border-radius: 10px;">
-                                    <div style="text-align: center; padding: 20px 0;">
-                                        <h1 style="color: #2F5D62;">🦶 Levità Podologia</h1>
-                                        <p style="color: #4a5f64; font-size: 18px;">Agendamento Confirmado!</p>
-                                    </div>
-                                    <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                                        <h2 style="color: #2F5D62;">Detalhes do Agendamento</h2>
-                                        <p><strong>👤 Cliente:</strong> ${salvo.nome}</p>
-                                        <p><strong>📞 Telefone:</strong> ${salvo.telefone}</p>
-                                        <p><strong>📧 E-mail:</strong> ${salvo.email}</p>
-                                        <p><strong>🏥 Serviço:</strong> ${salvo.servico}</p>
-                                        <p><strong>📅 Data:</strong> ${dataFormatada}</p>
-                                        <p><strong>⏰ Horário:</strong> ${salvo.horario}</p>
-                                        <p><strong>📍 Tipo:</strong> ${salvo.tipo === 'domicilio' ? '🏠 Domiciliar' : '🏢 Presencial'}</p>
-                                        <p><strong>📌 Endereço:</strong> ${salvo.endereco}</p>
-                                    </div>
-                                    <div style="text-align: center; margin-top: 20px; color: #4a5f64;">
-                                        <p>Em caso de imprevistos, entre em contato pelo telefone (11) 99999-9999</p>
-                                    </div>
-                                </div>
-                            `;
+                            var mensagemCliente = 
+                                '✅ Agendamento Confirmado!\n\n' +
+                                '👤 Cliente: ' + salvo.nome + '\n' +
+                                '📞 Telefone: ' + salvo.telefone + '\n' +
+                                '📧 E-mail: ' + salvo.email + '\n' +
+                                '🏥 Serviço: ' + salvo.servico + '\n' +
+                                '📅 Data: ' + dataFormatada + '\n' +
+                                '⏰ Horário: ' + salvo.horario + '\n' +
+                                '📍 Tipo: ' + (salvo.tipo === 'domicilio' ? 'Domiciliar' : 'Presencial') + '\n' +
+                                '📌 Endereço: ' + salvo.endereco + '\n\n' +
+                                'Em caso de imprevistos, entre em contato: (11) 99999-9999\n\n' +
+                                '📍 Levità Podologia - Cuidando dos seus pés com carinho!';
 
-                            // E-mail para a profissional
-                            var emailProfissional = `
-                                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f9f9f9; border-radius: 10px;">
-                                    <div style="text-align: center; padding: 20px 0;">
-                                        <h1 style="color: #2F5D62;">🦶 Novo Agendamento!</h1>
-                                    </div>
-                                    <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                                        <h2 style="color: #2F5D62;">Detalhes do Agendamento</h2>
-                                        <p><strong>👤 Cliente:</strong> ${salvo.nome}</p>
-                                        <p><strong>📞 Telefone:</strong> ${salvo.telefone}</p>
-                                        <p><strong>📧 E-mail:</strong> ${salvo.email}</p>
-                                        <p><strong>🏥 Serviço:</strong> ${salvo.servico}</p>
-                                        <p><strong>📅 Data:</strong> ${dataFormatada}</p>
-                                        <p><strong>⏰ Horário:</strong> ${salvo.horario}</p>
-                                        <p><strong>📍 Tipo:</strong> ${salvo.tipo === 'domicilio' ? '🏠 Domiciliar' : '🏢 Presencial'}</p>
-                                        <p><strong>📌 Endereço:</strong> ${salvo.endereco}</p>
-                                    </div>
-                                </div>
-                            `;
+                            var mensagemProfissional = 
+                                '📅 NOVO AGENDAMENTO!\n\n' +
+                                '👤 Cliente: ' + salvo.nome + '\n' +
+                                '📞 Telefone: ' + salvo.telefone + '\n' +
+                                '📧 E-mail: ' + salvo.email + '\n' +
+                                '🏥 Serviço: ' + salvo.servico + '\n' +
+                                '📅 Data: ' + dataFormatada + '\n' +
+                                '⏰ Horário: ' + salvo.horario + '\n' +
+                                '📍 Tipo: ' + (salvo.tipo === 'domicilio' ? 'Domiciliar' : 'Presencial') + '\n' +
+                                '📌 Endereço: ' + salvo.endereco;
 
                             // Enviar e-mails
                             Promise.all([
-                                enviarEmail(salvo.email, '✅ Confirmação de Agendamento - Levità Podologia', emailCliente),
-                                enviarEmail('kemp.ricardo@gmail.com', '📅 Novo Agendamento - Levità Podologia', emailProfissional)
+                                enviarEmail(salvo.email, '✅ Confirmação de Agendamento - Levità Podologia', mensagemCliente),
+                                enviarEmail('kemp.ricardo@gmail.com', '📅 Novo Agendamento - Levità Podologia', mensagemProfissional)
                             ]).then(function(resultados) {
-                                var todosSucesso = resultados.every(r => r.sucesso);
+                                var todosSucesso = resultados.every(function(r) { return r.sucesso; });
                                 if (todosSucesso) {
                                     addLog('✅ TODOS OS E-MAILS ENVIADOS COM SUCESSO!', 'sucesso');
                                 } else {
                                     addLog('⚠️ Alguns e-mails falharam. Verifique os logs acima.', 'warning');
                                 }
                             }).catch(function(err) {
-                                addLog(`⚠️ Erro ao enviar e-mails: ${err.message}`, 'warning');
+                                addLog('⚠️ Erro ao enviar e-mails: ' + err.message, 'warning');
                             });
+
+                            // ============================================
+                            // 📅 CRIAR EVENTO GOOGLE CALENDAR
+                            // ============================================
+                            criarEventoCalendar(salvo);
 
                             // ============================================
                             // ✅ FINALIZAR
                             // ============================================
                             addLog('═══════════════════════════════════════════', 'info');
                             addLog('🎉 AGENDAMENTO CONCLUÍDO COM SUCESSO!', 'sucesso');
-                            addLog('📋 Verifique:');
+                            addLog('📋 Verifique:', 'info');
                             addLog('   ✅ Dados salvos no Supabase', 'sucesso');
                             addLog('   📧 E-mails enviados (verifique caixa de entrada)', 'info');
                             addLog('   📅 Evento no Google Calendar (se configurado)', 'info');
                             addLog('═══════════════════════════════════════════', 'info');
                             
                             mostrarToast('✅ Agendamento realizado com sucesso!', 'sucesso');
-                            
-                            // Não redireciona - fica na página mostrando os logs
                         })
                         .catch(function(error) {
                             btn.innerHTML = originalText;
                             btn.disabled = false;
-                            addLog(`❌ Erro no processo: ${error.message}`, 'erro');
+                            addLog('❌ Erro no processo: ' + error.message, 'erro');
                             mostrarToast('Erro ao salvar agendamento.', 'erro');
                         });
                 })
                 .catch(function(error) {
-                    addLog(`❌ Erro na verificação: ${error.message}`, 'erro');
+                    addLog('❌ Erro na verificação: ' + error.message, 'erro');
                     mostrarToast('Erro ao verificar disponibilidade.', 'erro');
                 });
         }
