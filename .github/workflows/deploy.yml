@@ -5,6 +5,11 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -12,6 +17,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.PAT_TOKEN }}
     
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -30,17 +37,11 @@ jobs:
         echo "" >> js/config.js
         echo "// Configurações fixas" >> js/config.js
         echo "export const CALENDAR_ID = 'renatakemp@gmail.com';" >> js/config.js
-        echo "export const GOOGLE_API_KEY = 'AIzaSyB4o7dX...';" >> js/config.js
-    
-    - name: List generated files
-      run: |
-        echo "📁 Arquivos gerados:"
-        cat js/config.js
     
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+        github_token: ${{ secrets.PAT_TOKEN }}
         publish_dir: ./
         publish_branch: gh-pages
         force_orphan: true
