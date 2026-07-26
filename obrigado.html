@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <title>Agendamento Confirmado - Levità Podologia</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; font-size: 16px; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f9fbf9 0%, #edf3ec 100%);
+            color: #1e2b2f;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+            background: #FFFFFF;
+            border-radius: 24px;
+            padding: 50px 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(168, 195, 160, 0.15);
+            text-align: center;
+        }
+        
+        .icone {
+            font-size: 5rem;
+            color: #28a745;
+            margin-bottom: 16px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .header h1 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 2rem;
+            color: #2F5D62;
+            margin-bottom: 4px;
+        }
+        .header h1 span { color: #C9A227; }
+        .header p {
+            color: #4a5f64;
+            font-size: 1.05rem;
+        }
+        
+        .info-box {
+            background: #F4EFE8;
+            border-radius: 16px;
+            padding: 24px;
+            margin: 24px 0;
+            text-align: left;
+            border-left: 4px solid #C9A227;
+        }
+        .info-box .linha {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .info-box .linha:last-child { border-bottom: none; }
+        .info-box .rotulo { font-weight: 500; color: #4a5f64; }
+        .info-box .valor { font-weight: 600; color: #2F5D62; }
+        .protocolo { 
+            display: inline-block; 
+            padding: 4px 16px; 
+            background: #2F5D62; 
+            color: #fff; 
+            border-radius: 30px; 
+            font-size: 0.85rem; 
+            font-weight: 600; 
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 14px 34px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            text-align: center;
+            text-decoration: none;
+        }
+        .btn-primario {
+            background: #2F5D62;
+            color: #fff;
+            box-shadow: 0 8px 20px rgba(47, 93, 98, 0.25);
+        }
+        .btn-primario:hover {
+            background: #1c3e42;
+            transform: translateY(-3px);
+            box-shadow: 0 12px 28px rgba(47, 93, 98, 0.35);
+        }
+        .btn-outline {
+            background: transparent;
+            color: #2F5D62;
+            border: 2px solid #2F5D62;
+        }
+        .btn-outline:hover {
+            background: #2F5D62;
+            color: #fff;
+            transform: translateY(-3px);
+        }
+        .btn-whatsapp {
+            background: #25D366;
+            color: #fff;
+            box-shadow: 0 8px 20px rgba(37, 211, 102, 0.3);
+        }
+        .btn-whatsapp:hover {
+            background: #1da851;
+            transform: translateY(-3px);
+        }
+        
+        .botoes {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 24px;
+        }
+        .botoes .btn { flex: 1; min-width: 150px; }
+        
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e8edee;
+            font-size: 0.85rem;
+            color: #8a9ea3;
+        }
+        .footer a { color: #2F5D62; }
+        
+        .loading {
+            display: none;
+        }
+        .loading.ativo {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 480px) {
+            .container { padding: 30px 20px; }
+            .header h1 { font-size: 1.5rem; }
+            .botoes .btn { min-width: 100%; }
+            .info-box .linha { flex-direction: column; align-items: flex-start; gap: 2px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="icone"><i class="fas fa-check-circle"></i></div>
+        
+        <div class="header">
+            <h1>Levita<span>.</span></h1>
+            <p>✅ Agendamento Confirmado!</p>
+        </div>
+        
+        <p style="color: #4a5f64; margin: 8px 0 16px;">
+            Sua consulta foi agendada com sucesso! 🎉
+        </p>
+        
+        <div id="detalhes-agendamento" class="info-box">
+            <!-- Preenchido via JavaScript -->
+        </div>
+        
+        <div style="margin: 16px 0;">
+            <span class="protocolo" id="protocolo">#00000</span>
+        </div>
+        
+        <p style="color: #4a5f64; font-size: 0.95rem; margin-bottom: 8px;">
+            <i class="fas fa-envelope"></i> Um e-mail de confirmação foi enviado para você.<br />
+            <i class="fas fa-calendar-alt"></i> O evento foi adicionado ao seu Google Calendar.
+        </p>
+        
+        <div class="botoes">
+            <a href="index.html" class="btn btn-primario">
+                <i class="fas fa-home"></i> Voltar ao site
+            </a>
+            <a href="#" class="btn btn-whatsapp" id="btn-whatsapp" target="_blank">
+                <i class="fab fa-whatsapp"></i> Falar com Renata
+            </a>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Levitação Podologia - Podóloga Renata Kemp</strong></p>
+            <p>📱 (11) 97830-3833 | 📧 contato@levitapodologia.com.br</p>
+            <p style="margin-top: 8px; font-size: 0.75rem;">
+                Em caso de imprevistos, entre em contato com 24h de antecedência.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // CARREGAR DADOS DO AGENDAMENTO
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Recupera os dados do sessionStorage
+            var dadosStr = sessionStorage.getItem('agendamento_confirmado');
+            if (!dadosStr) {
+                // Se não tiver dados, redireciona para o site
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            try {
+                var dados = JSON.parse(dadosStr);
+                exibirDetalhes(dados);
+            } catch(e) {
+                window.location.href = 'index.html';
+            }
+            
+            // Configurar botão WhatsApp
+            var btnWhatsApp = document.getElementById('btn-whatsapp');
+            if (btnWhatsApp) {
+                btnWhatsApp.href = 'https://wa.me/5511978303833?text=Olá!%20Vim%20pelo%20site%20e%20gostaria%20de%20tirar%20uma%20dúvida%20sobre%20meu%20agendamento.';
+            }
+        });
+        
+        function exibirDetalhes(dados) {
+            var container = document.getElementById('detalhes-agendamento');
+            var dataObj = new Date(dados.data + 'T00:00:00');
+            var dataFormatada = dataObj.toLocaleDateString('pt-BR', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+            var tipoLabel = dados.tipo === 'domicilio' ? '🏠 Domiciliar' : '🏢 Presencial';
+            var statusLabel = dados.status.charAt(0).toUpperCase() + dados.status.slice(1);
+            
+            document.getElementById('protocolo').textContent = '#' + String(dados.id).padStart(5, '0');
+            
+            container.innerHTML = 
+                '<div class="linha"><span class="rotulo">👤 Nome</span><span class="valor">' + dados.nome + '</span></div>' +
+                '<div class="linha"><span class="rotulo">📱 Telefone</span><span class="valor">' + dados.telefone + '</span></div>' +
+                '<div class="linha"><span class="rotulo">📧 E-mail</span><span class="valor">' + (dados.email || 'Não informado') + '</span></div>' +
+                '<div class="linha"><span class="rotulo">📋 Serviço</span><span class="valor">' + dados.servico + '</span></div>' +
+                '<div class="linha"><span class="rotulo">📍 Tipo</span><span class="valor">' + tipoLabel + '</span></div>' +
+                '<div class="linha"><span class="rotulo">📅 Data</span><span class="valor">' + dataFormatada + '</span></div>' +
+                '<div class="linha"><span class="rotulo">⏰ Horário</span><span class="valor">' + dados.horario + '</span></div>' +
+                '<div class="linha"><span class="rotulo">📌 Status</span><span class="valor">' + statusLabel + '</span></div>';
+        }
+    </script>
+</body>
+</html>
