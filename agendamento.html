@@ -966,6 +966,21 @@
         }
 
         // ============================================
+        // FORMATAR DATA
+        // ============================================
+        function formatarData(dataStr) {
+            if (!dataStr) return 'Não informada';
+            try {
+                var data = new Date(dataStr + 'T00:00:00');
+                var dias = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+                var meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+                return dias[data.getDay()] + ', ' + data.getDate() + ' de ' + meses[data.getMonth()] + ' de ' + data.getFullYear();
+            } catch(e) {
+                return dataStr;
+            }
+        }
+
+        // ============================================
         // BUSCAR PRÓXIMA DATA DISPONÍVEL
         // ============================================
         async function buscarProximaDataDisponivel() {
@@ -1355,18 +1370,10 @@
         // ============================================
         // FUNÇÃO DE E-MAIL COM EMAILJS
         // ============================================
-        async function enviarEmail(para, assunto, corpo) {
+        async function enviarEmail(para, templateParams) {
             try {
                 addLog('📧 Enviando e-mail para: ' + para, 'info');
                 
-                var templateParams = {
-                    to_email: para,
-                    subject: assunto,
-                    message: corpo,
-                    from_name: 'Levità Podologia',
-                    to_name: para === 'kemp.ricardo@gmail.com' ? 'Profissional' : 'Cliente'
-                };
-
                 var response = await emailjs.send(
                     EMAILJS_SERVICE_ID,
                     EMAILJS_TEMPLATE_ID,
@@ -1396,7 +1403,6 @@
                 addLog('   📅 ' + agendamento.data + ' às ' + agendamento.horario, 'info');
                 addLog('   📧 ' + agendamento.email, 'info');
                 
-                // Simular sucesso (Google Calendar precisa de backend)
                 addLog('⚠️ Google Calendar: integração requer backend (Node.js)', 'warning');
                 return { sucesso: true };
             } catch (error) {
@@ -1556,56 +1562,42 @@
                             // 📧 ENVIAR E-MAILS COM EMAILJS
                             // ============================================
                             addLog('📧 Preparando envio de e-mails...', 'info');
-                            
-                            var dataObj = new Date(salvo.data + 'T00:00:00');
-                            var dataFormatada = dataObj.toLocaleDateString('pt-BR', {
-                                weekday: 'long',
-                                day: 'numeric',
-                                month: 'long',
-                                year: 'numeric'
-                            });
 
-                            var mensagemCliente = 
-                                '✅ Agendamento Confirmado!\n\n' +
-                                '👤 Cliente: ' + salvo.nome + '\n' +
-                                '📞 Telefone: ' + salvo.telefone + '\n' +
-                                '📧 E-mail: ' + salvo.email + '\n' +
-                                '🏥 Serviço: ' + salvo.servico + '\n' +
-                                '📅 Data: ' + dataFormatada + '\n' +
-                                '⏰ Horário: ' + salvo.horario + '\n' +
-                                '📍 Tipo: ' + (salvo.tipo === 'domicilio' ? 'Domiciliar' : 'Presencial') + '\n' +
-                                '📌 Endereço: ' + salvo.endereco + '\n\n' +
-                                'Em caso de imprevistos, entre em contato: (11) 99999-9999\n\n' +
-                                '📍 Levità Podologia - Cuidando dos seus pés com carinho!';
+                            var dataFormatada = formatarData(salvo.data);
+                            var protocolo = 'LEV-' + salvo.id.toString().slice(-6);
 
-                            var mensagemProfissional = 
-                                '📅 NOVO AGENDAMENTO!\n\n' +
-                                '👤 Cliente: ' + salvo.nome + '\n' +
-                                '📞 Telefone: ' + salvo.telefone + '\n' +
-                                '📧 E-mail: ' + salvo.email + '\n' +
-                                '🏥 Serviço: ' + salvo.servico + '\n' +
-                                '📅 Data: ' + dataFormatada + '\n' +
-                                '⏰ Horário: ' + salvo.horario + '\n' +
-                                '📍 Tipo: ' + (salvo.tipo === 'domicilio' ? 'Domiciliar' : 'Presencial') + '\n' +
-                                '📌 Endereço: ' + salvo.endereco;
+                            // 1. Template para o CLIENTE
+                            var templateParamsCliente = {
+                                to_name: salvo.nome || 'Cliente',
+                                servico: salvo.servico || 'Não informado',
+                                data: dataFormatada,
+                                horario: salvo.horario || 'Não informado',
+                                tipo: salvo.tipo === 'domicilio' ? '🏠 Domiciliar' : '🏢 Presencial',
+                                endereco: salvo.endereco || 'Não informado',
+                                status: '✅ Confirmado',
+                                protocolo: protocolo
+                            };
 
-                            // Enviar e-mails
-                            Promise.all([
-                                enviarEmail(salvo.email, '✅ Confirmação de Agendamento - Levità Podologia', mensagemCliente),
-                                enviarEmail('kemp.ricardo@gmail.com', '📅 Novo Agendamento - Levità Podologia', mensagemProfissional)
-                            ]).then(function(resultados) {
-                                var todosSucesso = resultados.every(function(r) { return r.sucesso; });
-                                if (todosSucesso) {
-                                    addLog('✅ TODOS OS E-MAILS ENVIADOS COM SUCESSO!', 'sucesso');
-                                } else {
-                                    addLog('⚠️ Alguns e-mails falharam. Verifique os logs acima.', 'warning');
-                                }
-                            }).catch(function(err) {
-                                addLog('⚠️ Erro ao enviar e-mails: ' + err.message, 'warning');
-                            });
+                            // 2. Template para a PROFISSIONAL
+                            var templateParamsProfissional = {
+                                to_name: 'Renata Kemp - Nova Consulta',
+                                servico: salvo.servico || 'Não informado',
+                                data: dataFormatada,
+                                horario: salvo.horario || 'Não informado',
+                                tipo: salvo.tipo === 'domicilio' ? '🏠 Domiciliar' : '🏢 Presencial',
+                                endereco: salvo.endereco || 'Não informado',
+                                status: '📅 NOVO AGENDAMENTO',
+                                protocolo: protocolo
+                            };
+
+                            // Enviar para o CLIENTE (e-mail que ele preencheu no formulário)
+                            enviarEmail(salvo.email, templateParamsCliente);
+
+                            // Enviar para a PROFISSIONAL (kemp.ricardo@gmail.com)
+                            enviarEmail('kemp.ricardo@gmail.com', templateParamsProfissional);
 
                             // ============================================
-                            // 📅 CRIAR EVENTO GOOGLE CALENDAR
+                            // 📅 GOOGLE CALENDAR
                             // ============================================
                             criarEventoCalendar(salvo);
 
@@ -1616,8 +1608,8 @@
                             addLog('🎉 AGENDAMENTO CONCLUÍDO COM SUCESSO!', 'sucesso');
                             addLog('📋 Verifique:', 'info');
                             addLog('   ✅ Dados salvos no Supabase', 'sucesso');
-                            addLog('   📧 E-mails enviados (verifique caixa de entrada)', 'info');
-                            addLog('   📅 Evento no Google Calendar (se configurado)', 'info');
+                            addLog('   📧 E-mail enviado para: ' + salvo.email, 'info');
+                            addLog('   📧 E-mail enviado para: kemp.ricardo@gmail.com', 'info');
                             addLog('═══════════════════════════════════════════', 'info');
                             
                             mostrarToast('✅ Agendamento realizado com sucesso!', 'sucesso');
