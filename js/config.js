@@ -1,12 +1,9 @@
-// Configurações do Supabase
-export const SUPABASE_URL = 'https://euktsrczpxejezkeyqoh.supabase.co';
-export const SUPABASE_ANON_KEY = 'sb_publishable_vH11tBYAWHlKNoCeQG-oMQ_r1fOxcRf';
-
-// Google Calendar
-export const GOOGLE_CLIENT_ID = 'SEU_CLIENT_ID_AQUI';
-export const GOOGLE_CLIENT_SECRET = 'SEU_CLIENT_SECRET_AQUI';
-export const CALENDAR_ID = 'renatakemp@gmail.com';
-export const GOOGLE_API_KEY = 'AIzaSyB4o7dX...';
-
-// Resend (Email)
-export const RESEND_API_KEY = 'SUA_RESEND_API_KEY';
+// Este arquivo será substituído pelo workflow com as secrets
+// Não commit secrets aqui!
+export const SUPABASE_URL = '';
+export const SUPABASE_ANON_KEY = '';
+export const GOOGLE_CLIENT_ID = '';
+export const GOOGLE_CLIENT_SECRET = '';
+export const GOOGLE_API_KEY = '';
+export const RESEND_API_KEY = '';
+export const CALENDAR_ID = 'kemp.ricardo@gmail.com';
