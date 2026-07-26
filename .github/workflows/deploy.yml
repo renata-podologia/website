@@ -1,1 +1,49 @@
+name: Deploy Website
 
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    
+    - name: Create config.js from secrets
+      run: |
+        mkdir -p js
+        echo "// Configurações do Supabase" > js/config.js
+        echo "export const SUPABASE_URL = '${{ secrets.SUPABASE_URL }}';" >> js/config.js
+        echo "export const SUPABASE_ANON_KEY = '${{ secrets.SUPABASE_ANON_KEY }}';" >> js/config.js
+        echo "export const GOOGLE_CLIENT_ID = '${{ secrets.GOOGLE_CLIENT_ID }}';" >> js/config.js
+        echo "export const GOOGLE_CLIENT_SECRET = '${{ secrets.GOOGLE_CLIENT_SECRET }}';" >> js/config.js
+        echo "export const RESEND_API_KEY = '${{ secrets.RESEND_API_KEY }}';" >> js/config.js
+        echo "" >> js/config.js
+        echo "// Configurações fixas" >> js/config.js
+        echo "export const CALENDAR_ID = 'renatakemp@gmail.com';" >> js/config.js
+        echo "export const GOOGLE_API_KEY = 'AIzaSyB4o7dX...';" >> js/config.js
+    
+    - name: List generated files
+      run: |
+        echo "📁 Arquivos gerados:"
+        cat js/config.js
+    
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./
+        publish_branch: gh-pages
+        force_orphan: true
+        user_name: 'github-actions[bot]'
+        user_email: 'github-actions[bot]@users.noreply.github.com'
+        commit_message: 'Deploy: ${{ github.event.head_commit.message }}'
