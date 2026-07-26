@@ -804,9 +804,6 @@
             console.log('%c═══════════════════════════════════════════', 'color: #888;');
             console.log('%c📌 ETAPA ' + etapa + ': ' + descricao, 'color: ' + cor + '; font-weight: bold; font-size: 14px;');
             console.log('%c═══════════════════════════════════════════', 'color: #888;');
-            
-            // Também adiciona ao log normal
-            addLog('📌 Etapa ' + etapa + ': ' + descricao, status);
         }
 
         // ============================================
@@ -845,11 +842,10 @@
         }
 
         // ============================================
-        // VALIDAÇÕES COM LOGS DE ETAPAS
+        // VALIDAÇÕES
         // ============================================
         function validarPasso1() {
             logEtapa('1', 'VALIDANDO DADOS DO CLIENTE', 'info');
-            addLog('🔍 Validando dados do cliente...', 'info');
             
             var nome = document.getElementById('nome').value.trim();
             var telefone = document.getElementById('telefone').value.trim();
@@ -889,16 +885,12 @@
             agendamento.email = email;
             
             addLog('✅ Dados do cliente validados', 'sucesso');
-            addLog('   👤 Nome: ' + nome, 'info');
-            addLog('   📞 Telefone: ' + telefone, 'info');
-            addLog('   📧 E-mail: ' + email, 'info');
             logEtapa('1', '✅ SUCESSO: Dados do cliente OK', 'sucesso');
             return true;
         }
 
         function validarPasso2() {
             logEtapa('2', 'VALIDANDO TIPO DE ATENDIMENTO', 'info');
-            addLog('🔍 Validando tipo de atendimento...', 'info');
             
             var tipoSelecionado = document.querySelector('.tipo-btn.selecionado');
             if (!tipoSelecionado) {
@@ -912,8 +904,6 @@
             addLog('✅ Tipo selecionado: ' + agendamento.tipo, 'sucesso');
             
             if (agendamento.tipo === 'domicilio') {
-                addLog('🏠 Validando endereço para atendimento domiciliar...', 'info');
-                
                 var cep = document.getElementById('cep').value.replace(/\D/g, '');
                 var numero = document.getElementById('numero-endereco').value.trim();
                 
@@ -945,15 +935,13 @@
                 agendamento.complemento = document.getElementById('complemento-endereco').value.trim();
                 agendamento.endereco = logradouro + ', ' + numero + (agendamento.complemento ? ', ' + agendamento.complemento : '') + ' - ' + document.getElementById('end-bairro').textContent + ', ' + document.getElementById('end-cidade').textContent + ' - ' + document.getElementById('end-estado').textContent;
                 
-                addLog('✅ Endereço validado:', 'sucesso');
-                addLog('   📌 ' + agendamento.endereco, 'info');
+                addLog('✅ Endereço validado: ' + agendamento.endereco, 'sucesso');
             } else {
                 agendamento.endereco = 'Rua da Clínica, 123 - Centro, Guarulhos - SP';
                 agendamento.cep = '';
                 agendamento.numero = '';
                 agendamento.complemento = '';
                 addLog('🏢 Atendimento presencial', 'sucesso');
-                addLog('   📌 ' + agendamento.endereco, 'info');
             }
             
             logEtapa('2', '✅ SUCESSO: Tipo de atendimento OK', 'sucesso');
@@ -962,7 +950,6 @@
 
         function validarPasso3() {
             logEtapa('3', 'VALIDANDO SERVIÇO SELECIONADO', 'info');
-            addLog('🔍 Validando serviço selecionado...', 'info');
             
             if (!agendamento.servico) {
                 addLog('❌ Nenhum serviço selecionado', 'erro');
@@ -978,7 +965,6 @@
 
         function validarPasso4() {
             logEtapa('4', 'VALIDANDO DATA E HORÁRIO', 'info');
-            addLog('🔍 Validando data e horário...', 'info');
             
             if (!agendamento.data) {
                 addLog('❌ Data não selecionada', 'erro');
@@ -1726,7 +1712,7 @@
                             criarEventoCalendar(salvo);
 
                             // ============================================
-                            // ✅ FINALIZAR
+                            // 🎉 REDIRECIONAR PARA OBRIGADO.HTML
                             // ============================================
                             console.log('%c═══════════════════════════════════════════', 'color: #888;');
                             logEtapa('8', '🎉 AGENDAMENTO CONCLUÍDO COM SUCESSO!', 'sucesso');
@@ -1739,6 +1725,16 @@
                             console.log('%c═══════════════════════════════════════════', 'color: #888;');
                             
                             mostrarToast('✅ Agendamento realizado com sucesso!', 'sucesso');
+                            
+                            // Salvar dados no sessionStorage para a página obrigado.html
+                            sessionStorage.setItem('agendamento_confirmado', JSON.stringify(salvo));
+                            addLog('💾 Dados salvos no sessionStorage', 'sucesso');
+                            addLog('🔄 Redirecionando para obrigado.html...', 'info');
+                            
+                            // Redirecionar após 2 segundos
+                            setTimeout(function() {
+                                window.location.href = 'obrigado.html';
+                            }, 2000);
                         })
                         .catch(function(error) {
                             btn.innerHTML = originalText;
