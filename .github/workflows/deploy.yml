@@ -36,9 +36,8 @@ jobs:
         echo "export const RESEND_API_KEY = '${{ secrets.RESEND_API_KEY }}';" >> js/config.js
         echo "" >> js/config.js
         echo "// Configurações Fixas" >> js/config.js
-        echo "export const CALENDAR_ID = 'renatakemp@gmail.com';" >> js/config.js
+        echo "export const CALENDAR_ID = 'kemp.ricardo@gmail.com';" >> js/config.js  # ← MUDAR AQUI
         
-        # Mostra o arquivo gerado (sem expor as secrets)
         echo "✅ config.js criado com sucesso!"
     
     - name: Deploy to GitHub Pages
