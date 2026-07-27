@@ -1936,9 +1936,6 @@
                             desabilitarBotao('Redirecionando...');
                             addLog('🔄 Redirecionando para obrigado.html...', 'info');
                             
-                            setTimeout(function() {
-                                window.location.href = '';
-                            }, 2000);
                         })
                         .catch(function(error) {
                             addLog('❌ Erro no processo: ' + error.message, 'erro');
