@@ -678,7 +678,6 @@
         // ============================================
         var SUPABASE_URL = 'https://euktsrczpxejezkeyqoh.supabase.co';
         var SUPABASE_ANON_KEY = 'sb_publishable_vH11tBYAWHlKNoCeQG-oMQ_r1fOxcRf';
-        var GOOGLE_API_KEY = 'AIzaSyCdPP0zCV9j79OWHTV2cF539ME2f6Sz8JM';
 
         // EMAILJS - SUAS CONFIGURAÇÕES
         var EMAILJS_USER_ID = 'rRmq87DuOwPzW-3Eo';
@@ -699,8 +698,6 @@
         } catch(e) {
             console.error('❌ Erro ao criar cliente Supabase:', e);
         }
-
-        console.log('✅ Supabase inicializado:', supabaseClient ? 'OK' : 'FALHOU');
 
         // ============================================
         // CONFIGURAÇÕES
@@ -770,46 +767,6 @@
         }
 
         // ============================================
-        // LOGS APENAS NO CONSOLE (COLORIDOS)
-        // ============================================
-        function addLog(mensagem, tipo) {
-            tipo = tipo || 'info';
-            var timestamp = new Date().toLocaleTimeString('pt-BR');
-            var prefixo = '[' + timestamp + ']';
-            
-            switch(tipo) {
-                case 'sucesso':
-                    console.log('%c' + prefixo + ' ✅ ' + mensagem, 'color: #00ff88; font-weight: bold;');
-                    break;
-                case 'erro':
-                    console.log('%c' + prefixo + ' ❌ ' + mensagem, 'color: #ff4444; font-weight: bold;');
-                    break;
-                case 'warning':
-                    console.log('%c' + prefixo + ' ⚠️ ' + mensagem, 'color: #ffaa00; font-weight: bold;');
-                    break;
-                case 'info':
-                    console.log('%c' + prefixo + ' ℹ️ ' + mensagem, 'color: #00aaff;');
-                    break;
-                default:
-                    console.log(prefixo + ' ' + mensagem);
-            }
-        }
-
-        // ============================================
-        // FUNÇÃO PARA LOG DE ETAPAS
-        // ============================================
-        function logEtapa(etapa, descricao, status) {
-            status = status || 'info';
-            var cor = status === 'sucesso' ? '#00ff88' : 
-                     status === 'erro' ? '#ff4444' : 
-                     status === 'warning' ? '#ffaa00' : '#00aaff';
-            
-            console.log('%c═══════════════════════════════════════════', 'color: #888;');
-            console.log('%c📌 ETAPA ' + etapa + ': ' + descricao, 'color: ' + cor + '; font-weight: bold; font-size: 14px;');
-            console.log('%c═══════════════════════════════════════════', 'color: #888;');
-        }
-
-        // ============================================
         // FUNÇÃO PARA DESABILITAR/REABILITAR BOTÃO
         // ============================================
         function desabilitarBotao(mensagem) {
@@ -850,7 +807,6 @@
         }
 
         function proximoPasso(passo) {
-            logEtapa(passo - 1, 'Validando passo ' + (passo - 1), 'info');
             if (passo === 2 && !validarPasso1()) return;
             if (passo === 3 && !validarPasso2()) return;
             if (passo === 4 && !validarPasso3()) return;
@@ -867,142 +823,92 @@
         // VALIDAÇÕES
         // ============================================
         function validarPasso1() {
-            logEtapa('1', 'VALIDANDO DADOS DO CLIENTE', 'info');
-            
             var nome = document.getElementById('nome').value.trim();
             var telefone = document.getElementById('telefone').value.trim();
             var email = document.getElementById('email').value.trim();
             
             if (!nome) {
-                addLog('❌ Nome não preenchido', 'erro');
                 mostrarToast('Digite seu nome completo.', 'erro');
                 document.getElementById('nome').focus();
-                logEtapa('1', 'FALHA: Nome não preenchido', 'erro');
                 return false;
             }
             if (!telefone || telefone.length < 10) {
-                addLog('❌ Telefone inválido: ' + telefone, 'erro');
                 mostrarToast('Digite um telefone válido (com DDD).', 'erro');
                 document.getElementById('telefone').focus();
-                logEtapa('1', 'FALHA: Telefone inválido', 'erro');
                 return false;
             }
             if (!email) {
-                addLog('❌ E-mail não preenchido', 'erro');
                 mostrarToast('Digite seu e-mail.', 'erro');
                 document.getElementById('email').focus();
-                logEtapa('1', 'FALHA: E-mail não preenchido', 'erro');
                 return false;
             }
             if (!email.includes('@') || !email.includes('.')) {
-                addLog('❌ E-mail inválido: ' + email, 'erro');
                 mostrarToast('Digite um e-mail válido.', 'erro');
                 document.getElementById('email').focus();
-                logEtapa('1', 'FALHA: E-mail inválido', 'erro');
                 return false;
             }
             
             agendamento.nome = nome;
             agendamento.telefone = telefone;
             agendamento.email = email;
-            
-            addLog('✅ Dados do cliente validados', 'sucesso');
-            logEtapa('1', '✅ SUCESSO: Dados do cliente OK', 'sucesso');
             return true;
         }
 
         function validarPasso2() {
-            logEtapa('2', 'VALIDANDO TIPO DE ATENDIMENTO', 'info');
-            
             var tipoSelecionado = document.querySelector('.tipo-btn.selecionado');
             if (!tipoSelecionado) {
-                addLog('❌ Tipo de atendimento não selecionado', 'erro');
                 mostrarToast('Selecione o tipo de atendimento.', 'erro');
-                logEtapa('2', 'FALHA: Tipo não selecionado', 'erro');
                 return false;
             }
-            
             agendamento.tipo = tipoSelecionado.dataset.tipo;
-            addLog('✅ Tipo selecionado: ' + agendamento.tipo, 'sucesso');
-            
             if (agendamento.tipo === 'domicilio') {
                 var cep = document.getElementById('cep').value.replace(/\D/g, '');
                 var numero = document.getElementById('numero-endereco').value.trim();
-                
                 if (!cep || cep.length < 8) {
-                    addLog('❌ CEP inválido: ' + cep, 'erro');
                     mostrarToast('Informe um CEP válido.', 'erro');
                     document.getElementById('cep').focus();
-                    logEtapa('2', 'FALHA: CEP inválido', 'erro');
                     return false;
                 }
                 if (!numero) {
-                    addLog('❌ Número do endereço não informado', 'erro');
                     mostrarToast('Informe o número do endereço.', 'erro');
                     document.getElementById('numero-endereco').focus();
-                    logEtapa('2', 'FALHA: Número não informado', 'erro');
                     return false;
                 }
-                
                 var logradouro = document.getElementById('end-logradouro').textContent;
                 if (logradouro === '-' || logradouro === 'Não encontrado') {
-                    addLog('❌ CEP não encontrado: ' + cep, 'erro');
                     mostrarToast('CEP não encontrado.', 'erro');
-                    logEtapa('2', 'FALHA: CEP não encontrado', 'erro');
                     return false;
                 }
-                
                 agendamento.cep = cep;
                 agendamento.numero = numero;
                 agendamento.complemento = document.getElementById('complemento-endereco').value.trim();
                 agendamento.endereco = logradouro + ', ' + numero + (agendamento.complemento ? ', ' + agendamento.complemento : '') + ' - ' + document.getElementById('end-bairro').textContent + ', ' + document.getElementById('end-cidade').textContent + ' - ' + document.getElementById('end-estado').textContent;
-                
-                addLog('✅ Endereço validado: ' + agendamento.endereco, 'sucesso');
             } else {
                 agendamento.endereco = 'Rua da Clínica, 123 - Centro, Guarulhos - SP';
                 agendamento.cep = '';
                 agendamento.numero = '';
                 agendamento.complemento = '';
-                addLog('🏢 Atendimento presencial', 'sucesso');
             }
-            
-            logEtapa('2', '✅ SUCESSO: Tipo de atendimento OK', 'sucesso');
             return true;
         }
 
         function validarPasso3() {
-            logEtapa('3', 'VALIDANDO SERVIÇO SELECIONADO', 'info');
-            
             if (!agendamento.servico) {
-                addLog('❌ Nenhum serviço selecionado', 'erro');
                 mostrarToast('Selecione um serviço.', 'erro');
-                logEtapa('3', 'FALHA: Serviço não selecionado', 'erro');
                 return false;
             }
-            
-            addLog('✅ Serviço selecionado: ' + agendamento.servico, 'sucesso');
-            logEtapa('3', '✅ SUCESSO: Serviço selecionado: ' + agendamento.servico, 'sucesso');
             return true;
         }
 
         function validarPasso4() {
-            logEtapa('4', 'VALIDANDO DATA E HORÁRIO', 'info');
-            
             if (!agendamento.data) {
-                addLog('❌ Data não selecionada', 'erro');
                 mostrarToast('Selecione uma data.', 'erro');
-                logEtapa('4', 'FALHA: Data não selecionada', 'erro');
                 return false;
             }
             if (!agendamento.horario) {
-                addLog('❌ Horário não selecionado', 'erro');
                 mostrarToast('Selecione um horário.', 'erro');
-                logEtapa('4', 'FALHA: Horário não selecionado', 'erro');
                 return false;
             }
-            
-            addLog('✅ Data: ' + agendamento.data + ' às ' + agendamento.horario, 'sucesso');
-            logEtapa('4', '✅ SUCESSO: Data e horário OK', 'sucesso');
             return true;
         }
 
@@ -1026,11 +932,7 @@
         // ============================================
         async function buscarProximaDataDisponivel() {
             try {
-                logEtapa('0', 'INICIANDO SISTEMA - BUSCANDO DATA DISPONÍVEL', 'info');
-                addLog('📅 Buscando próxima data disponível no Supabase...', 'info');
-                
                 if (!supabaseClient) {
-                    addLog('❌ Supabase não inicializado!', 'erro');
                     return null;
                 }
 
@@ -1043,8 +945,6 @@
                 
                 const hojeStr = dataAtual.toISOString().split('T')[0];
                 const limiteStr = dataLimite.toISOString().split('T')[0];
-                
-                addLog('📅 Período de busca: ' + hojeStr + ' até ' + limiteStr, 'info');
 
                 const { data: agendamentos, error } = await supabaseClient
                     .from('agendamentos')
@@ -1055,11 +955,8 @@
                     .order('data', { ascending: true });
 
                 if (error) {
-                    addLog('❌ Erro na consulta: ' + error.message, 'erro');
                     return null;
                 }
-
-                addLog('📋 Encontrados ' + (agendamentos?.length || 0) + ' agendamentos no período', 'info');
 
                 const ocupadosPorData = {};
                 
@@ -1083,8 +980,6 @@
                         }
                     }
                 }
-
-                addLog('📊 Datas com agendamentos: ' + Object.keys(ocupadosPorData).length, 'info');
 
                 const horaAtual = hoje.getHours();
                 const minutoAtual = hoje.getMinutes();
@@ -1129,18 +1024,13 @@
                     }
                     
                     if (temHorarioDisponivel) {
-                        addLog('✅ Data encontrada: ' + dataStr, 'sucesso');
-                        logEtapa('0', '✅ DATA ENCONTRADA: ' + dataStr, 'sucesso');
                         return dataTeste;
                     }
                 }
                 
-                addLog('⚠️ Nenhuma data disponível encontrada nos próximos 60 dias', 'warning');
-                logEtapa('0', '⚠️ NENHUMA DATA DISPONÍVEL', 'warning');
                 return null;
                 
             } catch (error) {
-                addLog('❌ Erro ao buscar próxima data: ' + error.message, 'erro');
                 return null;
             }
         }
@@ -1160,7 +1050,6 @@
                     var tipo = this.dataset.tipo;
                     document.getElementById('endereco-domicilio').style.display = tipo === 'domicilio' ? 'block' : 'none';
                     document.getElementById('endereco-presencial').style.display = tipo === 'presencial' ? 'block' : 'none';
-                    addLog('📌 Tipo de atendimento selecionado: ' + tipo, 'info');
                 });
             }
         });
@@ -1174,14 +1063,12 @@
                 mostrarToast('Digite um CEP válido com 8 dígitos.', 'erro');
                 return;
             }
-            addLog('🔍 Buscando CEP: ' + cep, 'info');
             mostrarLoading('Buscando CEP...');
             fetch(API_CEP_URL + cep + '/json/')
                 .then(function(response) { return response.json(); })
                 .then(function(data) {
                     esconderLoading();
                     if (data.erro) {
-                        addLog('❌ CEP não encontrado: ' + cep, 'erro');
                         mostrarToast('CEP não encontrado.', 'erro');
                         return;
                     }
@@ -1190,12 +1077,10 @@
                     document.getElementById('end-cidade').textContent = data.localidade || 'Não informado';
                     document.getElementById('end-estado').textContent = data.uf || 'Não informado';
                     document.getElementById('endereco-completo').classList.add('visivel');
-                    addLog('✅ CEP encontrado: ' + data.logradouro + ', ' + data.bairro + ' - ' + data.localidade, 'sucesso');
                     mostrarToast('CEP encontrado!', 'sucesso');
                 })
                 .catch(function() {
                     esconderLoading();
-                    addLog('❌ Erro ao buscar CEP: ' + cep, 'erro');
                     mostrarToast('Erro ao buscar CEP.', 'erro');
                 });
         }
@@ -1227,7 +1112,6 @@
                     }
                     this.classList.add('selecionado');
                     agendamento.servico = this.dataset.servico;
-                    addLog('📌 Serviço selecionado: ' + agendamento.servico, 'info');
                 });
             }
         });
@@ -1236,12 +1120,10 @@
         // DATAS E HORÁRIOS
         // ============================================
         function gerarHorarios(dataStr) {
-            addLog('🕐 Carregando horários para: ' + dataStr, 'info');
             var grid = document.getElementById('horarios-grid');
             grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; padding: 20px; color: #8a9ea3;"><i class="fas fa-spinner fa-spin"></i> Carregando horários...</p>';
             
             if (!supabaseClient) {
-                addLog('❌ Supabase não disponível!', 'erro');
                 grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; padding: 20px; color: #dc3545;">⚠️ Erro de conexão. Tente recarregar.</p>';
                 return;
             }
@@ -1259,7 +1141,6 @@
             var minutoAtual = hoje.getMinutes();
             
             if (diaSemana === 0) {
-                addLog('⛔ Domingo - não atendemos', 'warning');
                 grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; padding: 20px; color: #dc3545;">⚠️ Não atendemos aos domingos.</p>';
                 return;
             }
@@ -1271,7 +1152,6 @@
                     var hora = parseInt(h.split(':')[0]);
                     return hora >= 8 && hora < 13;
                 });
-                addLog('📌 Sábado - horários até 12:00', 'info');
             }
             
             if (horariosFiltrados.length === 0) {
@@ -1286,7 +1166,6 @@
                 .neq('status', 'cancelado')
                 .then(function(response) {
                     if (response.error) {
-                        addLog('❌ Erro ao carregar horários: ' + response.error.message, 'erro');
                         mostrarToast('Erro ao carregar horários.', 'erro');
                         return;
                     }
@@ -1305,11 +1184,7 @@
                         horariosOcupados.push(horarioLimpo);
                     }
                     
-                    addLog('📋 Horários ocupados: ' + horariosOcupados.length + ' de ' + horariosFiltrados.length, 'info');
-                    
                     grid.innerHTML = '';
-                    
-                    var totalDisponiveis = 0;
                     
                     for (var k = 0; k < horariosFiltrados.length; k++) {
                         var horario = horariosFiltrados[k];
@@ -1338,8 +1213,6 @@
                             btn.classList.add('confirmado');
                             btn.disabled = true;
                             btn.title = '❌ Horário já ocupado!';
-                        } else {
-                            totalDisponiveis++;
                         }
                         
                         btn.addEventListener('click', function() {
@@ -1353,23 +1226,12 @@
                             }
                             this.classList.add('selecionado');
                             agendamento.horario = this.dataset.horario;
-                            addLog('✅ Horário selecionado: ' + agendamento.horario, 'sucesso');
                         });
                         
                         grid.appendChild(btn);
                     }
-                    
-                    addLog('📊 Horários disponíveis: ' + totalDisponiveis + ' de ' + horariosFiltrados.length, 'info');
-                    
-                    if (totalDisponiveis === 0) {
-                        var msg = document.createElement('p');
-                        msg.style.cssText = 'grid-column: 1/-1; text-align:center; padding: 20px; color: #dc3545; font-weight: 600;';
-                        msg.innerHTML = '⚠️ Nenhum horário disponível para esta data. Escolha outra data.';
-                        grid.appendChild(msg);
-                    }
                 })
                 .catch(function(error) {
-                    addLog('❌ Erro na consulta: ' + error.message, 'erro');
                     mostrarToast('Erro ao carregar horários.', 'erro');
                     grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; padding: 20px; color: #dc3545;">⚠️ Erro ao carregar horários. Tente novamente.</p>';
                 });
@@ -1379,7 +1241,6 @@
         // INICIALIZAÇÃO DA DATA
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
-            logEtapa('0', '🚀 INICIALIZANDO SISTEMA DE AGENDAMENTO', 'info');
             var dataInput = document.getElementById('data-agendamento');
             var hoje = new Date();
             
@@ -1400,7 +1261,6 @@
                         var mes = String(dataParaUsar.getMonth() + 1).padStart(2, '0');
                         var dia = String(dataParaUsar.getDate()).padStart(2, '0');
                         dataStr = ano + '-' + mes + '-' + dia;
-                        addLog('📅 Próxima data disponível encontrada: ' + dataStr, 'sucesso');
                     } else {
                         var amanha = new Date(hoje);
                         amanha.setDate(amanha.getDate() + 1);
@@ -1409,7 +1269,6 @@
                         var mes = String(dataParaUsar.getMonth() + 1).padStart(2, '0');
                         var dia = String(dataParaUsar.getDate()).padStart(2, '0');
                         dataStr = ano + '-' + mes + '-' + dia;
-                        addLog('📅 Nenhuma data disponível encontrada, usando amanhã: ' + dataStr, 'warning');
                     }
                     
                     dataInput.value = dataStr;
@@ -1418,7 +1277,6 @@
                 })
                 .catch(function(error) {
                     esconderLoading();
-                    addLog('❌ Erro na inicialização: ' + error.message, 'erro');
                     var amanha = new Date(hoje);
                     amanha.setDate(amanha.getDate() + 1);
                     var ano = amanha.getFullYear();
@@ -1436,7 +1294,6 @@
                     document.querySelectorAll('.horario-btn').forEach(function(b) {
                         b.classList.remove('selecionado');
                     });
-                    addLog('📅 Data alterada para: ' + this.value, 'info');
                     gerarHorarios(this.value);
                 }
             });
@@ -1447,9 +1304,6 @@
         // ============================================
         async function enviarEmail(para, templateParams) {
             try {
-                logEtapa('6', '📧 ENVIANDO E-MAIL', 'info');
-                addLog('📧 Enviando e-mail para: ' + para, 'info');
-                
                 var params = {
                     to_email: para,
                     email: para,
@@ -1463,15 +1317,6 @@
                     protocolo: templateParams.protocolo || 'LEV-000000'
                 };
                 
-                console.log('📋 Parâmetros enviados:');
-                console.log('   to_email:', params.to_email);
-                console.log('   email:', params.email);
-                console.log('   to_name:', params.to_name);
-                console.log('   servico:', params.servico);
-                console.log('   data:', params.data);
-                console.log('   horario:', params.horario);
-                console.log('   protocolo:', params.protocolo);
-                
                 var response = await emailjs.send(
                     EMAILJS_SERVICE_ID,
                     EMAILJS_TEMPLATE_ID,
@@ -1479,21 +1324,11 @@
                 );
 
                 if (response.status === 200) {
-                    addLog('✅ E-mail enviado com sucesso para: ' + para, 'sucesso');
-                    logEtapa('6', '✅ E-MAIL ENVIADO PARA: ' + para, 'sucesso');
                     return { sucesso: true };
                 } else {
-                    addLog('❌ Erro ao enviar e-mail: ' + response.text, 'erro');
-                    logEtapa('6', '❌ FALHA NO E-MAIL PARA: ' + para, 'erro');
                     return { sucesso: false };
                 }
             } catch (error) {
-                addLog('❌ Erro ao enviar e-mail para ' + para + ': ' + error.message, 'erro');
-                if (error.text) {
-                    console.error('Detalhe do erro:', error.text);
-                    addLog('   Detalhe: ' + error.text, 'erro');
-                }
-                logEtapa('6', '❌ ERRO NO E-MAIL: ' + error.message, 'erro');
                 return { sucesso: false, erro: error.message };
             }
         }
@@ -1503,9 +1338,6 @@
         // ============================================
         async function criarEventoCalendar(dados) {
             try {
-                logEtapa('7', '📅 CRIANDO EVENTO NO GOOGLE CALENDAR', 'info');
-                addLog('📅 Criando evento no Google Calendar via Apps Script...', 'info');
-                
                 var dadosEvento = {
                     nome: dados.nome,
                     telefone: dados.telefone,
@@ -1518,12 +1350,7 @@
                     protocolo: dados.protocolo || 'LEV-' + dados.id.toString().slice(-6)
                 };
                 
-                addLog('📋 Dados enviados para o Apps Script:', 'info');
-                addLog('   👤 Nome: ' + dadosEvento.nome, 'info');
-                addLog('   📧 E-mail: ' + dadosEvento.email, 'info');
-                addLog('   📅 Data: ' + dadosEvento.data + ' às ' + dadosEvento.horario, 'info');
-                
-                var response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+                await fetch(GOOGLE_APPS_SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: {
@@ -1532,14 +1359,9 @@
                     body: JSON.stringify(dadosEvento)
                 });
 
-                addLog('✅ Evento criado no Google Calendar!', 'sucesso');
-                addLog('📧 Convite enviado para: ' + dadosEvento.email, 'sucesso');
-                logEtapa('7', '✅ EVENTO CRIADO PARA O CLIENTE: ' + dadosEvento.email, 'sucesso');
                 return { sucesso: true };
                 
             } catch (error) {
-                addLog('⚠️ Erro ao criar evento: ' + error.message, 'warning');
-                logEtapa('7', '⚠️ ERRO NO GOOGLE CALENDAR: ' + error.message, 'warning');
                 return { sucesso: false, erro: error.message };
             }
         }
@@ -1548,15 +1370,9 @@
         // SUPABASE - SALVAR
         // ============================================
         function salvarAgendamento(dados) {
-            logEtapa('5', '💾 SALVANDO NO SUPABASE', 'info');
-            
             if (!supabaseClient) {
-                addLog('❌ Erro de conexão com o Supabase!', 'erro');
-                logEtapa('5', '❌ ERRO DE CONEXÃO COM SUPABASE', 'erro');
                 return Promise.reject('Supabase não disponível');
             }
-            
-            addLog('💾 Salvando no Supabase...', 'info');
             
             return supabaseClient
                 .from('agendamentos')
@@ -1577,17 +1393,11 @@
                 .select()
                 .then(function(response) {
                     if (response.error) {
-                        addLog('❌ Erro ao salvar: ' + response.error.message, 'erro');
-                        logEtapa('5', '❌ ERRO AO SALVAR: ' + response.error.message, 'erro');
                         throw response.error;
                     }
-                    addLog('✅ Agendamento salvo! ID: ' + response.data[0].id, 'sucesso');
-                    logEtapa('5', '✅ AGENDAMENTO SALVO! ID: ' + response.data[0].id, 'sucesso');
                     return response.data ? response.data[0] : null;
                 })
                 .catch(function(error) {
-                    addLog('❌ Erro ao salvar: ' + error.message, 'erro');
-                    logEtapa('5', '❌ ERRO AO SALVAR: ' + error.message, 'erro');
                     return null;
                 });
         }
@@ -1609,57 +1419,23 @@
                 '<div class="linha"><span class="rotulo">Serviço</span><span class="valor"><strong>' + agendamento.servico + '</strong></span></div>' +
                 '<div class="linha"><span class="rotulo">Data</span><span class="valor">' + dataFormatada + '</span></div>' +
                 '<div class="linha"><span class="rotulo">Horário</span><span class="valor">' + agendamento.horario + '</span></div>';
-            addLog('📋 Resumo do agendamento gerado', 'info');
         }
 
         // ============================================
         // CONFIRMAR AGENDAMENTO
         // ============================================
         function confirmarAgendamento() {
-            logEtapa('1', '🚀 INICIANDO CONFIRMAÇÃO DE AGENDAMENTO', 'info');
-            console.log('%c═══════════════════════════════════════════', 'color: #888;');
-            
-            if (!validarPasso1()) {
-                logEtapa('1', '❌ FALHA NA VALIDAÇÃO DO PASSO 1', 'erro');
-                return;
-            }
-            if (!validarPasso2()) {
-                logEtapa('1', '❌ FALHA NA VALIDAÇÃO DO PASSO 2', 'erro');
-                return;
-            }
-            if (!validarPasso3()) {
-                logEtapa('1', '❌ FALHA NA VALIDAÇÃO DO PASSO 3', 'erro');
-                return;
-            }
-            if (!validarPasso4()) {
-                logEtapa('1', '❌ FALHA NA VALIDAÇÃO DO PASSO 4', 'erro');
-                return;
-            }
-
-            logEtapa('1', '✅ TODAS AS VALIDAÇÕES OK', 'sucesso');
-            addLog('📋 Dados do agendamento:', 'info');
-            addLog('   👤 Nome: ' + agendamento.nome, 'info');
-            addLog('   📞 Telefone: ' + agendamento.telefone, 'info');
-            addLog('   📧 E-mail: ' + agendamento.email, 'info');
-            addLog('   🏥 Serviço: ' + agendamento.servico, 'info');
-            addLog('   📅 Data: ' + agendamento.data, 'info');
-            addLog('   ⏰ Horário: ' + agendamento.horario, 'info');
+            if (!validarPasso1()) return;
+            if (!validarPasso2()) return;
+            if (!validarPasso3()) return;
+            if (!validarPasso4()) return;
 
             if (!supabaseClient) {
-                addLog('❌ Erro de conexão com o Supabase!', 'erro');
                 mostrarToast('Erro de conexão com o banco de dados.', 'erro');
-                logEtapa('1', '❌ ERRO DE CONEXÃO COM SUPABASE', 'erro');
                 return;
             }
 
-            // ============================================
-            // 🔒 DESABILITAR BOTÃO
-            // ============================================
             desabilitarBotao('Verificando disponibilidade...');
-            addLog('🔒 Botão desabilitado', 'info');
-
-            logEtapa('2', '⏳ VERIFICANDO DISPONIBILIDADE NO SUPABASE', 'info');
-            addLog('⏳ Verificando disponibilidade no Supabase...', 'info');
             
             supabaseClient
                 .from('agendamentos')
@@ -1669,55 +1445,35 @@
                 .neq('status', 'cancelado')
                 .then(function(response) {
                     if (response.error) {
-                        addLog('❌ Erro na verificação: ' + response.error.message, 'erro');
                         mostrarToast('Erro ao verificar disponibilidade.', 'erro');
-                        logEtapa('2', '❌ ERRO NA VERIFICAÇÃO', 'erro');
                         habilitarBotao();
                         return;
                     }
                     
                     var existentes = response.data || [];
-                    addLog('📊 Encontrados ' + existentes.length + ' agendamentos para este horário', 'info');
                     
                     if (existentes.length > 0) {
-                        addLog('❌ Horário já ocupado!', 'erro');
                         mostrarToast('Este horário não está mais disponível.', 'erro');
                         gerarHorarios(agendamento.data);
-                        logEtapa('2', '❌ HORÁRIO JÁ OCUPADO!', 'erro');
                         habilitarBotao();
                         return;
                     }
                     
-                    addLog('✅ Horário disponível!', 'sucesso');
-                    logEtapa('2', '✅ HORÁRIO DISPONÍVEL!', 'sucesso');
-                    
                     desabilitarBotao('Salvando no Supabase...');
-                    logEtapa('3', '💾 SALVANDO NO SUPABASE', 'info');
 
                     salvarAgendamento(agendamento)
                         .then(async function(salvo) {
                             if (!salvo) {
-                                addLog('❌ Falha ao salvar no Supabase', 'erro');
                                 mostrarToast('Erro ao salvar. Tente novamente.', 'erro');
-                                logEtapa('3', '❌ FALHA AO SALVAR', 'erro');
                                 habilitarBotao();
                                 return;
                             }
 
-                            addLog('✅ Agendamento SALVO no Supabase!', 'sucesso');
-                            addLog('🆔 ID: ' + salvo.id, 'info');
-                            logEtapa('3', '✅ AGENDAMENTO SALVO! ID: ' + salvo.id, 'sucesso');
-
-                            // ============================================
-                            // 📧 ENVIAR E-MAILS COM EMAILJS
-                            // ============================================
                             desabilitarBotao('Enviando e-mails...');
-                            addLog('📧 Preparando envio de e-mails...', 'info');
 
                             var dataFormatada = formatarData(salvo.data);
                             var protocolo = 'LEV-' + salvo.id.toString().slice(-6);
 
-                            // Template para o CLIENTE
                             var templateParamsCliente = {
                                 to_name: salvo.nome || 'Cliente',
                                 servico: salvo.servico || 'Não informado',
@@ -1729,7 +1485,6 @@
                                 protocolo: protocolo
                             };
 
-                            // Template para a PROFISSIONAL
                             var templateParamsProfissional = {
                                 to_name: 'Renata Kemp - Nova Consulta',
                                 servico: salvo.servico || 'Não informado',
@@ -1741,68 +1496,41 @@
                                 protocolo: protocolo
                             };
 
-                            // Enviar e-mails
                             try {
                                 await enviarEmail(salvo.email, templateParamsCliente);
                                 
                                 if (salvo.email !== 'kemp.ricardo@gmail.com') {
                                     await enviarEmail('kemp.ricardo@gmail.com', templateParamsProfissional);
-                                } else {
-                                    addLog('⚠️ Cliente e Profissional têm o mesmo e-mail. Pulando duplicata.', 'warning');
                                 }
                             } catch (error) {
-                                addLog('❌ Erro no envio de e-mails: ' + error.message, 'erro');
+                                // Silencioso
                             }
 
-                            // ============================================
-                            // 📅 GOOGLE CALENDAR
-                            // ============================================
                             desabilitarBotao('Criando evento no Google Calendar...');
                             await criarEventoCalendar(salvo);
 
-                            // ============================================
-                            // 🎉 REDIRECIONAR PARA OBRIGADO.HTML
-                            // ============================================
-                            console.log('%c═══════════════════════════════════════════', 'color: #888;');
-                            logEtapa('8', '🎉 AGENDAMENTO CONCLUÍDO COM SUCESSO!', 'sucesso');
-                            addLog('📋 Verifique:', 'info');
-                            addLog('   ✅ Dados salvos no Supabase', 'sucesso');
-                            addLog('   📧 E-mail enviado para: ' + salvo.email, 'info');
-                            if (salvo.email !== 'kemp.ricardo@gmail.com') {
-                                addLog('   📧 E-mail enviado para: kemp.ricardo@gmail.com', 'info');
-                            }
-                            addLog('   📅 Evento criado no Google Calendar', 'sucesso');
-                            console.log('%c═══════════════════════════════════════════', 'color: #888;');
-                            
                             mostrarToast('✅ Agendamento realizado com sucesso!', 'sucesso');
                             
                             sessionStorage.setItem('agendamento_confirmado', JSON.stringify(salvo));
-                            addLog('💾 Dados salvos no sessionStorage', 'sucesso');
                             
                             desabilitarBotao('Redirecionando...');
-                            addLog('🔄 Redirecionando para obrigado.html...', 'info');
                             
                             setTimeout(function() {
                                 window.location.href = 'obrigado.html';
                             }, 2000);
                         })
                         .catch(function(error) {
-                            addLog('❌ Erro no processo: ' + error.message, 'erro');
                             mostrarToast('Erro ao salvar agendamento.', 'erro');
-                            logEtapa('3', '❌ ERRO NO PROCESSO: ' + error.message, 'erro');
                             habilitarBotao();
                         });
                 })
                 .catch(function(error) {
-                    addLog('❌ Erro na verificação: ' + error.message, 'erro');
                     mostrarToast('Erro ao verificar disponibilidade.', 'erro');
-                    logEtapa('2', '❌ ERRO NA VERIFICAÇÃO: ' + error.message, 'erro');
                     habilitarBotao();
                 });
         }
 
         function novoAgendamento() {
-            addLog('🔄 Iniciando novo agendamento...', 'info');
             agendamento = {
                 nome: '',
                 telefone: '',
@@ -1855,7 +1583,6 @@
             irParaPasso(1);
             
             mostrarToast('Novo agendamento iniciado!', 'info');
-            addLog('✅ Novo agendamento iniciado', 'sucesso');
         }
     </script>
 </body>
