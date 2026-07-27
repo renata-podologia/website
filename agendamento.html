@@ -1353,34 +1353,46 @@
         }
 
         // ============================================
-        // FUNÇÃO GOOGLE CALENDAR VIA APPS SCRIPT
+        // FUNÇÃO GOOGLE CALENDAR VIA APPS SCRIPT - CORRIGIDA
         // ============================================
         async function criarEventoCalendar(dados) {
             try {
+                // Mapear os dados corretamente
                 var dadosEvento = {
-                    nome: dados.nome,
-                    telefone: dados.telefone,
-                    email: dados.email,
-                    servico: dados.servico,
-                    data: dados.data,
-                    horario: dados.horario,
-                    tipo: dados.tipo,
-                    endereco: dados.endereco,
-                    protocolo: dados.protocolo || 'LEV-' + dados.id.toString().slice(-6)
+                    nome: dados.nome || 'Cliente',
+                    telefone: dados.telefone || '',
+                    email: dados.email || '',
+                    servico: dados.servico || 'Não informado',
+                    data: dados.data || '',
+                    horario: dados.horario || '',
+                    tipo: dados.tipo || 'presencial',
+                    endereco: dados.endereco || '',
+                    protocolo: 'LEV-' + (dados.id ? dados.id.toString().slice(-6) : '000000')
                 };
                 
-                var response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+                console.log('Enviando para Google Calendar:', dadosEvento);
+                
+                // Usar fetch normal SEM 'no-cors'
+                const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'no-cors',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(dadosEvento)
                 });
 
-                return { sucesso: true };
+                if (response.ok) {
+                    const resultado = await response.json();
+                    console.log('Evento criado com sucesso:', resultado);
+                    return { sucesso: true };
+                } else {
+                    const erro = await response.text();
+                    console.error('Erro ao criar evento:', erro);
+                    return { sucesso: false, erro: erro };
+                }
                 
             } catch (error) {
+                console.error('Erro na requisição:', error);
                 return { sucesso: false, erro: error.message };
             }
         }
@@ -1417,6 +1429,7 @@
                     return response.data ? response.data[0] : null;
                 })
                 .catch(function(error) {
+                    console.error('Erro ao salvar:', error);
                     return null;
                 });
         }
@@ -1441,7 +1454,7 @@
         }
 
         // ============================================
-        // CONFIRMAR AGENDAMENTO
+        // CONFIRMAR AGENDAMENTO - CORRIGIDO
         // ============================================
         function confirmarAgendamento() {
             if (!validarPasso1()) return;
@@ -1516,17 +1529,26 @@
                             };
 
                             try {
+                                // Enviar e-mail para o cliente
                                 await enviarEmail(salvo.email, templateParamsCliente);
                                 
-                                if (salvo.email !== 'kemp.ricardo@gmail.com') {
-                                    await enviarEmail('kemp.ricardo@gmail.com', templateParamsProfissional);
-                                }
+                                // Enviar e-mail para a profissional
+                                await enviarEmail('kemp.ricardo@gmail.com', templateParamsProfissional);
                             } catch (error) {
-                                // Erro silencioso no envio de e-mails
+                                console.error('Erro ao enviar e-mails:', error);
+                                // Não interrompe o fluxo
                             }
 
+                            // Criar evento no Google Calendar
                             desabilitarBotao('Criando evento no Google Calendar...');
-                            await criarEventoCalendar(salvo);
+                            const resultadoCalendar = await criarEventoCalendar(salvo);
+                            
+                            if (resultadoCalendar.sucesso) {
+                                console.log('Evento criado no Google Calendar com sucesso');
+                            } else {
+                                console.warn('Erro ao criar evento no Google Calendar:', resultadoCalendar.erro);
+                                // Não interrompe o fluxo
+                            }
                             
                             mostrarToast('✅ Agendamento realizado com sucesso!', 'sucesso');
                             
@@ -1539,11 +1561,13 @@
                             }, 2000);
                         })
                         .catch(function(error) {
+                            console.error('Erro ao salvar agendamento:', error);
                             mostrarToast('Erro ao salvar agendamento.', 'erro');
                             habilitarBotao();
                         });
                 })
                 .catch(function(error) {
+                    console.error('Erro ao verificar disponibilidade:', error);
                     mostrarToast('Erro ao verificar disponibilidade.', 'erro');
                     habilitarBotao();
                 });
