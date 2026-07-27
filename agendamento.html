@@ -401,7 +401,6 @@
         .legenda-horarios .bola.confirmado { background: #dc3545; }
         .legenda-horarios .bola.passado { background: #8a9ea3; }
         
-        /* Botão de teste flutuante */
         .btn-teste {
             position: fixed;
             bottom: 20px;
@@ -1537,35 +1536,33 @@
                 logEtapa('7', '📅 CRIANDO EVENTO NO GOOGLE CALENDAR', 'info');
                 addLog('📅 Criando evento no Google Calendar via Apps Script...', 'info');
                 
-                // 🔧 CORREÇÃO: Formatar a data para ISO (YYYY-MM-DD)
-                const dataISO = dados.data; // Já está no formato YYYY-MM-DD
-                const horarioCompleto = dados.horario + ':00'; // Adiciona os segundos
-                
-                // 🔧 CORREÇÃO: Criar data no formato ISO completo
-                const dataHoraISO = dataISO + 'T' + horarioCompleto;
-                
+                // 🔧 Preparar dados no formato EXATO que o Google Apps Script espera
+                // Seu script espera: nome, email, telefone, servico, data, horario, tipo, endereco, protocolo
                 var dadosEvento = {
-                    nome: dados.nome,
-                    telefone: dados.telefone,
-                    email: dados.email,
-                    servico: dados.servico,
-                    // Enviar a data no formato ISO completo
-                    dataHora: dataHoraISO,
-                    data: dataISO,
-                    horario: dados.horario,
-                    tipo: dados.tipo,
-                    endereco: dados.endereco,
-                    protocolo: dados.protocolo || 'LEV-' + String(dados.id).slice(-6)
+                    nome: dados.nome || '',
+                    email: dados.email || '',
+                    telefone: dados.telefone || '',
+                    servico: dados.servico || '',
+                    data: dados.data || '',  // Formato: YYYY-MM-DD
+                    horario: dados.horario || '',  // Formato: HH:MM
+                    tipo: dados.tipo || 'presencial',
+                    endereco: dados.endereco || 'Rua da Clínica, 123 - Centro, Guarulhos - SP',
+                    protocolo: dados.protocolo || 'LEV-' + String(dados.id || Math.floor(Math.random() * 1000)).slice(-6)
                 };
                 
                 addLog('📋 Dados enviados para o Apps Script:', 'info');
                 addLog('   👤 Nome: ' + dadosEvento.nome, 'info');
                 addLog('   📧 E-mail: ' + dadosEvento.email, 'info');
-                addLog('   📅 Data/Hora ISO: ' + dadosEvento.dataHora, 'info');
+                addLog('   📞 Telefone: ' + dadosEvento.telefone, 'info');
+                addLog('   🏥 Serviço: ' + dadosEvento.servico, 'info');
                 addLog('   📅 Data: ' + dadosEvento.data, 'info');
                 addLog('   ⏰ Horário: ' + dadosEvento.horario, 'info');
+                addLog('   📌 Tipo: ' + dadosEvento.tipo, 'info');
+                addLog('   📍 Endereço: ' + dadosEvento.endereco, 'info');
+                addLog('   🔑 Protocolo: ' + dadosEvento.protocolo, 'info');
                 addLog('   🔗 URL: ' + GOOGLE_APPS_SCRIPT_URL, 'info');
                 
+                // 🔧 Enviar para o Google Apps Script
                 const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
                     method: 'POST',
                     mode: 'cors',
@@ -1575,18 +1572,31 @@
                     body: JSON.stringify(dadosEvento)
                 });
 
-                if (response.ok) {
-                    const resultado = await response.text();
-                    addLog('✅ Resposta do Apps Script: ' + resultado, 'sucesso');
-                    addLog('✅ Evento criado no Google Calendar!', 'sucesso');
-                    addLog('📧 Convite enviado para: ' + dadosEvento.email, 'sucesso');
+                // 🔧 Processar a resposta
+                const respostaTexto = await response.text();
+                addLog('📋 Resposta bruta: ' + respostaTexto, 'info');
+                
+                // Tentar parsear como JSON
+                let respostaJson;
+                try {
+                    respostaJson = JSON.parse(respostaTexto);
+                } catch(e) {
+                    // Se não for JSON, usar o texto como está
+                    respostaJson = { sucesso: response.ok, mensagem: respostaTexto };
+                }
+                
+                if (response.ok && respostaJson.sucesso !== false) {
+                    addLog('✅ Evento criado com sucesso!', 'sucesso');
+                    if (respostaJson.evento) {
+                        addLog('   🆔 ID: ' + respostaJson.evento.id, 'info');
+                        addLog('   🔗 Link: ' + respostaJson.evento.link, 'info');
+                    }
                     logEtapa('7', '✅ EVENTO CRIADO PARA: ' + dadosEvento.email, 'sucesso');
-                    return { sucesso: true, resposta: resultado };
+                    return { sucesso: true, resposta: respostaJson };
                 } else {
-                    const erroTexto = await response.text();
-                    addLog('⚠️ Erro na resposta do Apps Script: ' + response.status, 'warning');
-                    addLog('📋 Detalhe: ' + erroTexto, 'warning');
-                    return { sucesso: false, erro: 'Status: ' + response.status + ' - ' + erroTexto };
+                    const erroMsg = respostaJson.erro || respostaJson.mensagem || 'Erro desconhecido';
+                    addLog('⚠️ Erro do Apps Script: ' + erroMsg, 'warning');
+                    return { sucesso: false, erro: erroMsg };
                 }
                 
             } catch (error) {
@@ -1597,7 +1607,7 @@
         }
 
         // ============================================
-        // FUNÇÃO DE TESTE DO GOOGLE APPS SCRIPT
+        // FUNÇÃO DE TESTE DO GOOGLE APPS SCRIPT (CORRIGIDA)
         // ============================================
         async function testarGoogleScript() {
             console.log('%c═══════════════════════════════════════════', 'color: #888;');
@@ -1607,7 +1617,7 @@
             mostrarLoading('Testando conexão...');
             addLog('🧪 Iniciando teste de conexão...', 'info');
             
-            // 🔧 CORREÇÃO: Usar data no formato ISO correto
+            // 🔧 Gerar data no formato YYYY-MM-DD (o mesmo que seu agendamento usa)
             const agora = new Date();
             const amanha = new Date(agora);
             amanha.setDate(amanha.getDate() + 1);
@@ -1616,7 +1626,25 @@
             const mes = String(amanha.getMonth() + 1).padStart(2, '0');
             const dia = String(amanha.getDate()).padStart(2, '0');
             const dataISO = ano + '-' + mes + '-' + dia;
-            const dataHoraISO = dataISO + 'T10:00:00';
+            const horario = '10:00';
+            
+            // 🔧 Dados no formato EXATO que seu Google Apps Script espera
+            const dadosTeste = {
+                nome: 'Teste Sistema - ' + new Date().toLocaleString(),
+                email: 'teste@email.com',
+                telefone: '(11) 99999-9999',
+                servico: 'Teste de Conexão',
+                data: dataISO,
+                horario: horario,
+                tipo: 'presencial',
+                endereco: 'Rua Teste, 123 - Centro, São Paulo - SP',
+                protocolo: 'TEST-' + String(Math.floor(Math.random() * 1000)).padStart(3, '0')
+            };
+            
+            addLog('📋 Dados de teste:', 'info');
+            addLog('   👤 Nome: ' + dadosTeste.nome, 'info');
+            addLog('   📧 E-mail: ' + dadosTeste.email, 'info');
+            addLog('   📅 Data: ' + dadosTeste.data + ' às ' + dadosTeste.horario, 'info');
             
             try {
                 const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
@@ -1625,48 +1653,41 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({
-                        test: true,
-                        nome: 'Teste Sistema',
-                        email: 'teste@email.com',
-                        telefone: '(11) 99999-9999',
-                        servico: 'Teste de Conexão',
-                        dataHora: dataHoraISO,
-                        data: dataISO,
-                        horario: '10:00',
-                        tipo: 'Presencial',
-                        endereco: 'Rua Teste, 123 - Centro - SP',
-                        protocolo: 'TEST-001'
-                    })
+                    body: JSON.stringify(dadosTeste)
                 });
                 
                 esconderLoading();
                 
                 console.log('📡 Status da resposta:', response.status);
+                console.log('📡 Headers:', response.headers);
                 
-                if (response.ok) {
-                    const texto = await response.text();
+                const texto = await response.text();
+                console.log('📋 Resposta bruta:', texto);
+                
+                // Tentar parsear como JSON
+                let resposta;
+                try {
+                    resposta = JSON.parse(texto);
+                } catch(e) {
+                    resposta = { sucesso: false, erro: 'Resposta não é JSON: ' + texto };
+                }
+                
+                if (response.ok && resposta.sucesso !== false) {
                     addLog('✅ CONEXÃO OK!', 'sucesso');
-                    addLog('📋 Resposta do servidor: ' + texto, 'info');
+                    addLog('📋 Resposta: ' + JSON.stringify(resposta, null, 2), 'info');
                     console.log('%c✅ Teste concluído com sucesso!', 'color: #00ff88; font-weight: bold;');
-                    mostrarToast('✅ Conexão com Google Apps Script funcionando!', 'sucesso');
                     
-                    // Tenta extrair o link do evento se existir
-                    try {
-                        const json = JSON.parse(texto);
-                        if (json.eventLink) {
-                            console.log('🔗 Link do evento:', json.eventLink);
-                            addLog('🔗 Link do evento: ' + json.eventLink, 'info');
-                        }
-                    } catch(e) {
-                        // Não é JSON, tudo bem
+                    if (resposta.evento) {
+                        addLog('   🔗 Link do evento: ' + resposta.evento.link, 'info');
+                        console.log('🔗 Link do evento:', resposta.evento.link);
                     }
+                    
+                    mostrarToast('✅ Conexão com Google Apps Script funcionando!', 'sucesso');
                 } else {
-                    const erro = await response.text();
-                    addLog('❌ Conexão falhou: ' + response.status, 'erro');
-                    addLog('📋 Erro: ' + erro, 'erro');
+                    const erroMsg = resposta.erro || 'Erro desconhecido';
+                    addLog('❌ Conexão falhou: ' + erroMsg, 'erro');
                     console.log('%c❌ Teste falhou!', 'color: #ff4444; font-weight: bold;');
-                    mostrarToast('❌ Erro na conexão: ' + response.status, 'erro');
+                    mostrarToast('❌ Erro: ' + erroMsg, 'erro');
                 }
             } catch (error) {
                 esconderLoading();
@@ -1916,7 +1937,7 @@
                             addLog('🔄 Redirecionando para obrigado.html...', 'info');
                             
                             setTimeout(function() {
-                                window.location.href = 'agendamento.html';
+                                window.location.href = '';
                             }, 2000);
                         })
                         .catch(function(error) {
