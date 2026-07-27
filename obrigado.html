@@ -147,16 +147,6 @@
             transform: translateY(-3px);
             box-shadow: 0 12px 28px rgba(47, 93, 98, 0.35);
         }
-        .btn-outline {
-            background: transparent;
-            color: #2F5D62;
-            border: 2px solid #2F5D62;
-        }
-        .btn-outline:hover {
-            background: #2F5D62;
-            color: #fff;
-            transform: translateY(-3px);
-        }
         .btn-whatsapp {
             background: #25D366;
             color: #fff;
@@ -196,9 +186,7 @@
         }
         .info-extra i { color: #2F5D62; margin-right: 8px; }
         
-        /* ============================================
-           CONFETES
-           ============================================ */
+        /* Confetes */
         .confetti-container {
             position: fixed;
             top: 0;
@@ -229,7 +217,6 @@
             }
         }
         
-        /* Cores dos confetes */
         .confetti:nth-child(1) { background: #ff6b6b; }
         .confetti:nth-child(2) { background: #feca57; }
         .confetti:nth-child(3) { background: #48dbfb; }
@@ -246,7 +233,17 @@
         .confetti:nth-child(14) { background: #a29bfe; }
         .confetti:nth-child(15) { background: #fd79a8; }
         
-        /* Responsivo */
+        .badge-teste {
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 30px;
+            background: #fff3cd;
+            color: #856404;
+            font-weight: 600;
+            font-size: 0.8rem;
+            margin-top: 8px;
+        }
+        
         @media (max-width: 480px) {
             .container { padding: 30px 20px; }
             .header h1 { font-size: 1.5rem; }
@@ -259,19 +256,13 @@
 </head>
 <body>
 
-    <!-- ============================================
-         CONTAINER DE CONFETES
-         ============================================ -->
+    <!-- CONFETES -->
     <div class="confetti-container" id="confetti-container"></div>
 
-    <!-- ============================================
-         CONTEÚDO PRINCIPAL
-         ============================================ -->
+    <!-- CONTEÚDO -->
     <div class="container">
-        <!-- Ícone de Sucesso -->
         <div class="icone"><i class="fas fa-check-circle"></i></div>
         
-        <!-- Header -->
         <div class="header">
             <h1>Levita<span>.</span></h1>
             <p>✅ Agendamento Confirmado!</p>
@@ -281,24 +272,20 @@
             Sua consulta foi agendada com sucesso! 🎉
         </p>
         
-        <!-- Protocolo -->
         <div style="margin: 16px 0;">
             <span class="protocolo" id="protocolo">#00000</span>
         </div>
         
-        <!-- Detalhes do Agendamento -->
         <div id="detalhes-agendamento" class="info-box">
             <!-- Preenchido via JavaScript -->
         </div>
         
-        <!-- Informações Adicionais -->
         <div class="info-extra">
             <p><i class="fas fa-envelope"></i> Um e-mail de confirmação foi enviado para você.</p>
             <p><i class="fas fa-calendar-alt"></i> O evento foi adicionado ao seu Google Calendar.</p>
             <p><i class="fas fa-clock"></i> Lembrete: Chegue com 10 minutos de antecedência.</p>
         </div>
         
-        <!-- Botões -->
         <div class="botoes">
             <a href="index.html" class="btn btn-primario">
                 <i class="fas fa-home"></i> Voltar ao site
@@ -308,7 +295,6 @@
             </a>
         </div>
         
-        <!-- Footer -->
         <div class="footer">
             <p><strong>Levitação Podologia - Podóloga Renata Kemp</strong></p>
             <p>📱 (11) 97830-3833 | 📧 contato@levitapodologia.com.br</p>
@@ -321,56 +307,11 @@
         </div>
     </div>
 
-    <!-- ============================================
-         SCRIPT PRINCIPAL
-         ============================================ -->
     <script>
-        // ============================================
-        // FUNÇÃO DE LOG (APENAS CONSOLE)
-        // ============================================
-        function log(mensagem, tipo) {
-            tipo = tipo || 'info';
-            var timestamp = new Date().toLocaleTimeString('pt-BR');
-            var prefixo = '[' + timestamp + ']';
-            
-            switch(tipo) {
-                case 'sucesso':
-                    console.log('%c' + prefixo + ' ✅ ' + mensagem, 'color: #00ff88; font-weight: bold;');
-                    break;
-                case 'erro':
-                    console.log('%c' + prefixo + ' ❌ ' + mensagem, 'color: #ff4444; font-weight: bold;');
-                    break;
-                case 'warning':
-                    console.log('%c' + prefixo + ' ⚠️ ' + mensagem, 'color: #ffaa00; font-weight: bold;');
-                    break;
-                case 'info':
-                    console.log('%c' + prefixo + ' ℹ️ ' + mensagem, 'color: #00aaff;');
-                    break;
-                default:
-                    console.log(prefixo + ' ' + mensagem);
-            }
-        }
-
-        // ============================================
-        // FUNÇÃO PARA LOG DE ETAPAS
-        // ============================================
-        function logEtapa(etapa, descricao, status) {
-            status = status || 'info';
-            var cor = status === 'sucesso' ? '#00ff88' : 
-                     status === 'erro' ? '#ff4444' : 
-                     status === 'warning' ? '#ffaa00' : '#00aaff';
-            
-            console.log('%c═══════════════════════════════════════════', 'color: #888;');
-            console.log('%c📌 ETAPA ' + etapa + ': ' + descricao, 'color: ' + cor + '; font-weight: bold; font-size: 14px;');
-            console.log('%c═══════════════════════════════════════════', 'color: #888;');
-        }
-
         // ============================================
         // FUNÇÃO PARA GERAR CONFETES
         // ============================================
         function lancarConfetes() {
-            logEtapa('🎊', 'LANÇANDO CONFETES', 'sucesso');
-            
             var container = document.getElementById('confetti-container');
             var cores = [
                 '#ff6b6b', '#feca57', '#48dbfb', '#1dd1a1', '#5f27cd',
@@ -379,51 +320,39 @@
                 '#00b894', '#00cec9', '#0984e3', '#6c5ce7', '#fd79a8'
             ];
             
-            // Número de confetes
             var quantidade = 150;
             
             for (var i = 0; i < quantidade; i++) {
                 var confetti = document.createElement('div');
                 confetti.className = 'confetti';
                 
-                // Posição horizontal aleatória
                 var left = Math.random() * 100;
                 confetti.style.left = left + '%';
                 
-                // Cor aleatória
                 var cor = cores[Math.floor(Math.random() * cores.length)];
                 confetti.style.background = cor;
                 
-                // Tamanho aleatório
                 var size = Math.random() * 8 + 4;
                 confetti.style.width = size + 'px';
                 confetti.style.height = size + 'px';
                 
-                // Forma aleatória (quadrado ou círculo)
                 if (Math.random() > 0.5) {
                     confetti.style.borderRadius = '50%';
                 }
                 
-                // Duração da animação aleatória
                 var duracao = Math.random() * 2 + 2;
                 confetti.style.animationDuration = duracao + 's';
                 
-                // Atraso aleatório
                 var atraso = Math.random() * 1.5;
                 confetti.style.animationDelay = atraso + 's';
                 
-                // Rotação inicial aleatória
                 confetti.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)';
                 
                 container.appendChild(confetti);
             }
             
-            log('🎊 ' + quantidade + ' confetes lançados!', 'sucesso');
-            
-            // Remover confetes após a animação
             setTimeout(function() {
                 container.innerHTML = '';
-                log('🧹 Confetes removidos', 'info');
             }, 5000);
         }
 
@@ -431,59 +360,29 @@
         // CARREGAR DADOS DO AGENDAMENTO
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
-            logEtapa('1', '🚀 PÁGINA DE OBRIGADO CARREGADA', 'info');
-            log('📄 Inicializando página de confirmação...', 'info');
-            
-            // Recupera os dados do sessionStorage
             var dadosStr = sessionStorage.getItem('agendamento_confirmado');
             
             if (!dadosStr) {
-                log('⚠️ Nenhum dado de agendamento encontrado', 'warning');
-                log('🔄 Redirecionando para a página inicial...', 'info');
                 window.location.href = 'index.html';
                 return;
             }
             
             try {
                 var dados = JSON.parse(dadosStr);
-                log('✅ Dados do agendamento recuperados com sucesso!', 'sucesso');
-                log('📋 Dados:', 'info');
-                log('   👤 Nome: ' + dados.nome, 'info');
-                log('   📧 E-mail: ' + dados.email, 'info');
-                log('   🏥 Serviço: ' + dados.servico, 'info');
-                log('   📅 Data: ' + dados.data + ' às ' + dados.horario, 'info');
-                log('   🆔 ID: ' + dados.id, 'info');
-                
                 exibirDetalhes(dados);
-                logEtapa('2', '✅ DADOS EXIBIDOS NA TELA', 'sucesso');
-                
             } catch(e) {
-                log('❌ Erro ao processar dados: ' + e.message, 'erro');
                 window.location.href = 'index.html';
                 return;
             }
             
-            // Configurar botão WhatsApp
             var btnWhatsApp = document.getElementById('btn-whatsapp');
             if (btnWhatsApp) {
-                var mensagem = 'Olá! Vim pelo site e gostaria de tirar uma dúvida sobre meu agendamento.';
-                btnWhatsApp.href = 'https://wa.me/5511978303833?text=' + encodeURIComponent(mensagem);
-                log('📱 Botão WhatsApp configurado', 'info');
+                btnWhatsApp.href = 'https://wa.me/5511978303833?text=Olá!%20Vim%20pelo%20site%20e%20gostaria%20de%20tirar%20uma%20dúvida%20sobre%20meu%20agendamento.';
             }
             
-            // ============================================
-            // 🎊 LANÇAR CONFETES
-            // ============================================
-            // Pequeno atraso para a página carregar primeiro
             setTimeout(function() {
                 lancarConfetes();
             }, 500);
-            
-            logEtapa('3', '🎊 CONFETES LANÇADOS', 'sucesso');
-            log('✅ Página de obrigado completamente carregada!', 'sucesso');
-            console.log('%c═══════════════════════════════════════════', 'color: #888;');
-            console.log('%c🎉 AGRADECEMOS PELA PREFERÊNCIA!', 'color: #C9A227; font-weight: bold; font-size: 16px;');
-            console.log('%c═══════════════════════════════════════════', 'color: #888;');
         });
         
         // ============================================
@@ -492,10 +391,7 @@
         function exibirDetalhes(dados) {
             var container = document.getElementById('detalhes-agendamento');
             
-            if (!container) {
-                log('❌ Container de detalhes não encontrado', 'erro');
-                return;
-            }
+            if (!container) return;
             
             var dataObj = new Date(dados.data + 'T00:00:00');
             var dataFormatada = dataObj.toLocaleDateString('pt-BR', {
@@ -507,12 +403,9 @@
             var tipoLabel = dados.tipo === 'domicilio' ? '🏠 Domiciliar' : '🏢 Presencial';
             var statusLabel = dados.status.charAt(0).toUpperCase() + dados.status.slice(1);
             
-            // Protocolo (ID com 5 dígitos)
             var protocolo = '#' + String(dados.id).padStart(5, '0');
             document.getElementById('protocolo').textContent = protocolo;
-            log('🔑 Protocolo gerado: ' + protocolo, 'info');
             
-            // Preencher HTML
             container.innerHTML = 
                 '<div class="linha"><span class="rotulo">👤 Nome</span><span class="valor">' + dados.nome + '</span></div>' +
                 '<div class="linha"><span class="rotulo">📱 Telefone</span><span class="valor">' + dados.telefone + '</span></div>' +
@@ -522,17 +415,7 @@
                 '<div class="linha"><span class="rotulo">📅 Data</span><span class="valor">' + dataFormatada + '</span></div>' +
                 '<div class="linha"><span class="rotulo">⏰ Horário</span><span class="valor">' + dados.horario + '</span></div>' +
                 '<div class="linha"><span class="rotulo">📌 Status</span><span class="valor"><span class="status-badge">' + statusLabel + '</span></span></div>';
-            
-            log('📋 Detalhes exibidos na tela', 'sucesso');
         }
-        
-        // ============================================
-        // RECARREGAR CONFETES (CASO O USUÁRIO CLIQUE EM ALGUM LUGAR)
-        // ============================================
-        document.addEventListener('click', function() {
-            // Se o usuário clicar, podemos lançar mais confetes (opcional)
-            // lancarConfetes();
-        });
     </script>
 </body>
 </html>
