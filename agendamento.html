@@ -1334,7 +1334,7 @@
         }
 
         // ============================================
-        // FUNÇÃO GOOGLE CALENDAR VIA APPS SCRIPT
+        // FUNÇÃO GOOGLE CALENDAR VIA APPS SCRIPT (CORRIGIDA)
         // ============================================
         async function criarEventoCalendar(dados) {
             try {
@@ -1350,18 +1350,27 @@
                     protocolo: dados.protocolo || 'LEV-' + dados.id.toString().slice(-6)
                 };
                 
-                await fetch(GOOGLE_APPS_SCRIPT_URL, {
+                // Enviar para o Google Apps Script
+                var response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'no-cors',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(dadosEvento)
                 });
 
-                return { sucesso: true };
+                // Tentar ler a resposta
+                var resultado = await response.json();
+                
+                if (resultado.sucesso) {
+                    return { sucesso: true };
+                } else {
+                    console.error('Erro no Apps Script:', resultado.erro);
+                    return { sucesso: false, erro: resultado.erro };
+                }
                 
             } catch (error) {
+                console.error('Erro ao criar evento:', error);
                 return { sucesso: false, erro: error.message };
             }
         }
@@ -1507,7 +1516,11 @@
                             }
 
                             desabilitarBotao('Criando evento no Google Calendar...');
-                            await criarEventoCalendar(salvo);
+                            var resultadoCalendar = await criarEventoCalendar(salvo);
+                            
+                            if (!resultadoCalendar.sucesso) {
+                                console.warn('Google Calendar:', resultadoCalendar.erro);
+                            }
 
                             mostrarToast('✅ Agendamento realizado com sucesso!', 'sucesso');
                             
