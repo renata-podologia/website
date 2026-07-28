@@ -425,17 +425,6 @@
             box-shadow: 0 6px 20px rgba(47, 93, 98, 0.4);
         }
         
-        .badge-reserva {
-            display: inline-block;
-            background: #f0ad4e;
-            color: #fff;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-left: 8px;
-        }
-        
         @media (max-width: 768px) {
             body { padding: 10px; }
             .container { padding: 20px 16px; }
@@ -685,16 +674,6 @@
         <!-- PASSO 5 -->
         <div class="passo-conteudo" id="passo-5">
             <h3 class="passo-title"><i class="fas fa-check-circle"></i> Confirme seus dados</h3>
-            
-            <div style="background: #FFF3CD; border-left: 4px solid #f0ad4e; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
-                <p style="color: #856404; margin: 0;">
-                    <i class="fas fa-info-circle"></i> 
-                    <strong>Reserva Aguardando Confirmação</strong><br>
-                    Sua reserva será efetuada e aguardará confirmação da nossa equipe. 
-                    Você receberá um e-mail de confirmação em breve.
-                </p>
-            </div>
-            
             <div class="resumo-agendamento" id="resumo-agendamento"></div>
             
             <div class="form-actions">
@@ -702,7 +681,7 @@
                     <i class="fas fa-arrow-left"></i> Voltar
                 </button>
                 <button type="button" class="btn btn-success" onclick="confirmarAgendamento()" id="btn-confirmar">
-                    <i class="fas fa-save"></i> Efetuar Reserva
+                    <i class="fas fa-save"></i> Confirmar e Salvar
                 </button>
             </div>
         </div>
@@ -730,7 +709,7 @@
         var SUPABASE_URL = 'https://euktsrczpxejezkeyqoh.supabase.co';
         var SUPABASE_ANON_KEY = 'sb_publishable_vH11tBYAWHlKNoCeQG-oMQ_r1fOxcRf';
         
-        // 🔧 URL DO GOOGLE APPS SCRIPT (ATUALIZADA)
+        // 🔧 URL DO GOOGLE APPS SCRIPT (USE A SUA URL ATUALIZADA)
         var GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxcG6GrOy8jIQQgn40n-MlAk5FMSc1KYJYiNeHupWzGMeT_zFhHYrbSPuzw4sSHsr1J/exec';
 
         // EMAILJS - SUAS CONFIGURAÇÕES
@@ -874,7 +853,7 @@
         function habilitarBotao() {
             var btn = document.getElementById('btn-confirmar');
             btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-save"></i> Efetuar Reserva';
+            btn.innerHTML = '<i class="fas fa-save"></i> Confirmar e Salvar';
             btn.style.opacity = '1';
             btn.style.cursor = 'pointer';
         }
@@ -1494,88 +1473,69 @@
         });
 
         // ============================================
-        // FUNÇÃO DE E-MAIL - RESERVA EFETUADA
+        // FUNÇÃO DE E-MAIL COM EMAILJS
         // ============================================
-        async function enviarEmailReserva(para, dados) {
+        async function enviarEmail(para, templateParams) {
             try {
-                logEtapa('6', '📧 ENVIANDO E-MAIL DE RESERVA', 'info');
-                addLog('📧 Enviando e-mail de reserva para: ' + para, 'info');
+                logEtapa('6', '📧 ENVIANDO E-MAIL', 'info');
+                addLog('📧 Enviando e-mail para: ' + para, 'info');
                 
-                // 🔧 E-mail de RESERVA (não confirmado)
-                var templateParams = {
+                var params = {
                     to_email: para,
-                    to_name: dados.nome || 'Cliente',
-                    servico: dados.servico || 'Não informado',
-                    data: dados.data || 'Não informada',
-                    horario: dados.horario || 'Não informado',
-                    tipo: dados.tipo === 'domicilio' ? '🏠 Domiciliar' : '🏢 Presencial',
-                    endereco: dados.endereco || 'Não informado',
-                    status: '⏳ Aguardando Confirmação',
-                    protocolo: dados.protocolo || 'LEV-000000'
+                    email: para,
+                    to_name: templateParams.to_name || 'Cliente',
+                    servico: templateParams.servico || 'Não informado',
+                    data: templateParams.data || 'Não informada',
+                    horario: templateParams.horario || 'Não informado',
+                    tipo: templateParams.tipo || 'Não informado',
+                    endereco: templateParams.endereco || 'Não informado',
+                    status: templateParams.status || 'Confirmado',
+                    protocolo: templateParams.protocolo || 'LEV-000000'
                 };
+                
+                console.log('📋 Parâmetros enviados:');
+                console.log('   to_email:', params.to_email);
+                console.log('   email:', params.email);
+                console.log('   to_name:', params.to_name);
+                console.log('   servico:', params.servico);
+                console.log('   data:', params.data);
+                console.log('   horario:', params.horario);
+                console.log('   protocolo:', params.protocolo);
                 
                 var response = await emailjs.send(
                     EMAILJS_SERVICE_ID,
                     EMAILJS_TEMPLATE_ID,
-                    templateParams
+                    params
                 );
 
                 if (response.status === 200) {
-                    addLog('✅ E-mail de reserva enviado para: ' + para, 'sucesso');
-                    logEtapa('6', '✅ E-MAIL DE RESERVA ENVIADO PARA: ' + para, 'sucesso');
+                    addLog('✅ E-mail enviado com sucesso para: ' + para, 'sucesso');
+                    logEtapa('6', '✅ E-MAIL ENVIADO PARA: ' + para, 'sucesso');
                     return { sucesso: true };
                 } else {
                     addLog('❌ Erro ao enviar e-mail: ' + response.text, 'erro');
+                    logEtapa('6', '❌ FALHA NO E-MAIL PARA: ' + para, 'erro');
                     return { sucesso: false };
                 }
             } catch (error) {
-                addLog('❌ Erro ao enviar e-mail: ' + error.message, 'erro');
+                addLog('❌ Erro ao enviar e-mail para ' + para + ': ' + error.message, 'erro');
+                if (error.text) {
+                    console.error('Detalhe do erro:', error.text);
+                    addLog('   Detalhe: ' + error.text, 'erro');
+                }
+                logEtapa('6', '❌ ERRO NO E-MAIL: ' + error.message, 'erro');
                 return { sucesso: false, erro: error.message };
             }
         }
 
         // ============================================
-        // NOTIFICAR ADMINISTRADOR SOBRE NOVA RESERVA
-        // ============================================
-        async function notificarAdminNovaReserva(dados) {
-            try {
-                addLog('📧 Notificando administrador sobre nova reserva...', 'info');
-                
-                var templateParams = {
-                    to_email: 'kemp.ricardo@gmail.com',
-                    to_name: 'Administrador Levità',
-                    servico: dados.servico || 'Não informado',
-                    data: dados.data || 'Não informada',
-                    horario: dados.horario || 'Não informado',
-                    tipo: dados.tipo === 'domicilio' ? '🏠 Domiciliar' : '🏢 Presencial',
-                    endereco: dados.endereco || 'Não informado',
-                    status: '⏳ AGUARDANDO CONFIRMAÇÃO',
-                    protocolo: dados.protocolo || 'LEV-000000'
-                };
-                
-                var response = await emailjs.send(
-                    EMAILJS_SERVICE_ID,
-                    EMAILJS_TEMPLATE_ID,
-                    templateParams
-                );
-
-                if (response.status === 200) {
-                    addLog('✅ Administrador notificado sobre nova reserva', 'sucesso');
-                } else {
-                    addLog('⚠️ Erro ao notificar administrador: ' + response.text, 'warning');
-                }
-            } catch (error) {
-                addLog('⚠️ Erro ao notificar administrador: ' + error.message, 'warning');
-            }
-        }
-
-        // ============================================
-        // FUNÇÃO GOOGLE CALENDAR VIA JSONP
+        // FUNÇÃO GOOGLE CALENDAR VIA JSONP (NÃO USA CORS)
         // ============================================
         function criarEventoCalendarJSONP(dados) {
             return new Promise((resolve, reject) => {
                 const callbackName = 'jsonp_callback_' + Date.now();
                 
+                // Preparar dados
                 const params = new URLSearchParams({
                     callback: callbackName,
                     nome: dados.nome || '',
@@ -1591,11 +1551,13 @@
                 
                 const url = GOOGLE_APPS_SCRIPT_URL + '?' + params.toString();
                 
+                // Criar callback global
                 window[callbackName] = function(response) {
                     delete window[callbackName];
                     if (document.body.contains(script)) {
                         document.body.removeChild(script);
                     }
+                    
                     if (response && response.sucesso) {
                         resolve(response);
                     } else {
@@ -1603,6 +1565,7 @@
                     }
                 };
                 
+                // Criar script tag
                 const script = document.createElement('script');
                 script.src = url;
                 script.onerror = function() {
@@ -1610,9 +1573,10 @@
                     if (document.body.contains(script)) {
                         document.body.removeChild(script);
                     }
-                    reject(new Error('Falha ao carregar o script JSONP.'));
+                    reject(new Error('Falha ao carregar o script JSONP. Verifique a URL do Google Apps Script.'));
                 };
                 
+                // Timeout de 30 segundos
                 const timeout = setTimeout(function() {
                     delete window[callbackName];
                     if (document.body.contains(script)) {
@@ -1621,6 +1585,7 @@
                     reject(new Error('Timeout: O Google Apps Script não respondeu.'));
                 }, 30000);
                 
+                // Se resolver, limpar timeout
                 const originalResolve = resolve;
                 resolve = function(value) {
                     clearTimeout(timeout);
@@ -1675,15 +1640,24 @@
                 
                 if (resultado && resultado.sucesso) {
                     addLog('✅ CONEXÃO OK via JSONP!', 'sucesso');
+                    addLog('📋 Resposta: ' + JSON.stringify(resultado, null, 2), 'info');
                     console.log('%c✅ Teste concluído com sucesso via JSONP!', 'color: #00ff88; font-weight: bold;');
+                    
+                    if (resultado.evento) {
+                        addLog('   🔗 Link do evento: ' + resultado.evento.link, 'info');
+                        console.log('🔗 Link do evento:', resultado.evento.link);
+                    }
+                    
                     mostrarToast('✅ Conexão via JSONP funcionando!', 'sucesso');
                 } else {
                     addLog('❌ Conexão falhou: ' + (resultado?.mensagem || 'Erro desconhecido'), 'erro');
+                    console.log('%c❌ Teste falhou!', 'color: #ff4444; font-weight: bold;');
                     mostrarToast('❌ Erro: ' + (resultado?.mensagem || 'Falha na conexão'), 'erro');
                 }
             } catch (error) {
                 esconderLoading();
                 addLog('❌ Erro no teste: ' + error.message, 'erro');
+                console.log('%c❌ ERRO: ' + error.message, 'color: #ff4444; font-weight: bold;');
                 console.error(error);
                 mostrarToast('❌ Erro: ' + error.message, 'erro');
             }
@@ -1751,7 +1725,6 @@
             
             addLog('💾 Salvando no Supabase...', 'info');
             
-            // 🔧 Status sempre como 'pendente' (aguardando confirmação)
             return supabaseClient
                 .from('agendamentos')
                 .insert([{
@@ -1766,7 +1739,7 @@
                     servico: dados.servico,
                     data: dados.data,
                     horario: dados.horario,
-                    status: 'pendente'  // 🔧 Status PENDENTE (não confirmado)
+                    status: 'pendente'
                 }])
                 .select()
                 .then(function(response) {
@@ -1775,8 +1748,8 @@
                         logEtapa('5', '❌ ERRO AO SALVAR: ' + response.error.message, 'erro');
                         throw response.error;
                     }
-                    addLog('✅ Reserva salva! ID: ' + response.data[0].id, 'sucesso');
-                    logEtapa('5', '✅ RESERVA SALVA! ID: ' + response.data[0].id, 'sucesso');
+                    addLog('✅ Agendamento salvo! ID: ' + response.data[0].id, 'sucesso');
+                    logEtapa('5', '✅ AGENDAMENTO SALVO! ID: ' + response.data[0].id, 'sucesso');
                     return response.data ? response.data[0] : null;
                 })
                 .catch(function(error) {
@@ -1802,19 +1775,15 @@
                 '<div class="linha"><span class="rotulo">Endereço</span><span class="valor">' + agendamento.endereco + '</span></div>' +
                 '<div class="linha"><span class="rotulo">Serviço</span><span class="valor"><strong>' + agendamento.servico + '</strong></span></div>' +
                 '<div class="linha"><span class="rotulo">Data</span><span class="valor">' + dataFormatada + '</span></div>' +
-                '<div class="linha"><span class="rotulo">Horário</span><span class="valor">' + agendamento.horario + '</span></div>' +
-                '<div class="linha" style="border-top: 2px solid #C9A227; margin-top: 8px; padding-top: 12px;">' +
-                '<span class="rotulo">Status</span>' +
-                '<span class="valor"><span style="background: #f0ad4e; color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem;">⏳ Aguardando Confirmação</span></span>' +
-                '</div>';
+                '<div class="linha"><span class="rotulo">Horário</span><span class="valor">' + agendamento.horario + '</span></div>';
             addLog('📋 Resumo do agendamento gerado', 'info');
         }
 
         // ============================================
-        // CONFIRMAR AGENDAMENTO - RESERVA
+        // CONFIRMAR AGENDAMENTO
         // ============================================
         function confirmarAgendamento() {
-            logEtapa('1', '🚀 INICIANDO RESERVA DE AGENDAMENTO', 'info');
+            logEtapa('1', '🚀 INICIANDO CONFIRMAÇÃO DE AGENDAMENTO', 'info');
             console.log('%c═══════════════════════════════════════════', 'color: #888;');
             
             if (!validarPasso1()) {
@@ -1850,7 +1819,9 @@
                 return;
             }
 
+            // ============================================
             // 🔒 DESABILITAR BOTÃO
+            // ============================================
             desabilitarBotao('Verificando disponibilidade...');
             addLog('🔒 Botão desabilitado', 'info');
 
@@ -1887,8 +1858,8 @@
                     addLog('✅ Horário disponível!', 'sucesso');
                     logEtapa('2', '✅ HORÁRIO DISPONÍVEL!', 'sucesso');
                     
-                    desabilitarBotao('Salvando reserva...');
-                    logEtapa('3', '💾 SALVANDO RESERVA NO SUPABASE', 'info');
+                    desabilitarBotao('Salvando no Supabase...');
+                    logEtapa('3', '💾 SALVANDO NO SUPABASE', 'info');
 
                     salvarAgendamento(agendamento)
                         .then(async function(salvo) {
@@ -1900,56 +1871,77 @@
                                 return;
                             }
 
-                            addLog('✅ Reserva SALVA no Supabase (PENDENTE)!', 'sucesso');
+                            addLog('✅ Agendamento SALVO no Supabase!', 'sucesso');
                             addLog('🆔 ID: ' + salvo.id, 'info');
-                            logEtapa('3', '✅ RESERVA SALVA! ID: ' + salvo.id, 'sucesso');
+                            logEtapa('3', '✅ AGENDAMENTO SALVO! ID: ' + salvo.id, 'sucesso');
 
                             // ============================================
-                            // 📧 ENVIAR E-MAIL DE RESERVA (NÃO CONFIRMADO)
+                            // 📧 ENVIAR E-MAILS COM EMAILJS
                             // ============================================
-                            desabilitarBotao('Enviando e-mail de reserva...');
-                            addLog('📧 Preparando envio de e-mail de reserva...', 'info');
+                            desabilitarBotao('Enviando e-mails...');
+                            addLog('📧 Preparando envio de e-mails...', 'info');
 
                             var dataFormatada = formatarData(salvo.data);
                             var protocolo = 'LEV-' + salvo.id.toString().slice(-6);
-                            
-                            var dadosEmail = {
-                                nome: salvo.nome,
-                                telefone: salvo.telefone,
-                                email: salvo.email,
-                                servico: salvo.servico,
-                                data: dataFormatada,
-                                horario: salvo.horario,
-                                tipo: salvo.tipo,
-                                endereco: salvo.endereco,
+
+                            // Template para o CLIENTE
+                            var templateParamsCliente = {
+                                to_name: salvo.nome || 'Cliente',
+                                servico: salvo.servico || 'Não informado',
+                                data: dataFormatada || 'Não informada',
+                                horario: salvo.horario || 'Não informado',
+                                tipo: salvo.tipo === 'domicilio' ? '🏠 Domiciliar' : '🏢 Presencial',
+                                endereco: salvo.endereco || 'Não informado',
+                                status: '✅ Confirmado',
                                 protocolo: protocolo
                             };
 
-                            // ✅ Enviar apenas e-mail de RESERVA (não confirmado)
-                            await enviarEmailReserva(salvo.email, dadosEmail);
-                            
-                            // ✅ Notificar administrador sobre nova reserva
-                            await notificarAdminNovaReserva(dadosEmail);
+                            // Template para a PROFISSIONAL
+                            var templateParamsProfissional = {
+                                to_name: 'Renata Kemp - Nova Consulta',
+                                servico: salvo.servico || 'Não informado',
+                                data: dataFormatada || 'Não informada',
+                                horario: salvo.horario || 'Não informado',
+                                tipo: salvo.tipo === 'domicilio' ? '🏠 Domiciliar' : '🏢 Presencial',
+                                endereco: salvo.endereco || 'Não informado',
+                                status: '📅 NOVO AGENDAMENTO',
+                                protocolo: protocolo
+                            };
+
+                            // Enviar e-mails
+                            try {
+                                await enviarEmail(salvo.email, templateParamsCliente);
+                                
+                                if (salvo.email !== 'kemp.ricardo@gmail.com') {
+                                    await enviarEmail('kemp.ricardo@gmail.com', templateParamsProfissional);
+                                } else {
+                                    addLog('⚠️ Cliente e Profissional têm o mesmo e-mail. Pulando duplicata.', 'warning');
+                                }
+                            } catch (error) {
+                                addLog('❌ Erro no envio de e-mails: ' + error.message, 'erro');
+                            }
 
                             // ============================================
-                            // 📅 GOOGLE CALENDAR
+                            // 📅 GOOGLE CALENDAR (JSONP)
                             // ============================================
                             desabilitarBotao('Criando evento no Google Calendar...');
                             await criarEventoCalendar(salvo);
 
                             // ============================================
-                            // 🎉 FINALIZAR
+                            // 🎉 REDIRECIONAR PARA OBRIGADO.HTML
                             // ============================================
                             console.log('%c═══════════════════════════════════════════', 'color: #888;');
-                            logEtapa('8', '🎉 RESERVA EFETUADA COM SUCESSO!', 'sucesso');
+                            logEtapa('8', '🎉 AGENDAMENTO CONCLUÍDO COM SUCESSO!', 'sucesso');
                             addLog('📋 Verifique:', 'info');
-                            addLog('   ✅ Reserva salva no Supabase (PENDENTE)', 'sucesso');
-                            addLog('   📧 E-mail de reserva enviado para: ' + salvo.email, 'info');
-                            addLog('   📧 Administrador notificado', 'info');
+                            addLog('   ✅ Dados salvos no Supabase', 'sucesso');
+                            addLog('   📧 E-mail enviado para: ' + salvo.email, 'info');
+                            if (salvo.email !== 'kemp.ricardo@gmail.com') {
+                                addLog('   📧 E-mail enviado para: kemp.ricardo@gmail.com', 'info');
+                            }
                             addLog('   📅 Evento criado no Google Calendar', 'sucesso');
                             console.log('%c═══════════════════════════════════════════', 'color: #888;');
                             
-                            mostrarToast('✅ Reserva efetuada! Aguarde confirmação.', 'sucesso');
+                            mostrarToast('✅ Agendamento realizado com sucesso!', 'sucesso');
                             
                             sessionStorage.setItem('agendamento_confirmado', JSON.stringify(salvo));
                             addLog('💾 Dados salvos no sessionStorage', 'sucesso');
@@ -1957,7 +1949,7 @@
                             desabilitarBotao('Redirecionando...');
                             addLog('🔄 Redirecionando para obrigado.html...', 'info');
                             
-                            // Redirecionar para página de confirmação
+                            // Redirecionar
                             window.location.href = 'obrigado.html';
                         })
                         .catch(function(error) {
