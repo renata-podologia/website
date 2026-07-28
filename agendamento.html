@@ -907,7 +907,7 @@
             console.error('❌ Erro ao criar cliente Supabase:', e);
         }
 
-        console.log('✅ Supabase inicializado:', supabaseClient ? 'OK' : 'FALHOU');
+        
 
         var HORARIOS_BASE = ['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
         var DIAS_SEMANA = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
@@ -980,19 +980,19 @@
             
             switch(tipo) {
                 case 'sucesso':
-                    console.log('%c' + prefixo + ' ✅ ' + mensagem, 'color: #00ff88; font-weight: bold;');
+                    
                     break;
                 case 'erro':
-                    console.log('%c' + prefixo + ' ❌ ' + mensagem, 'color: #ff4444; font-weight: bold;');
+                    
                     break;
                 case 'warning':
-                    console.log('%c' + prefixo + ' ⚠️ ' + mensagem, 'color: #ffaa00; font-weight: bold;');
+                    
                     break;
                 case 'info':
-                    console.log('%c' + prefixo + ' ℹ️ ' + mensagem, 'color: #00aaff;');
+                    
                     break;
                 default:
-                    console.log(prefixo + ' ' + mensagem);
+                    
             }
         }
 
@@ -1002,9 +1002,7 @@
                      status === 'erro' ? '#ff4444' : 
                      status === 'warning' ? '#ffaa00' : '#00aaff';
             
-            console.log('%c═══════════════════════════════════════════', 'color: #888;');
-            console.log('%c📌 ETAPA ' + etapa + ': ' + descricao, 'color: ' + cor + '; font-weight: bold; font-size: 14px;');
-            console.log('%c═══════════════════════════════════════════', 'color: #888;');
+
         }
 
         function desabilitarBotao(mensagem) {
@@ -1945,7 +1943,7 @@
         // ============================================
         function confirmarAgendamento() {
             logEtapa('1', '🚀 INICIANDO RESERVA DE AGENDAMENTO', 'info');
-            console.log('%c═══════════════════════════════════════════', 'color: #888;');
+            
             
             if (!validarPasso1()) {
                 logEtapa('1', '❌ FALHA NA VALIDAÇÃO DO PASSO 1', 'erro');
@@ -2056,14 +2054,6 @@
                             var resultEmail = await enviarEmailReserva(salvo.email, dadosEmail);
                             
                             await notificarAdminNovaReserva(dadosEmail);
-
-                            console.log('%c═══════════════════════════════════════════', 'color: #888;');
-                            logEtapa('8', '🎉 RESERVA EFETUADA COM SUCESSO!', 'sucesso');
-                            addLog('📋 Verifique:', 'info');
-                            addLog('   ✅ Reserva salva no Supabase (PENDENTE)', 'sucesso');
-                            addLog('   📧 E-mail de reserva enviado para: ' + salvo.email, 'info');
-                            addLog('   📧 Administrador notificado', 'info');
-                            console.log('%c═══════════════════════════════════════════', 'color: #888;');
                             
                             mostrarToast('✅ Reserva efetuada! Aguarde confirmação.', 'sucesso');
                             
