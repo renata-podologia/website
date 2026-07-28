@@ -22,6 +22,7 @@
             align-items: center;
             justify-content: center;
         }
+        
         .container {
             max-width: 900px;
             width: 100%;
@@ -31,7 +32,26 @@
             padding: 40px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
             border: 1px solid rgba(168, 195, 160, 0.15);
+            position: relative;
+            overflow: hidden;
         }
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #2F5D62, #C9A227, #2F5D62);
+            background-size: 200% 100%;
+            animation: gradiente 3s ease infinite;
+        }
+        @keyframes gradiente {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
         .btn {
             display: inline-block;
             padding: 14px 34px;
@@ -53,6 +73,7 @@
         .btn-outline { background: transparent; color: #2F5D62; border: 2px solid #2F5D62; }
         .btn-outline:hover { background: #2F5D62; color: #fff; transform: translateY(-3px); }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .btn i { margin-right: 8px; }
         
         .header {
             display: flex;
@@ -96,6 +117,7 @@
             margin-bottom: 32px;
             font-size: 1.05rem;
         }
+        .header-subtitle strong { color: #2F5D62; }
         
         .passo-indicador {
             display: flex;
@@ -115,10 +137,12 @@
             font-size: 0.85rem;
             font-weight: 500;
             transition: all 0.3s ease;
+            cursor: default;
         }
         .passo-indicador .passo.ativo {
             background: #2F5D62;
             color: #fff;
+            box-shadow: 0 4px 15px rgba(47, 93, 98, 0.2);
         }
         .passo-indicador .passo .numero {
             display: inline-flex;
@@ -178,6 +202,11 @@
             outline: none;
             border-color: #2F5D62;
             background: #fff;
+            box-shadow: 0 0 0 4px rgba(47, 93, 98, 0.1);
+        }
+        .form-group input:disabled {
+            background: #F4EFE8;
+            color: #4a5f64;
         }
         
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
@@ -197,7 +226,7 @@
             margin-top: 8px;
         }
         .tipo-btn {
-            padding: 20px;
+            padding: 24px 20px;
             border: 2px solid #e8edee;
             border-radius: 16px;
             background: #fafbfb;
@@ -213,10 +242,12 @@
             align-items: center;
             gap: 8px;
         }
-        .tipo-btn i { font-size: 2rem; color: #2F5D62; opacity: 0.6; }
-        .tipo-btn:hover:not(.selecionado) { border-color: #2F5D62; background: #F4EFE8; }
-        .tipo-btn.selecionado { border-color: #C9A227; background: #C9A227; color: #fff; }
+        .tipo-btn i { font-size: 2.5rem; color: #2F5D62; opacity: 0.5; transition: all 0.3s ease; }
+        .tipo-btn:hover:not(.selecionado) { border-color: #2F5D62; background: #F4EFE8; transform: translateY(-2px); }
+        .tipo-btn.selecionado { border-color: #C9A227; background: #C9A227; color: #fff; transform: translateY(-2px); box-shadow: 0 8px 25px rgba(201, 162, 39, 0.3); }
         .tipo-btn.selecionado i { color: #fff; opacity: 1; }
+        .tipo-btn small { font-weight: 400; opacity: 0.7; }
+        .tipo-btn.selecionado small { opacity: 0.9; }
         
         .cep-busca-group {
             display: flex;
@@ -228,11 +259,12 @@
         
         .endereco-completo {
             margin-top: 12px;
-            padding: 16px;
+            padding: 16px 20px;
             background: #F4EFE8;
             border-radius: 12px;
             border-left: 4px solid #C9A227;
             display: none;
+            animation: fadeIn 0.3s ease;
         }
         .endereco-completo.visivel { display: block; }
         .endereco-completo p { margin: 4px 0; font-size: 0.95rem; }
@@ -245,21 +277,21 @@
             margin-top: 8px;
         }
         .horario-btn {
-            padding: 10px 12px;
+            padding: 12px 12px;
             border: 2px solid #e8edee;
             border-radius: 10px;
             background: #fafbfb;
             cursor: pointer;
             font-family: 'Inter', sans-serif;
-            font-size: 0.9rem;
-            font-weight: 500;
+            font-size: 0.95rem;
+            font-weight: 600;
             transition: all 0.3s ease;
             text-align: center;
             color: #1e2b2f;
             position: relative;
         }
-        .horario-btn:hover:not(.indisponivel):not(.confirmado):not(.passado) { border-color: #2F5D62; background: #F4EFE8; }
-        .horario-btn.selecionado { border-color: #C9A227; background: #C9A227; color: #fff; }
+        .horario-btn:hover:not(.indisponivel):not(.confirmado):not(.passado) { border-color: #2F5D62; background: #F4EFE8; transform: translateY(-2px); }
+        .horario-btn.selecionado { border-color: #C9A227; background: #C9A227; color: #fff; transform: translateY(-2px); box-shadow: 0 8px 25px rgba(201, 162, 39, 0.3); }
         .horario-btn.confirmado {
             opacity: 0.7;
             cursor: not-allowed;
@@ -286,7 +318,7 @@
             margin-top: 8px;
         }
         .servico-btn {
-            padding: 14px 16px;
+            padding: 16px 16px;
             border: 2px solid #e8edee;
             border-radius: 12px;
             background: #fafbfb;
@@ -302,9 +334,9 @@
             align-items: center;
             gap: 4px;
         }
-        .servico-btn i { font-size: 1.4rem; color: #2F5D62; opacity: 0.6; }
-        .servico-btn:hover:not(.selecionado) { border-color: #2F5D62; background: #F4EFE8; }
-        .servico-btn.selecionado { border-color: #C9A227; background: #C9A227; color: #fff; }
+        .servico-btn i { font-size: 1.6rem; color: #2F5D62; opacity: 0.5; transition: all 0.3s ease; }
+        .servico-btn:hover:not(.selecionado) { border-color: #2F5D62; background: #F4EFE8; transform: translateY(-2px); }
+        .servico-btn.selecionado { border-color: #C9A227; background: #C9A227; color: #fff; transform: translateY(-2px); box-shadow: 0 8px 25px rgba(201, 162, 39, 0.3); }
         .servico-btn.selecionado i { color: #fff; opacity: 1; }
         
         .resumo-agendamento {
@@ -351,7 +383,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(255,255,255,0.85);
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(4px);
             display: none;
             justify-content: center;
             align-items: center;
@@ -401,6 +434,30 @@
         .legenda-horarios .bola.confirmado { background: #dc3545; }
         .legenda-horarios .bola.passado { background: #8a9ea3; }
         
+        .info-reserva {
+            background: #FFF3CD;
+            border-left: 4px solid #f0ad4e;
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        .info-reserva i { color: #f0ad4e; font-size: 1.4rem; margin-top: 2px; }
+        .info-reserva p { color: #856404; margin: 0; font-size: 0.95rem; }
+        .info-reserva strong { display: block; }
+        
+        .badge-status {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 30px;
+            background: #f0ad4e;
+            color: #fff;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
         @media (max-width: 768px) {
             body { padding: 10px; }
             .container { padding: 20px 16px; }
@@ -419,11 +476,14 @@
             .passo-indicador .passo { font-size: 0.7rem; padding: 4px 10px; }
             .header-title { font-size: 1.5rem; }
             .legenda-horarios { font-size: 0.75rem; gap: 12px; }
+            .info-reserva { flex-direction: column; }
         }
         @media (max-width: 480px) {
             .container { padding: 16px 12px; }
             .servicos-escolha { grid-template-columns: 1fr; }
             .btn { padding: 12px 20px; font-size: 0.9rem; }
+            .tipo-btn { padding: 16px; }
+            .tipo-btn i { font-size: 2rem; }
         }
     </style>
 </head>
@@ -448,7 +508,7 @@
                 <h1 class="header-title">Levità <span>.</span></h1>
             </div>
             <a href="index.html" class="back-link">
-                <i class="fas fa-arrow-left"></i> Voltar para o site
+                <i class="fas fa-arrow-left"></i> Voltar ao site
             </a>
         </div>
         
@@ -513,12 +573,12 @@
                 <button type="button" class="tipo-btn" data-tipo="domicilio">
                     <i class="fas fa-home"></i>
                     <span>Domiciliar</span>
-                    <small style="font-weight: 400; opacity: 0.7;">Renata vai até você</small>
+                    <small>Renata vai até você</small>
                 </button>
                 <button type="button" class="tipo-btn" data-tipo="presencial">
                     <i class="fas fa-building"></i>
                     <span>Presencial</span>
-                    <small style="font-weight: 400; opacity: 0.7;">Você vai à clínica</small>
+                    <small>Você vai à clínica</small>
                 </button>
             </div>
 
@@ -553,7 +613,7 @@
             <div id="endereco-presencial" style="display: none; margin-top: 20px;">
                 <div class="form-group">
                     <label>Endereço da Clínica</label>
-                    <input type="text" id="endereco-clinica" value="Rua da Clínica, 123 - Centro, Guarulhos - SP" disabled style="background: #F4EFE8;" />
+                    <input type="text" id="endereco-clinica" value="Rua da Clínica, 123 - Centro, Guarulhos - SP" disabled />
                     <small style="color: #4a5f64; display: block; margin-top: 4px;">
                         <i class="fas fa-info-circle"></i> Endereço fixo da clínica.
                     </small>
@@ -650,13 +710,13 @@
         <div class="passo-conteudo" id="passo-5">
             <h3 class="passo-title"><i class="fas fa-check-circle"></i> Confirme seus dados</h3>
             
-            <div style="background: #FFF3CD; border-left: 4px solid #f0ad4e; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
-                <p style="color: #856404; margin: 0;">
-                    <i class="fas fa-info-circle"></i> 
-                    <strong>Reserva Aguardando Confirmação</strong><br>
-                    Sua reserva será efetuada e aguardará confirmação da nossa equipe. 
+            <div class="info-reserva">
+                <i class="fas fa-info-circle"></i>
+                <div>
+                    <strong>Reserva Aguardando Confirmação</strong>
+                    Sua reserva será efetuada e aguardará confirmação da nossa equipe.
                     Você receberá um e-mail de confirmação em breve.
-                </p>
+                </div>
             </div>
             
             <div class="resumo-agendamento" id="resumo-agendamento"></div>
@@ -1469,18 +1529,15 @@
         });
 
         // ============================================
-        // FUNÇÃO PARA CRIAR LINK DO GOOGLE CALENDAR (VERSÃO SIMPLIFICADA)
+        // FUNÇÃO PARA CRIAR LINK DO GOOGLE CALENDAR
         // ============================================
         function criarLinkGoogleCalendar(dados) {
             try {
-                // 🔧 PEGAR DATA E HORÁRIO
                 var dataStr = dados.data || '';
                 var horarioStr = dados.horario || '10:00';
                 
-                // 🔧 GARANTIR QUE A DATA ESTEJA NO FORMATO YYYY-MM-DD
                 var dataLimpa = dataStr;
                 
-                // Se for formato "Terça, 28 de Julho de 2026"
                 if (dataStr.includes('de')) {
                     var partes = dataStr.split(', ');
                     if (partes.length > 1) {
@@ -1499,7 +1556,6 @@
                     }
                 }
                 
-                // Se for formato "28/07/2026"
                 if (dataLimpa.includes('/')) {
                     var partes = dataLimpa.split('/');
                     if (partes.length === 3) {
@@ -1507,7 +1563,6 @@
                     }
                 }
                 
-                // SE AINDA NÃO TIVER DATA VÁLIDA, USA HOJE
                 if (!dataLimpa || dataLimpa === 'Não informada' || dataLimpa === '') {
                     var hoje = new Date();
                     var ano = hoje.getFullYear();
@@ -1516,11 +1571,10 @@
                     dataLimpa = ano + '-' + mes + '-' + dia;
                 }
                 
-                // 🔧 CRIAR DATA (USANDO SPLIT PARA EVITAR PROBLEMAS COM O Date)
                 var dataParts = dataLimpa.split('-');
                 if (dataParts.length === 3) {
                     var year = parseInt(dataParts[0]);
-                    var month = parseInt(dataParts[1]) - 1; // Mês começa em 0
+                    var month = parseInt(dataParts[1]) - 1;
                     var day = parseInt(dataParts[2]);
                     
                     var hour = parseInt(horarioStr.split(':')[0]) || 10;
@@ -1528,13 +1582,11 @@
                     
                     var dataHora = new Date(year, month, day, hour, minute, 0);
                     
-                    // Verificar se a data é válida
                     if (isNaN(dataHora.getTime())) {
                         var hoje = new Date();
                         dataHora = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate(), hour, minute, 0);
                     }
                     
-                    // 🔧 FORMATAR PARA O GOOGLE CALENDAR (YYYYMMDDTHHMMSS)
                     var yearStr = String(dataHora.getFullYear());
                     var monthStr = String(dataHora.getMonth() + 1).padStart(2, '0');
                     var dayStr = String(dataHora.getDate()).padStart(2, '0');
@@ -1552,7 +1604,9 @@
                     
                     var end = yearFim + monthFim + dayFim + 'T' + hoursFim + minutesFim + '00';
                     
-                    var title = 'Levità - ' + (dados.servico || 'Consulta') + ' - ' + (dados.nome || 'Cliente');
+                    // 🔧 TÍTULO: APENAS "Levità Podologia"
+                    var title = 'Levità Podologia';
+                    
                     var description = 
                         'Cliente: ' + (dados.nome || '') + '\n' +
                         'Telefone: ' + (dados.telefone || '') + '\n' +
@@ -1574,12 +1628,11 @@
                     return url;
                 }
                 
-                // FALLBACK
                 var now = new Date();
                 var later = new Date(now.getTime() + 3600000);
                 var startFallback = now.toISOString().replace(/[-:]/g, '').slice(0, 15);
                 var endFallback = later.toISOString().replace(/[-:]/g, '').slice(0, 15);
-                return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=Levita%20-%20Consulta&dates=' + startFallback + '/' + endFallback;
+                return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=Levita%20Podologia&dates=' + startFallback + '/' + endFallback;
                 
             } catch (error) {
                 console.error('❌ Erro ao gerar link do Google Calendar:', error);
@@ -1587,7 +1640,7 @@
                 var later = new Date(now.getTime() + 3600000);
                 var startFallback = now.toISOString().replace(/[-:]/g, '').slice(0, 15);
                 var endFallback = later.toISOString().replace(/[-:]/g, '').slice(0, 15);
-                return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=Levita%20-%20Consulta&dates=' + startFallback + '/' + endFallback;
+                return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=Levita%20Podologia&dates=' + startFallback + '/' + endFallback;
             }
         }
 
@@ -1734,7 +1787,7 @@
                 '<div class="linha"><span class="rotulo">Horário</span><span class="valor">' + agendamento.horario + '</span></div>' +
                 '<div class="linha" style="border-top: 2px solid #C9A227; margin-top: 8px; padding-top: 12px;">' +
                 '<span class="rotulo">Status</span>' +
-                '<span class="valor"><span style="background: #f0ad4e; color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem;">⏳ Aguardando Confirmação</span></span>' +
+                '<span class="valor"><span class="badge-status">⏳ Aguardando Confirmação</span></span>' +
                 '</div>';
             addLog('📋 Resumo do agendamento gerado', 'info');
         }
@@ -1832,9 +1885,6 @@
                             addLog('🆔 ID: ' + salvo.id, 'info');
                             logEtapa('3', '✅ RESERVA SALVA! ID: ' + salvo.id, 'sucesso');
 
-                            // ============================================
-                            // 📧 PREPARAR DADOS PARA O E-MAIL
-                            // ============================================
                             var dataFormatada = formatarData(salvo.data);
                             var dataISO = formatarDataISO(salvo.data);
                             var protocolo = 'LEV-' + salvo.id.toString().slice(-6);
@@ -1852,22 +1902,13 @@
                                 protocolo: protocolo
                             };
 
-                            // ============================================
-                            // 📧 ENVIAR E-MAIL DE RESERVA (APENAS 1)
-                            // ============================================
                             desabilitarBotao('Enviando e-mail de reserva...');
                             addLog('📧 Preparando envio de e-mail de reserva...', 'info');
                             
                             var resultEmail = await enviarEmailReserva(salvo.email, dadosEmail);
                             
-                            // ============================================
-                            // 📧 NOTIFICAR ADMINISTRADOR
-                            // ============================================
                             await notificarAdminNovaReserva(dadosEmail);
 
-                            // ============================================
-                            // 🎉 FINALIZAR
-                            // ============================================
                             console.log('%c═══════════════════════════════════════════', 'color: #888;');
                             logEtapa('8', '🎉 RESERVA EFETUADA COM SUCESSO!', 'sucesso');
                             addLog('📋 Verifique:', 'info');
