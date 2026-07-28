@@ -11,7 +11,7 @@
     
     <style>
         /* ============================================
-           RESET & BASE
+           RESET & BASE PREMIUM
            ============================================ */
         * {
             margin: 0;
@@ -46,22 +46,34 @@
             padding: 0 24px;
         }
         .section {
-            padding: 80px 0;
+            padding: 100px 0;
+            position: relative;
         }
         .section-title {
             font-family: 'Poppins', sans-serif;
             font-weight: 700;
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             color: #1e2b2f;
             text-align: center;
             margin-bottom: 12px;
+            position: relative;
+        }
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, #C9A227, #2F5D62);
+            margin: 12px auto 0;
+            border-radius: 4px;
         }
         .section-subtitle {
             text-align: center;
             color: #4a5f64;
             max-width: 600px;
             margin: 0 auto 48px;
-            font-size: 1.1rem;
+            font-size: 1.15rem;
+            opacity: 0.8;
         }
         .section-title span {
             color: #C9A227;
@@ -76,50 +88,70 @@
             --petroleo-escuro: #1c3e42;
             --bege: #F4EFE8;
             --dourado: #C9A227;
+            --dourado-claro: #e8d48b;
             --branco: #FFFFFF;
             --cinza-claro: #F7F8FA;
             --texto: #1e2b2f;
-            --sombra: 0 10px 30px rgba(0, 0, 0, 0.06);
+            --sombra: 0 20px 60px rgba(0, 0, 0, 0.06);
+            --sombra-hover: 0 30px 80px rgba(47, 93, 98, 0.1);
         }
 
         /* ============================================
-           BOTÕES
+           BOTÕES PREMIUM
            ============================================ */
         .btn {
-            display: inline-block;
-            padding: 14px 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 16px 38px;
             border-radius: 50px;
             font-weight: 600;
             font-size: 1rem;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             border: none;
             cursor: pointer;
             font-family: 'Inter', sans-serif;
             text-align: center;
             -webkit-tap-highlight-color: transparent;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        .btn:active::after {
+            width: 300px;
+            height: 300px;
         }
         .btn-whatsapp {
             background: #25D366;
             color: #fff;
-            box-shadow: 0 8px 20px rgba(37, 211, 102, 0.3);
+            box-shadow: 0 8px 30px rgba(37, 211, 102, 0.35);
         }
         .btn-whatsapp:hover {
             background: #1da851;
-            transform: translateY(-3px);
-            box-shadow: 0 12px 28px rgba(37, 211, 102, 0.4);
-        }
-        .btn-whatsapp:active {
-            transform: scale(0.96);
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 16px 40px rgba(37, 211, 102, 0.45);
         }
         .btn-primario {
             background: var(--petroleo);
             color: #fff;
-            box-shadow: 0 8px 20px rgba(47, 93, 98, 0.25);
+            box-shadow: 0 8px 30px rgba(47, 93, 98, 0.3);
         }
         .btn-primario:hover {
             background: var(--petroleo-escuro);
-            transform: translateY(-3px);
-            box-shadow: 0 12px 28px rgba(47, 93, 98, 0.35);
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 16px 40px rgba(47, 93, 98, 0.4);
         }
         .btn-secundario {
             background: transparent;
@@ -129,50 +161,40 @@
         .btn-secundario:hover {
             background: var(--petroleo);
             color: #fff;
-            transform: translateY(-3px);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(47, 93, 98, 0.2);
         }
-        .btn-sm {
-            padding: 8px 16px;
-            font-size: 0.8rem;
-            min-width: auto;
-            border-radius: 30px;
-        }
-        .btn-success {
-            background: #28a745;
+        .btn-dourado {
+            background: var(--dourado);
             color: #fff;
+            box-shadow: 0 8px 30px rgba(201, 162, 39, 0.3);
         }
-        .btn-success:hover {
-            background: #1e7e34;
+        .btn-dourado:hover {
+            background: #b8921f;
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 16px 40px rgba(201, 162, 39, 0.4);
         }
-        .btn-danger {
-            background: #dc3545;
-            color: #fff;
-        }
-        .btn-danger:hover {
-            background: #bd2130;
-        }
-        .btn-warning {
-            background: #ffc107;
-            color: #212529;
-        }
-        .btn-warning:hover {
-            background: #e0a800;
-        }
+        .btn i { font-size: 1.1rem; }
 
         /* ============================================
-           HEADER
+           HEADER PREMIUM
            ============================================ */
         header {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             z-index: 1000;
-            padding: 12px 0;
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.04);
+            padding: 14px 0;
+            box-shadow: 0 2px 30px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s ease;
+        }
+        header.scrolled {
+            padding: 8px 0;
+            box-shadow: 0 4px 40px rgba(0, 0, 0, 0.08);
         }
         header .container {
             display: flex;
@@ -183,16 +205,19 @@
         .logo {
             font-family: 'Poppins', sans-serif;
             font-weight: 700;
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             color: var(--petroleo);
             display: flex;
             align-items: center;
             gap: 10px;
             flex-shrink: 0;
+            transition: all 0.3s ease;
         }
+        .logo:hover { transform: scale(1.02); }
         .logo img {
-            height: 40px;
+            height: 42px;
             width: auto;
+            border-radius: 8px;
         }
         .logo span {
             color: var(--dourado);
@@ -209,7 +234,7 @@
         }
         nav ul li a {
             color: var(--texto);
-            transition: color 0.3s;
+            transition: all 0.3s ease;
             position: relative;
             white-space: nowrap;
         }
@@ -219,9 +244,10 @@
             bottom: -4px;
             left: 0;
             width: 0;
-            height: 2px;
-            background: var(--dourado);
-            transition: width 0.3s;
+            height: 2.5px;
+            background: linear-gradient(90deg, var(--dourado), var(--petroleo));
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 4px;
         }
         nav ul li a:hover {
             color: var(--petroleo);
@@ -231,27 +257,28 @@
         }
         .menu-mobile {
             display: none;
-            font-size: 1.6rem;
+            font-size: 1.8rem;
             color: var(--petroleo);
             cursor: pointer;
             padding: 4px 8px;
             -webkit-tap-highlight-color: transparent;
             user-select: none;
+            transition: all 0.3s ease;
         }
-        .menu-mobile:active {
-            transform: scale(0.9);
-        }
+        .menu-mobile:hover { transform: scale(1.1); }
+        .menu-mobile:active { transform: scale(0.9); }
         .nav-agendar {
-            background: var(--dourado);
+            background: linear-gradient(135deg, var(--dourado), #b8921f);
             color: #fff !important;
-            padding: 8px 20px;
+            padding: 10px 24px;
             border-radius: 50px;
             font-weight: 600;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(201, 162, 39, 0.25);
         }
         .nav-agendar:hover {
-            background: #b8921f;
-            transform: translateY(-2px);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 30px rgba(201, 162, 39, 0.35);
         }
         .nav-agendar::after {
             display: none !important;
@@ -259,79 +286,145 @@
         .nav-admin {
             background: var(--petroleo);
             color: #fff !important;
-            padding: 8px 20px;
+            padding: 10px 24px;
             border-radius: 50px;
             font-weight: 600;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(47, 93, 98, 0.2);
         }
         .nav-admin:hover {
             background: var(--petroleo-escuro);
-            transform: translateY(-2px);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 30px rgba(47, 93, 98, 0.3);
         }
         .nav-admin::after {
             display: none !important;
         }
 
         /* ============================================
-           HERO
+           HERO PREMIUM
            ============================================ */
         .hero {
-            min-height: 90vh;
+            min-height: 100vh;
             display: flex;
             align-items: center;
-            background: linear-gradient(135deg, #f9fbf9 0%, #edf3ec 100%);
+            background: linear-gradient(160deg, #f9fbf9 0%, #edf3ec 50%, #e8eee6 100%);
             padding-top: 80px;
             position: relative;
             overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(201, 162, 39, 0.05) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(47, 93, 98, 0.04) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
         }
         .hero .container {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 60px;
             align-items: center;
+            position: relative;
+            z-index: 2;
         }
         .hero-content h1 {
             font-family: 'Poppins', sans-serif;
             font-weight: 800;
-            font-size: 3.5rem;
-            line-height: 1.1;
+            font-size: 3.8rem;
+            line-height: 1.08;
             color: #1e2b2f;
             margin-bottom: 20px;
         }
         .hero-content h1 span {
-            color: var(--dourado);
+            background: linear-gradient(135deg, var(--dourado), #b8921f);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         .hero-content p {
-            font-size: 1.2rem;
+            font-size: 1.25rem;
             color: #4a5f64;
             max-width: 500px;
             margin-bottom: 32px;
+            line-height: 1.8;
+        }
+        .hero-content p strong {
+            color: var(--petroleo);
         }
         .hero-buttons {
             display: flex;
             flex-wrap: wrap;
             gap: 16px;
         }
+        .hero-image {
+            position: relative;
+        }
         .hero-image img {
             max-width: 100%;
             border-radius: 30px;
-            box-shadow: 0 30px 60px rgba(47, 93, 98, 0.15);
+            box-shadow: 0 40px 80px rgba(47, 93, 98, 0.15);
             height: auto;
+            transition: all 0.6s ease;
+        }
+        .hero-image:hover img {
+            transform: scale(1.01);
+            box-shadow: 0 50px 100px rgba(47, 93, 98, 0.2);
+        }
+        .hero-image::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            right: -20px;
+            width: 100px;
+            height: 100px;
+            border: 3px solid var(--dourado);
+            border-radius: 20px;
+            opacity: 0.2;
+            z-index: -1;
         }
 
         /* ============================================
-           BANNER
+           BANNER PREMIUM
            ============================================ */
         .banner-home {
-            background: var(--petroleo);
+            background: linear-gradient(135deg, var(--petroleo), var(--petroleo-escuro));
             color: #fff;
-            padding: 40px 0;
+            padding: 50px 0;
             text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .banner-home::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(201, 162, 39, 0.05) 0%, transparent 70%);
+            border-radius: 50%;
         }
         .banner-home h2 {
             color: #fff;
-            font-size: 2rem;
+            font-size: 2.2rem;
             font-family: 'Poppins', sans-serif;
+            position: relative;
         }
         .banner-home h2 i {
             color: var(--dourado);
@@ -341,7 +434,8 @@
             font-size: 1.2rem;
             opacity: 0.9;
             max-width: 700px;
-            margin: 8px auto 0;
+            margin: 12px auto 0;
+            position: relative;
         }
         .banner-home .highlight {
             color: var(--dourado);
@@ -349,7 +443,7 @@
         }
 
         /* ============================================
-           SOBRE
+           SOBRE PREMIUM
            ============================================ */
         .sobre-grid {
             display: grid;
@@ -361,33 +455,59 @@
             font-size: 1.1rem;
             color: #2d4449;
             margin-bottom: 20px;
+            line-height: 1.8;
         }
         .sobre-texto .valores {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px 16px;
+            gap: 8px 12px;
             margin-top: 16px;
         }
         .sobre-texto .valores span {
             background: var(--bege);
-            padding: 6px 16px;
+            padding: 6px 18px;
             border-radius: 30px;
             font-size: 0.85rem;
             font-weight: 500;
             color: var(--petroleo);
             display: inline-block;
+            transition: all 0.3s ease;
+            cursor: default;
+        }
+        .sobre-texto .valores span:hover {
+            background: var(--petroleo);
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(47, 93, 98, 0.2);
+        }
+        .sobre-imagem {
+            position: relative;
         }
         .sobre-imagem img {
             border-radius: 30px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.06);
             width: 100%;
             aspect-ratio: 1/1;
             object-fit: cover;
             height: auto;
+            transition: all 0.6s ease;
+        }
+        .sobre-imagem:hover img {
+            transform: scale(1.01);
+            box-shadow: 0 30px 80px rgba(47, 93, 98, 0.1);
+        }
+        .sobre-imagem::after {
+            content: '🦶';
+            position: absolute;
+            bottom: -10px;
+            right: -10px;
+            font-size: 4rem;
+            opacity: 0.1;
+            transform: rotate(-10deg);
         }
 
         /* ============================================
-           SERVIÇOS
+           SERVIÇOS PREMIUM
            ============================================ */
         .servicos-grid {
             display: grid;
@@ -396,29 +516,51 @@
         }
         .servico-card {
             background: var(--branco);
-            padding: 30px 20px;
-            border-radius: 20px;
+            padding: 32px 20px;
+            border-radius: 24px;
             box-shadow: var(--sombra);
             text-align: center;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(168, 195, 160, 0.1);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(168, 195, 160, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+        .servico-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--dourado), var(--petroleo));
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .servico-card:hover::before {
+            opacity: 1;
         }
         .servico-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 15px 40px rgba(47, 93, 98, 0.08);
+            transform: translateY(-10px);
+            box-shadow: var(--sombra-hover);
             border-color: var(--salvia);
         }
         .servico-card i {
-            font-size: 2.4rem;
+            font-size: 2.6rem;
             color: var(--petroleo);
             background: var(--bege);
-            padding: 16px;
-            border-radius: 16px;
+            padding: 18px;
+            border-radius: 18px;
             margin-bottom: 16px;
             display: inline-block;
+            transition: all 0.4s ease;
+        }
+        .servico-card:hover i {
+            background: var(--petroleo);
+            color: #fff;
+            transform: rotate(-6deg) scale(1.05);
         }
         .servico-card h3 {
-            font-size: 1.1rem;
+            font-size: 1.15rem;
             font-family: 'Poppins', sans-serif;
             font-weight: 600;
             color: var(--petroleo);
@@ -427,60 +569,85 @@
         .servico-card p {
             font-size: 0.9rem;
             color: #4a5f64;
+            line-height: 1.6;
         }
 
         /* ============================================
-           DIFERENCIAIS
+           DIFERENCIAIS PREMIUM
            ============================================ */
         .diferenciais-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 30px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
         }
         .diferencial-item {
             background: var(--branco);
             padding: 32px 24px;
-            border-radius: 20px;
+            border-radius: 24px;
             text-align: center;
             box-shadow: var(--sombra);
             border-top: 4px solid var(--dourado);
-            transition: 0.3s;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .diferencial-item::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 0;
+            background: linear-gradient(0deg, rgba(47, 93, 98, 0.03), transparent);
+            transition: height 0.5s ease;
+        }
+        .diferencial-item:hover::after {
+            height: 100%;
         }
         .diferencial-item:hover {
-            transform: translateY(-4px);
+            transform: translateY(-8px);
+            box-shadow: var(--sombra-hover);
         }
         .diferencial-item i {
-            font-size: 2.2rem;
+            font-size: 2.4rem;
             color: var(--petroleo);
             margin-bottom: 12px;
+            display: inline-block;
+            transition: all 0.4s ease;
+        }
+        .diferencial-item:hover i {
+            transform: scale(1.1) rotate(-4deg);
+            color: var(--dourado);
         }
         .diferencial-item h4 {
             font-size: 1.1rem;
             font-family: 'Poppins', sans-serif;
             font-weight: 600;
             color: var(--petroleo);
+            position: relative;
         }
         .diferencial-item p {
             font-size: 0.95rem;
             color: #4a5f64;
             margin-top: 4px;
+            position: relative;
         }
 
         /* ============================================
-           GALERIA
+           GALERIA PREMIUM
            ============================================ */
         .caso-container {
             background: var(--branco);
-            border-radius: 24px;
-            padding: 40px;
+            border-radius: 28px;
+            padding: 48px;
             margin-bottom: 50px;
             box-shadow: var(--sombra);
-            border: 1px solid rgba(168, 195, 160, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(168, 195, 160, 0.06);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .caso-container:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 40px rgba(47, 93, 98, 0.08);
+            transform: translateY(-6px);
+            box-shadow: var(--sombra-hover);
         }
         .caso-titulo {
             text-align: center;
@@ -488,14 +655,14 @@
         }
         .badge-caso {
             display: inline-block;
-            background: var(--dourado);
+            background: linear-gradient(135deg, var(--dourado), #b8921f);
             color: #fff;
-            padding: 4px 16px;
+            padding: 4px 20px;
             border-radius: 30px;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
             margin-bottom: 10px;
         }
         .caso-titulo h3 {
@@ -506,6 +673,7 @@
         }
         .caso-titulo h3 i {
             margin-right: 12px;
+            color: var(--dourado);
         }
         .caso-descricao {
             color: #4a5f64;
@@ -521,31 +689,41 @@
             margin: 20px 0 16px;
         }
         .caso-item {
-            border-radius: 16px;
+            border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
             position: relative;
             aspect-ratio: 1/1;
             background: var(--bege);
+            transition: all 0.4s ease;
+        }
+        .caso-item:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.1);
         }
         .caso-item img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             display: block;
+            transition: all 0.6s ease;
+        }
+        .caso-item:hover img {
+            transform: scale(1.05);
         }
         .caso-label {
             position: absolute;
-            top: 12px;
-            left: 12px;
-            background: rgba(0, 0, 0, 0.7);
+            top: 14px;
+            left: 14px;
+            background: rgba(0, 0, 0, 0.75);
             color: #fff;
-            padding: 4px 14px;
+            padding: 4px 16px;
             border-radius: 30px;
             font-size: 0.7rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            backdrop-filter: blur(4px);
         }
         .caso-item.antes .caso-label {
             background: rgba(220, 53, 69, 0.85);
@@ -554,41 +732,58 @@
             background: rgba(40, 167, 69, 0.85);
         }
         .caso-legenda {
-            padding: 12px 16px;
+            padding: 14px 16px;
             font-size: 0.85rem;
             text-align: center;
             background: var(--cinza-claro);
-            border-radius: 0 0 16px 16px;
+            border-radius: 0 0 20px 20px;
+            font-weight: 500;
         }
         .caso-legenda i {
             margin-right: 6px;
         }
         .caso-seta {
-            font-size: 2.5rem;
+            font-size: 3rem;
             color: var(--dourado);
             padding: 0 8px;
             display: flex;
             align-items: center;
             justify-content: center;
+            animation: setaPulse 2s ease-in-out infinite;
+        }
+        @keyframes setaPulse {
+            0%, 100% { transform: translateX(0); opacity: 1; }
+            50% { transform: translateX(8px); opacity: 0.6; }
         }
         .caso-resultado {
             background: var(--bege);
-            padding: 16px 24px;
-            border-radius: 12px;
+            padding: 18px 24px;
+            border-radius: 16px;
             text-align: center;
             margin-top: 16px;
             border-left: 4px solid var(--dourado);
+            transition: all 0.3s ease;
+        }
+        .caso-resultado:hover {
+            background: var(--petroleo);
+            border-left-color: var(--dourado);
+        }
+        .caso-resultado:hover i,
+        .caso-resultado:hover span {
+            color: #fff;
         }
         .caso-resultado i {
             margin-right: 8px;
+            transition: color 0.3s ease;
         }
         .caso-resultado span {
             font-size: 0.95rem;
             color: #2d4449;
+            transition: color 0.3s ease;
         }
 
         /* ============================================
-           VÍDEOS
+           VÍDEOS PREMIUM
            ============================================ */
         .videos-grid {
             display: grid;
@@ -599,14 +794,15 @@
         }
         .video-card {
             background: #f8f9fa;
-            border-radius: 18px;
+            border-radius: 24px;
             overflow: hidden;
             box-shadow: var(--sombra);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(168, 195, 160, 0.06);
         }
         .video-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+            transform: translateY(-8px);
+            box-shadow: var(--sombra-hover);
         }
         .video-wrapper {
             position: relative;
@@ -623,20 +819,24 @@
             background: #111;
         }
         .video-card h3 {
-            padding: 20px 22px 8px;
+            padding: 22px 24px 8px;
             font-size: 1.15rem;
             font-family: 'Poppins', sans-serif;
             color: var(--petroleo);
         }
+        .video-card h3 i {
+            color: var(--dourado);
+            margin-right: 8px;
+        }
         .video-card p {
-            padding: 0 22px 22px;
+            padding: 0 24px 24px;
             font-size: 0.95rem;
             line-height: 1.6;
             color: #4a5f64;
         }
 
         /* ============================================
-           DEPOIMENTOS
+           DEPOIMENTOS PREMIUM
            ============================================ */
         .depoimentos-grid {
             display: grid;
@@ -645,28 +845,53 @@
         }
         .depoimento-card {
             background: var(--branco);
-            padding: 30px;
-            border-radius: 20px;
+            padding: 32px;
+            border-radius: 24px;
             box-shadow: var(--sombra);
-            border: 1px solid rgba(168, 195, 160, 0.1);
+            border: 1px solid rgba(168, 195, 160, 0.06);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        .depoimento-card::before {
+            content: '"';
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 4rem;
+            color: var(--dourado);
+            opacity: 0.08;
+            font-family: Georgia, serif;
+        }
+        .depoimento-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--sombra-hover);
         }
         .depoimento-card .stars {
             color: var(--dourado);
             font-size: 1.2rem;
             margin-bottom: 12px;
+            letter-spacing: 4px;
         }
         .depoimento-card p {
             font-style: italic;
             color: #2d4449;
             margin-bottom: 16px;
+            font-size: 1.05rem;
+            line-height: 1.7;
         }
         .depoimento-card .autor {
             font-weight: 600;
             color: var(--petroleo);
+            font-size: 1rem;
+        }
+        .depoimento-card .autor span {
+            font-weight: 400;
+            color: #8a9ea3;
+            font-size: 0.85rem;
         }
 
         /* ============================================
-           FAQ
+           FAQ PREMIUM
            ============================================ */
         .faq-lista {
             max-width: 800px;
@@ -674,32 +899,38 @@
         }
         .faq-item {
             background: var(--branco);
-            border-radius: 16px;
+            border-radius: 20px;
             margin-bottom: 12px;
             box-shadow: var(--sombra);
-            border: 1px solid rgba(168, 195, 160, 0.1);
+            border: 1px solid rgba(168, 195, 160, 0.06);
             overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .faq-item:hover {
+            box-shadow: var(--sombra-hover);
         }
         .faq-pergunta {
-            padding: 20px 24px;
+            padding: 22px 28px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
             font-weight: 600;
             color: var(--petroleo);
-            transition: background 0.2s;
+            transition: all 0.3s ease;
             -webkit-tap-highlight-color: transparent;
             user-select: none;
+            font-size: 1.05rem;
         }
         .faq-pergunta:hover {
             background: var(--bege);
         }
         .faq-pergunta i {
-            transition: transform 0.3s;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             color: var(--dourado);
             flex-shrink: 0;
             margin-left: 12px;
+            font-size: 1.2rem;
         }
         .faq-item.ativo .faq-pergunta i {
             transform: rotate(180deg);
@@ -707,17 +938,19 @@
         .faq-resposta {
             max-height: 0;
             overflow: hidden;
-            transition: max-height 0.4s ease, padding 0.3s ease;
-            padding: 0 24px;
+            transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease;
+            padding: 0 28px;
             color: #3a4f54;
+            font-size: 1rem;
+            line-height: 1.8;
         }
         .faq-item.ativo .faq-resposta {
             max-height: 300px;
-            padding: 0 24px 20px 24px;
+            padding: 0 28px 24px 28px;
         }
 
         /* ============================================
-           CONTATO
+           CONTATO PREMIUM
            ============================================ */
         .contato-grid {
             display: grid;
@@ -735,11 +968,16 @@
             gap: 16px;
             font-size: 1.05rem;
             word-break: break-word;
+            padding: 4px 0;
+            transition: all 0.3s ease;
+        }
+        .contato-info .item:hover {
+            transform: translateX(6px);
         }
         .contato-info .item i {
             font-size: 1.4rem;
-            width: 44px;
-            height: 44px;
+            width: 48px;
+            height: 48px;
             background: var(--bege);
             display: flex;
             align-items: center;
@@ -747,24 +985,39 @@
             border-radius: 50%;
             color: var(--petroleo);
             flex-shrink: 0;
+            transition: all 0.4s ease;
+        }
+        .contato-info .item:hover i {
+            background: var(--petroleo);
+            color: #fff;
+            transform: scale(1.05);
         }
         .contato-box {
             background: var(--bege);
-            padding: 24px;
-            border-radius: 16px;
+            padding: 24px 28px;
+            border-radius: 20px;
             border-left: 4px solid var(--dourado);
+            transition: all 0.3s ease;
+        }
+        .contato-box:hover {
+            background: var(--cinza-claro);
+            transform: translateX(4px);
         }
         .contato-box h4 {
             font-family: 'Poppins', sans-serif;
             color: var(--petroleo);
             margin-bottom: 4px;
         }
+        .contato-box h4 i {
+            color: var(--dourado);
+            margin-right: 8px;
+        }
         .contato-box p {
             color: #3a4f54;
         }
         .contato-mapa {
             background: var(--bege);
-            border-radius: 20px;
+            border-radius: 24px;
             padding: 40px 30px;
             text-align: center;
             display: flex;
@@ -772,12 +1025,29 @@
             align-items: center;
             justify-content: center;
             height: 100%;
-            min-height: 250px;
+            min-height: 280px;
+            transition: all 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .contato-mapa::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(201, 162, 39, 0.04) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .contato-mapa:hover {
+            transform: scale(1.01);
+            box-shadow: var(--sombra-hover);
         }
         .contato-mapa i {
-            font-size: 4rem;
+            font-size: 4.5rem;
             color: var(--petroleo);
-            opacity: 0.2;
+            opacity: 0.15;
             margin-bottom: 16px;
         }
         .contato-mapa h3 {
@@ -789,12 +1059,24 @@
         }
 
         /* ============================================
-           RODAPÉ
+           RODAPÉ PREMIUM
            ============================================ */
         footer {
             background: var(--petroleo);
             color: rgba(255, 255, 255, 0.8);
-            padding: 40px 0 20px;
+            padding: 50px 0 24px;
+            position: relative;
+            overflow: hidden;
+        }
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--dourado), transparent);
+            opacity: 0.3;
         }
         footer .row {
             display: flex;
@@ -805,18 +1087,24 @@
         footer .col h4 {
             color: #fff;
             font-weight: 600;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
             font-size: 1.1rem;
             font-family: 'Poppins', sans-serif;
+        }
+        footer .col h4 i {
+            color: var(--dourado);
+            margin-right: 8px;
         }
         footer .col p,
         footer .col a {
             font-size: 0.95rem;
-            line-height: 1.8;
+            line-height: 2;
             word-break: break-word;
+            transition: all 0.3s ease;
         }
         footer .col a:hover {
             color: var(--dourado);
+            transform: translateX(4px);
         }
         footer .social {
             display: flex;
@@ -825,29 +1113,33 @@
             flex-wrap: wrap;
         }
         footer .social a {
-            background: rgba(255, 255, 255, 0.08);
-            width: 40px;
-            height: 40px;
+            background: rgba(255, 255, 255, 0.06);
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: 0.3s;
+            transition: all 0.4s ease;
+            font-size: 1.1rem;
         }
         footer .social a:hover {
             background: var(--dourado);
             color: #fff;
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(201, 162, 39, 0.3);
         }
         footer .copyright {
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            padding-top: 24px;
             text-align: center;
             font-size: 0.85rem;
             margin-top: 30px;
+            opacity: 0.7;
         }
 
         /* ============================================
-           WHATSAPP FLOAT
+           WHATSAPP FLOAT PREMIUM
            ============================================ */
         .whatsapp-float {
             position: fixed;
@@ -855,20 +1147,29 @@
             right: 28px;
             z-index: 999;
             background: #25D366;
-            width: 60px;
-            height: 60px;
+            width: 64px;
+            height: 64px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #fff;
-            font-size: 2.2rem;
-            box-shadow: 0 6px 25px rgba(37, 211, 102, 0.4);
-            transition: all 0.3s ease;
+            font-size: 2.4rem;
+            box-shadow: 0 8px 35px rgba(37, 211, 102, 0.4);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
+            animation: floatWhats 3s ease-in-out infinite;
+        }
+        @keyframes floatWhats {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
         }
         .whatsapp-float:hover {
-            transform: scale(1.08);
+            transform: scale(1.1) translateY(-4px);
+            box-shadow: 0 12px 45px rgba(37, 211, 102, 0.5);
+        }
+        .whatsapp-float:active {
+            transform: scale(0.9);
         }
 
         .back-top {
@@ -878,17 +1179,17 @@
             z-index: 999;
             background: var(--petroleo);
             color: #fff;
-            width: 44px;
-            height: 44px;
+            width: 46px;
+            height: 46px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.2rem;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
             opacity: 0;
             visibility: hidden;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
         }
         .back-top.visivel {
@@ -897,21 +1198,24 @@
         }
         .back-top:hover {
             background: var(--petroleo-escuro);
-            transform: translateY(-4px);
+            transform: translateY(-6px);
+            box-shadow: 0 8px 30px rgba(47, 93, 98, 0.3);
         }
 
         /* ============================================
-           RESPONSIVIDADE
+           RESPONSIVIDADE PREMIUM
            ============================================ */
         @media (max-width: 1200px) {
             .container { padding: 0 20px; }
-            .hero-content h1 { font-size: 3rem; }
+            .hero-content h1 { font-size: 3.2rem; }
+            .section { padding: 80px 0; }
         }
         @media (max-width: 992px) {
             .hero .container { grid-template-columns: 1fr; text-align: center; gap: 40px; }
             .hero-content p { margin: 0 auto 32px; max-width: 100%; }
             .hero-buttons { justify-content: center; }
             .hero-content h1 { font-size: 2.8rem; }
+            .hero-image::after { display: none; }
             .sobre-grid { grid-template-columns: 1fr; text-align: center; gap: 40px; }
             .sobre-texto .valores { justify-content: center; }
             .servicos-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
@@ -921,12 +1225,13 @@
             .caso-grid { grid-template-columns: 1fr auto 1fr; gap: 16px; }
             .videos-grid { grid-template-columns: 1fr 1fr; gap: 25px; max-width: 100%; }
             .section { padding: 60px 0; }
-            .section-title { font-size: 2.2rem; }
+            .section-title { font-size: 2.4rem; }
+            .contato-mapa { min-height: 200px; }
         }
         @media (max-width: 768px) {
-            nav ul { display: none; flex-direction: column; background: #fff; position: absolute; top: 70px; left: 0; width: 100%; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); gap: 16px; text-align: center; border-top: 1px solid rgba(0,0,0,0.05); }
+            nav ul { display: none; flex-direction: column; background: #fff; position: absolute; top: 70px; left: 0; width: 100%; padding: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.08); gap: 16px; text-align: center; border-top: 1px solid rgba(0,0,0,0.04); }
             nav ul.aberto { display: flex; }
-            nav ul li a { font-size: 1.1rem; padding: 8px 0; display: block; }
+            nav ul li a { font-size: 1.05rem; padding: 10px 0; display: block; }
             .menu-mobile { display: block; }
             .hero-content h1 { font-size: 2.2rem; }
             .hero-content p { font-size: 1rem; }
@@ -942,7 +1247,7 @@
             .depoimentos-grid { grid-template-columns: 1fr; gap: 16px; }
             .caso-grid { grid-template-columns: 1fr; gap: 12px; }
             .caso-seta { transform: rotate(90deg); padding: 4px 0; font-size: 2rem; }
-            .caso-container { padding: 24px 16px; }
+            .caso-container { padding: 24px 16px; border-radius: 20px; }
             .caso-titulo h3 { font-size: 1.3rem; }
             .caso-legenda { font-size: 0.8rem; padding: 10px 12px; }
             .caso-resultado { padding: 14px 16px; }
@@ -959,7 +1264,9 @@
             footer .row { flex-direction: column; gap: 24px; text-align: center; }
             footer .social { justify-content: center; }
             .container { padding: 0 16px; }
-            .nav-agendar, .nav-admin { padding: 6px 16px; font-size: 0.85rem; }
+            .nav-agendar, .nav-admin { padding: 8px 18px; font-size: 0.85rem; }
+            .whatsapp-float { width: 56px; height: 56px; font-size: 2rem; bottom: 20px; right: 20px; }
+            .back-top { bottom: 80px; right: 20px; width: 40px; height: 40px; font-size: 1rem; }
         }
         @media (max-width: 480px) {
             .hero-content h1 { font-size: 1.8rem; }
@@ -969,7 +1276,7 @@
             .servicos-grid { grid-template-columns: 1fr; gap: 14px; }
             .diferenciais-grid { grid-template-columns: 1fr; gap: 14px; }
             .depoimentos-grid { grid-template-columns: 1fr; gap: 14px; }
-            .caso-container { padding: 18px 12px; margin-bottom: 30px; }
+            .caso-container { padding: 18px 12px; margin-bottom: 30px; border-radius: 16px; }
             .caso-titulo h3 { font-size: 1.1rem; }
             .caso-descricao { font-size: 0.9rem; }
             .caso-seta { font-size: 1.6rem; }
@@ -992,7 +1299,7 @@
             .banner-home p { font-size: 0.95rem; }
             .section { padding: 40px 0; }
             .whatsapp-float { width: 50px; height: 50px; font-size: 1.8rem; bottom: 16px; right: 16px; }
-            .back-top { bottom: 76px; right: 16px; width: 38px; height: 38px; font-size: 1rem; }
+            .back-top { bottom: 72px; right: 16px; width: 36px; height: 36px; font-size: 0.9rem; }
             .container { padding: 0 12px; }
             footer { padding: 30px 0 16px; }
             footer .col h4 { font-size: 1rem; }
@@ -1003,6 +1310,7 @@
             .faq-pergunta { padding: 14px 16px; font-size: 0.95rem; }
             .faq-resposta { font-size: 0.9rem; }
             .faq-item.ativo .faq-resposta { padding: 0 16px 14px 16px; }
+            .section-title::after { width: 40px; }
         }
         @media (max-width: 380px) {
             .hero-content h1 { font-size: 1.5rem; }
@@ -1013,13 +1321,14 @@
             .video-card h3 { font-size: 0.85rem; }
             .video-card p { font-size: 0.8rem; }
             .caso-item { aspect-ratio: 1/1; }
+            .contato-info .item { font-size: 0.8rem; }
         }
     </style>
 </head>
 <body>
 
     <!-- ===== HEADER ===== -->
-    <header>
+    <header id="header">
         <div class="container">
             <a href="index.html" class="logo">
                 <img src="images/Logo.jpeg" alt="Levità Podologia - Podóloga Renata Kemp" />
@@ -1075,7 +1384,7 @@
                 <strong>Escolha a melhor opção para você:</strong><br />
                 Atendimento <span class="highlight">domiciliar</span> com conforto e segurança, ou <span class="highlight">presencial</span> em nossa clínica em Guarulhos.
             </p>
-            <a href="agendamento.html" class="btn btn-whatsapp" style="margin-top:20px;">
+            <a href="agendamento.html" class="btn btn-dourado" style="margin-top:20px;">
                 <i class="fas fa-calendar-check"></i> Agendar Agora
             </a>
         </div>
@@ -1145,7 +1454,7 @@
             <h2 class="section-title">Antes e <span>Depois</span></h2>
             <p class="section-subtitle">Resultados reais dos tratamentos realizados pela <strong>Podóloga Renata Kemp</strong>.</p>
             <div class="caso-container">
-                <div class="caso-titulo"><span class="badge-caso">CASO 1</span><h3><i class="fas fa-exclamation-triangle" style="color: var(--dourado);"></i> Unha Encravada</h3><p class="caso-descricao">Tratamento de unha encravada (onicocriptose) com técnica minimamente invasiva.</p></div>
+                <div class="caso-titulo"><span class="badge-caso">CASO 1</span><h3><i class="fas fa-exclamation-triangle"></i> Unha Encravada</h3><p class="caso-descricao">Tratamento de unha encravada (onicocriptose) com técnica minimamente invasiva.</p></div>
                 <div class="caso-grid">
                     <div class="caso-item antes"><div class="caso-label">ANTES</div><img src="images/antes1.png" alt="Unha encravada - Antes" loading="lazy" /><div class="caso-legenda"><i class="fas fa-exclamation-circle" style="color: #dc3545;"></i> Unha encravada com inflamação e dor</div></div>
                     <div class="caso-seta"><i class="fas fa-arrow-right"></i></div>
@@ -1154,7 +1463,7 @@
                 <div class="caso-resultado"><i class="fas fa-star" style="color: var(--dourado);"></i><span>Resultado: Paciente com alívio imediato da dor e recuperação completa em 7 dias.</span></div>
             </div>
             <div class="caso-container">
-                <div class="caso-titulo"><span class="badge-caso">CASO 2</span><h3><i class="fas fa-circle" style="color: var(--dourado);"></i> Calosidade</h3><p class="caso-descricao">Remoção de calosidade (hiperqueratose) com técnica indolor e resultados duradouros.</p></div>
+                <div class="caso-titulo"><span class="badge-caso">CASO 2</span><h3><i class="fas fa-circle"></i> Calosidade</h3><p class="caso-descricao">Remoção de calosidade (hiperqueratose) com técnica indolor e resultados duradouros.</p></div>
                 <div class="caso-grid">
                     <div class="caso-item antes"><div class="caso-label">ANTES</div><img src="images/antes2.png" alt="Calosidade - Antes" loading="lazy" /><div class="caso-legenda"><i class="fas fa-exclamation-circle" style="color: #dc3545;"></i> Calosidade espessa, amarelada e ressecada</div></div>
                     <div class="caso-seta"><i class="fas fa-arrow-right"></i></div>
@@ -1174,12 +1483,12 @@
             <div class="videos-grid">
                 <div class="video-card">
                     <div class="video-wrapper"><video controls preload="metadata" playsinline><source src="videos/video1.mp4" type="video/mp4">Seu navegador não suporta a reprodução de vídeos.</video></div>
-                    <h3><i class="fas fa-star" style="color: var(--dourado);"></i> Relato de Experiência</h3>
+                    <h3><i class="fas fa-star"></i> Relato de Experiência</h3>
                     <p>Depoimento emocionante de uma paciente sobre o atendimento da <strong>Podóloga Renata Kemp</strong> e os resultados transformadores do tratamento.</p>
                 </div>
                 <div class="video-card">
                     <div class="video-wrapper"><video controls preload="metadata" playsinline><source src="videos/video2.mp4" type="video/mp4">Seu navegador não suporta a reprodução de vídeos.</video></div>
-                    <h3><i class="fas fa-play-circle" style="color: var(--dourado);"></i> Nosso Trabalho</h3>
+                    <h3><i class="fas fa-play-circle"></i> Nosso Trabalho</h3>
                     <p>Veja a <strong>Podóloga Renata Kemp</strong> em ação, realizando atendimentos com cuidado, dedicação e profissionalismo.</p>
                 </div>
             </div>
@@ -1192,9 +1501,9 @@
             <h2 class="section-title">O que dizem sobre a <span>Podóloga Renata Kemp</span></h2>
             <p class="section-subtitle">Depoimentos reais de pacientes que confiaram no trabalho de Renata.</p>
             <div class="depoimentos-grid">
-                <div class="depoimento-card"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><p>"Excelente atendimento! A Renata veio até minha casa e resolveu meu problema com unha encravada. Super recomendo!"</p><div class="autor">— Maria A.</div></div>
-                <div class="depoimento-card"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><p>"Sou diabética e sempre tive receio de cuidar dos pés. O atendimento domiciliar da Renata me trouxe muita segurança e confiança."</p><div class="autor">— Helena S.</div></div>
-                <div class="depoimento-card"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><p>"Minha mãe de 82 anos foi atendida em casa com todo carinho. Profissionalismo e dedicação que emocionam."</p><div class="autor">— Roberto C.</div></div>
+                <div class="depoimento-card"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><p>"Excelente atendimento! A Renata veio até minha casa e resolveu meu problema com unha encravada. Super recomendo!"</p><div class="autor">— Maria A. <span>• 3 meses atrás</span></div></div>
+                <div class="depoimento-card"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><p>"Sou diabética e sempre tive receio de cuidar dos pés. O atendimento domiciliar da Renata me trouxe muita segurança e confiança."</p><div class="autor">— Helena S. <span>• 2 meses atrás</span></div></div>
+                <div class="depoimento-card"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><p>"Minha mãe de 82 anos foi atendida em casa com todo carinho. Profissionalismo e dedicação que emocionam."</p><div class="autor">— Roberto C. <span>• 1 mês atrás</span></div></div>
             </div>
         </div>
     </section>
@@ -1222,8 +1531,8 @@
             <p class="section-subtitle">Agende sua consulta com a Podóloga Renata Kemp ou tire suas dúvidas.</p>
             <div class="contato-grid">
                 <div class="contato-info">
-                    <div class="contato-box"><h4><i class="fas fa-home" style="color: var(--dourado);"></i> Atendimento Domiciliar</h4><p>Agende seu horário e a <strong>Podóloga Renata Kemp</strong> vai até você!</p><p style="font-size: 0.95rem; margin-top: 4px;"><i class="fas fa-map-marker-alt" style="color: var(--dourado);"></i> <strong>Guarulhos e região</strong></p></div>
-                    <div class="contato-box" style="border-left-color: var(--petroleo);"><h4><i class="fas fa-building" style="color: var(--petroleo);"></i> Atendimento Presencial</h4><p>Agende seu horário e venha à clínica em Guarulhos.</p><p style="font-size: 0.95rem; margin-top: 4px;"><i class="fas fa-map-marker-alt" style="color: var(--petroleo);"></i> <strong>Guarulhos - SP</strong></p></div>
+                    <div class="contato-box"><h4><i class="fas fa-home"></i> Atendimento Domiciliar</h4><p>Agende seu horário e a <strong>Podóloga Renata Kemp</strong> vai até você!</p><p style="font-size: 0.95rem; margin-top: 4px;"><i class="fas fa-map-marker-alt"></i> <strong>Guarulhos e região</strong></p></div>
+                    <div class="contato-box" style="border-left-color: var(--petroleo);"><h4><i class="fas fa-building"></i> Atendimento Presencial</h4><p>Agende seu horário e venha à clínica em Guarulhos.</p><p style="font-size: 0.95rem; margin-top: 4px;"><i class="fas fa-map-marker-alt"></i> <strong>Guarulhos - SP</strong></p></div>
                     <div class="item"><i class="fas fa-phone-alt"></i><span>(11) 97830-3833</span></div>
                     <div class="item"><i class="fab fa-whatsapp"></i><span>(11) 97830-3833</span></div>
                     <div class="item"><i class="fas fa-envelope"></i><span>contato@levitapodologia.com.br</span></div>
@@ -1239,7 +1548,7 @@
     <footer>
         <div class="container">
             <div class="row">
-                <div class="col"><h4><i class="fas fa-leaf" style="color:var(--salvia);"></i> Levità Podologia</h4><p>Leveza para cada passo.<br />Cuidando dos seus pés com dedicação e excelência.</p><p><strong>Podóloga Renata Kemp</strong></p><p><i class="fas fa-home" style="color: var(--dourado);"></i> Atendimento Domiciliar</p><p><i class="fas fa-building" style="color: var(--dourado);"></i> Atendimento Presencial</p><p><i class="fas fa-map-marker-alt" style="color: var(--dourado);"></i> Guarulhos e região</p><div class="social"><a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a><a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a><a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a></div></div>
+                <div class="col"><h4><i class="fas fa-leaf"></i> Levità Podologia</h4><p>Leveza para cada passo.<br />Cuidando dos seus pés com dedicação e excelência.</p><p><strong>Podóloga Renata Kemp</strong></p><p><i class="fas fa-home"></i> Atendimento Domiciliar</p><p><i class="fas fa-building"></i> Atendimento Presencial</p><p><i class="fas fa-map-marker-alt"></i> Guarulhos e região</p><div class="social"><a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a><a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a><a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a></div></div>
                 <div class="col"><h4>Links rápidos</h4><a href="#sobre">Sobre</a><br /><a href="#servicos">Serviços</a><br /><a href="#galeria">Galeria</a><br /><a href="#videos">Vídeos</a><br /><a href="#depoimentos">Depoimentos</a><br /><a href="#faq">FAQ</a></div>
                 <div class="col"><h4>Contato</h4><p><i class="fas fa-phone-alt" style="width:20px;"></i> (11) 97830-3833</p><p><i class="fab fa-whatsapp" style="width:20px;"></i> (11) 97830-3833</p><p><i class="fas fa-envelope" style="width:20px;"></i> contato@levitapodologia.com.br</p><p><i class="fas fa-clock" style="width:20px;"></i> Seg–Sex: 8h–19h</p><p><strong>Podóloga Renata Kemp</strong></p></div>
             </div>
@@ -1259,7 +1568,23 @@
 
     <script>
         // ============================================
-        // WHATSAPP FLOAT - PEDIR MAIS INFORMAÇÕES
+        // HEADER SCROLL
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            const header = document.getElementById('header');
+            if (header) {
+                window.addEventListener('scroll', function() {
+                    if (window.scrollY > 80) {
+                        header.classList.add('scrolled');
+                    } else {
+                        header.classList.remove('scrolled');
+                    }
+                });
+            }
+        });
+
+        // ============================================
+        // WHATSAPP FLOAT
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
             const whatsappFloat = document.getElementById('whatsapp-float');
@@ -1365,7 +1690,7 @@
         });
 
         // ============================================
-        // ANIMAÇÕES
+        // ANIMAÇÕES DE ENTRADA
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
             const elementos = document.querySelectorAll(
@@ -1375,8 +1700,8 @@
             if (elementos.length) {
                 elementos.forEach(function(el) {
                     el.style.opacity = '0';
-                    el.style.transform = 'translateY(30px)';
-                    el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                    el.style.transform = 'translateY(40px)';
+                    el.style.transition = 'opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), transform 0.7s cubic-bezier(0.4, 0, 0.2, 1)';
                 });
 
                 const observer = new IntersectionObserver(function(entries) {
@@ -1386,7 +1711,7 @@
                             entry.target.style.transform = 'translateY(0)';
                         }
                     });
-                }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+                }, { threshold: 0.08, rootMargin: '0px 0px -50px 0px' });
 
                 elementos.forEach(function(el) {
                     observer.observe(el);
@@ -1400,7 +1725,7 @@
                             el.style.transform = 'translateY(0)';
                         }
                     });
-                }, 200);
+                }, 300);
             }
         });
     </script>
