@@ -401,6 +401,30 @@
         .legenda-horarios .bola.confirmado { background: #dc3545; }
         .legenda-horarios .bola.passado { background: #8a9ea3; }
         
+        .btn-teste {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            background: #2F5D62;
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+        .btn-teste:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(47, 93, 98, 0.4);
+        }
+        
         @media (max-width: 768px) {
             body { padding: 10px; }
             .container { padding: 20px 16px; }
@@ -419,6 +443,7 @@
             .passo-indicador .passo { font-size: 0.7rem; padding: 4px 10px; }
             .header-title { font-size: 1.5rem; }
             .legenda-horarios { font-size: 0.75rem; gap: 12px; }
+            .btn-teste { bottom: 10px; right: 10px; padding: 8px 16px; font-size: 12px; }
         }
         @media (max-width: 480px) {
             .container { padding: 16px 12px; }
@@ -662,6 +687,11 @@
         </div>
     </div>
 
+    <!-- Botão de Teste do Google Apps Script -->
+    <button class="btn-teste" onclick="testarGoogleScript()">
+        <i class="fas fa-vial"></i> Testar Google Script
+    </button>
+
     <!-- ============================================
          SUPABASE
          ============================================ -->
@@ -678,15 +708,14 @@
         // ============================================
         var SUPABASE_URL = 'https://euktsrczpxejezkeyqoh.supabase.co';
         var SUPABASE_ANON_KEY = 'sb_publishable_vH11tBYAWHlKNoCeQG-oMQ_r1fOxcRf';
-        var GOOGLE_API_KEY = 'AIzaSyCdPP0zCV9j79OWHTV2cF539ME2f6Sz8JM';
+        
+        // 🔧 URL DO GOOGLE APPS SCRIPT (USE A SUA URL ATUALIZADA)
+        var GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxcG6GrOy8jIQQgn40n-MlAk5FMSc1KYJYiNeHupWzGMeT_zFhHYrbSPuzw4sSHsr1J/exec';
 
         // EMAILJS - SUAS CONFIGURAÇÕES
         var EMAILJS_USER_ID = 'rRmq87DuOwPzW-3Eo';
         var EMAILJS_SERVICE_ID = 'service_4gybw6a';
         var EMAILJS_TEMPLATE_ID = 'template_zjwgg1g';
-
-        // GOOGLE APPS SCRIPT - URL DO SEU SCRIPT
-        var GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzPhNf4U2SM-XXqLzPMNZDeJlSxRO9zmsVyGZE7O4Vx2ZVPuUGa0xyVeii_o-SHPnk/exec';
 
         // Inicializar EmailJS
         emailjs.init(EMAILJS_USER_ID);
@@ -701,6 +730,7 @@
         }
 
         console.log('✅ Supabase inicializado:', supabaseClient ? 'OK' : 'FALHOU');
+        console.log('✅ Google Apps Script URL:', GOOGLE_APPS_SCRIPT_URL);
 
         // ============================================
         // CONFIGURAÇÕES
@@ -1499,43 +1529,180 @@
         }
 
         // ============================================
-        // FUNÇÃO GOOGLE CALENDAR VIA APPS SCRIPT
+        // FUNÇÃO GOOGLE CALENDAR VIA JSONP (NÃO USA CORS)
+        // ============================================
+        function criarEventoCalendarJSONP(dados) {
+            return new Promise((resolve, reject) => {
+                const callbackName = 'jsonp_callback_' + Date.now();
+                
+                // Preparar dados
+                const params = new URLSearchParams({
+                    callback: callbackName,
+                    nome: dados.nome || '',
+                    email: dados.email || '',
+                    telefone: dados.telefone || '',
+                    servico: dados.servico || '',
+                    data: dados.data || '',
+                    horario: dados.horario || '',
+                    tipo: dados.tipo || 'presencial',
+                    endereco: dados.endereco || 'Rua da Clínica, 123 - Centro, Guarulhos - SP',
+                    protocolo: dados.protocolo || 'LEV-' + String(Math.floor(Math.random() * 1000))
+                });
+                
+                const url = GOOGLE_APPS_SCRIPT_URL + '?' + params.toString();
+                
+                // Criar callback global
+                window[callbackName] = function(response) {
+                    delete window[callbackName];
+                    if (document.body.contains(script)) {
+                        document.body.removeChild(script);
+                    }
+                    
+                    if (response && response.sucesso) {
+                        resolve(response);
+                    } else {
+                        reject(new Error(response?.erro || response?.mensagem || 'Erro desconhecido'));
+                    }
+                };
+                
+                // Criar script tag
+                const script = document.createElement('script');
+                script.src = url;
+                script.onerror = function() {
+                    delete window[callbackName];
+                    if (document.body.contains(script)) {
+                        document.body.removeChild(script);
+                    }
+                    reject(new Error('Falha ao carregar o script JSONP. Verifique a URL do Google Apps Script.'));
+                };
+                
+                // Timeout de 30 segundos
+                const timeout = setTimeout(function() {
+                    delete window[callbackName];
+                    if (document.body.contains(script)) {
+                        document.body.removeChild(script);
+                    }
+                    reject(new Error('Timeout: O Google Apps Script não respondeu.'));
+                }, 30000);
+                
+                // Se resolver, limpar timeout
+                const originalResolve = resolve;
+                resolve = function(value) {
+                    clearTimeout(timeout);
+                    originalResolve(value);
+                };
+                
+                document.body.appendChild(script);
+            });
+        }
+
+        // ============================================
+        // FUNÇÃO DE TESTE - USANDO JSONP
+        // ============================================
+        async function testarGoogleScript() {
+            console.log('%c═══════════════════════════════════════════', 'color: #888;');
+            console.log('%c🧪 TESTE DE CONEXÃO COM GOOGLE APPS SCRIPT (JSONP)', 'color: #00aaff; font-weight: bold;');
+            console.log('%c═══════════════════════════════════════════', 'color: #888;');
+            
+            mostrarLoading('Testando conexão via JSONP...');
+            addLog('🧪 Iniciando teste de conexão via JSONP...', 'info');
+            
+            const agora = new Date();
+            const amanha = new Date(agora);
+            amanha.setDate(amanha.getDate() + 1);
+            
+            const ano = amanha.getFullYear();
+            const mes = String(amanha.getMonth() + 1).padStart(2, '0');
+            const dia = String(amanha.getDate()).padStart(2, '0');
+            const dataISO = ano + '-' + mes + '-' + dia;
+            
+            const dadosTeste = {
+                nome: 'Teste JSONP - ' + new Date().toLocaleString(),
+                email: 'teste@email.com',
+                telefone: '(11) 99999-9999',
+                servico: 'Teste de Conexão JSONP',
+                data: dataISO,
+                horario: '10:00',
+                tipo: 'presencial',
+                endereco: 'Rua Teste, 123 - Centro, São Paulo - SP',
+                protocolo: 'TEST-' + String(Math.floor(Math.random() * 1000)).padStart(3, '0')
+            };
+            
+            addLog('📋 Dados de teste:', 'info');
+            addLog('   👤 Nome: ' + dadosTeste.nome, 'info');
+            addLog('   📧 E-mail: ' + dadosTeste.email, 'info');
+            addLog('   📅 Data: ' + dadosTeste.data + ' às ' + dadosTeste.horario, 'info');
+            addLog('   🔗 URL: ' + GOOGLE_APPS_SCRIPT_URL, 'info');
+            
+            try {
+                const resultado = await criarEventoCalendarJSONP(dadosTeste);
+                esconderLoading();
+                
+                if (resultado && resultado.sucesso) {
+                    addLog('✅ CONEXÃO OK via JSONP!', 'sucesso');
+                    addLog('📋 Resposta: ' + JSON.stringify(resultado, null, 2), 'info');
+                    console.log('%c✅ Teste concluído com sucesso via JSONP!', 'color: #00ff88; font-weight: bold;');
+                    
+                    if (resultado.evento) {
+                        addLog('   🔗 Link do evento: ' + resultado.evento.link, 'info');
+                        console.log('🔗 Link do evento:', resultado.evento.link);
+                    }
+                    
+                    mostrarToast('✅ Conexão via JSONP funcionando!', 'sucesso');
+                } else {
+                    addLog('❌ Conexão falhou: ' + (resultado?.mensagem || 'Erro desconhecido'), 'erro');
+                    console.log('%c❌ Teste falhou!', 'color: #ff4444; font-weight: bold;');
+                    mostrarToast('❌ Erro: ' + (resultado?.mensagem || 'Falha na conexão'), 'erro');
+                }
+            } catch (error) {
+                esconderLoading();
+                addLog('❌ Erro no teste: ' + error.message, 'erro');
+                console.log('%c❌ ERRO: ' + error.message, 'color: #ff4444; font-weight: bold;');
+                console.error(error);
+                mostrarToast('❌ Erro: ' + error.message, 'erro');
+            }
+        }
+
+        // ============================================
+        // FUNÇÃO GOOGLE CALENDAR - USANDO JSONP (para o agendamento)
         // ============================================
         async function criarEventoCalendar(dados) {
             try {
-                logEtapa('7', '📅 CRIANDO EVENTO NO GOOGLE CALENDAR', 'info');
-                addLog('📅 Criando evento no Google Calendar via Apps Script...', 'info');
+                logEtapa('7', '📅 CRIANDO EVENTO NO GOOGLE CALENDAR (JSONP)', 'info');
+                addLog('📅 Criando evento no Google Calendar via JSONP...', 'info');
                 
-                var dadosEvento = {
-                    nome: dados.nome,
-                    telefone: dados.telefone,
-                    email: dados.email,
-                    servico: dados.servico,
-                    data: dados.data,
-                    horario: dados.horario,
-                    tipo: dados.tipo,
-                    endereco: dados.endereco,
-                    protocolo: dados.protocolo || 'LEV-' + dados.id.toString().slice(-6)
+                const dadosEvento = {
+                    nome: dados.nome || '',
+                    email: dados.email || '',
+                    telefone: dados.telefone || '',
+                    servico: dados.servico || '',
+                    data: dados.data || '',
+                    horario: dados.horario || '',
+                    tipo: dados.tipo || 'presencial',
+                    endereco: dados.endereco || 'Rua da Clínica, 123 - Centro, Guarulhos - SP',
+                    protocolo: dados.protocolo || 'LEV-' + String(dados.id || Math.floor(Math.random() * 1000)).slice(-6)
                 };
                 
-                addLog('📋 Dados enviados para o Apps Script:', 'info');
+                addLog('📋 Dados enviados para o Apps Script (JSONP):', 'info');
                 addLog('   👤 Nome: ' + dadosEvento.nome, 'info');
                 addLog('   📧 E-mail: ' + dadosEvento.email, 'info');
                 addLog('   📅 Data: ' + dadosEvento.data + ' às ' + dadosEvento.horario, 'info');
                 
-                var response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(dadosEvento)
-                });
-
-                addLog('✅ Evento criado no Google Calendar!', 'sucesso');
-                addLog('📧 Convite enviado para: ' + dadosEvento.email, 'sucesso');
-                logEtapa('7', '✅ EVENTO CRIADO PARA O CLIENTE: ' + dadosEvento.email, 'sucesso');
-                return { sucesso: true };
+                const resultado = await criarEventoCalendarJSONP(dadosEvento);
+                
+                if (resultado && resultado.sucesso) {
+                    addLog('✅ Evento criado com sucesso via JSONP!', 'sucesso');
+                    if (resultado.evento) {
+                        addLog('   🆔 ID: ' + resultado.evento.id, 'info');
+                        addLog('   🔗 Link: ' + resultado.evento.link, 'info');
+                    }
+                    logEtapa('7', '✅ EVENTO CRIADO PARA: ' + dadosEvento.email, 'sucesso');
+                    return { sucesso: true, resposta: resultado };
+                } else {
+                    const erroMsg = resultado?.erro || resultado?.mensagem || 'Erro desconhecido';
+                    addLog('⚠️ Erro do Apps Script: ' + erroMsg, 'warning');
+                    return { sucesso: false, erro: erroMsg };
+                }
                 
             } catch (error) {
                 addLog('⚠️ Erro ao criar evento: ' + error.message, 'warning');
@@ -1755,7 +1922,7 @@
                             }
 
                             // ============================================
-                            // 📅 GOOGLE CALENDAR
+                            // 📅 GOOGLE CALENDAR (JSONP)
                             // ============================================
                             desabilitarBotao('Criando evento no Google Calendar...');
                             await criarEventoCalendar(salvo);
@@ -1782,9 +1949,8 @@
                             desabilitarBotao('Redirecionando...');
                             addLog('🔄 Redirecionando para obrigado.html...', 'info');
                             
-                            setTimeout(function() {
-                                window.location.href = 'obrigado.html';
-                            }, 2000);
+                            // Redirecionar
+                            window.location.href = 'obrigado.html';
                         })
                         .catch(function(error) {
                             addLog('❌ Erro no processo: ' + error.message, 'erro');
@@ -1857,6 +2023,30 @@
             mostrarToast('Novo agendamento iniciado!', 'info');
             addLog('✅ Novo agendamento iniciado', 'sucesso');
         }
+
+        // ============================================
+        // INICIALIZAR MASCARAS DE TELEFONE
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            var telefoneInput = document.getElementById('telefone');
+            if (telefoneInput) {
+                telefoneInput.addEventListener('input', function() {
+                    var value = this.value.replace(/\D/g, '');
+                    if (value.length > 11) value = value.slice(0, 11);
+                    
+                    if (value.length > 0) {
+                        if (value.length <= 2) {
+                            value = '(' + value;
+                        } else if (value.length <= 6) {
+                            value = '(' + value.slice(0, 2) + ') ' + value.slice(2);
+                        } else {
+                            value = '(' + value.slice(0, 2) + ') ' + value.slice(2, 7) + '-' + value.slice(7);
+                        }
+                    }
+                    this.value = value;
+                });
+            }
+        });
     </script>
 </body>
 </html>
