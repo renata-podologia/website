@@ -401,17 +401,6 @@
         .legenda-horarios .bola.confirmado { background: #dc3545; }
         .legenda-horarios .bola.passado { background: #8a9ea3; }
         
-        .badge-reserva {
-            display: inline-block;
-            background: #f0ad4e;
-            color: #fff;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-left: 8px;
-        }
-        
         @media (max-width: 768px) {
             body { padding: 10px; }
             .container { padding: 20px 16px; }
@@ -700,7 +689,7 @@
         var SUPABASE_URL = 'https://euktsrczpxejezkeyqoh.supabase.co';
         var SUPABASE_ANON_KEY = 'sb_publishable_vH11tBYAWHlKNoCeQG-oMQ_r1fOxcRf';
         
-        // 🔧 URL DO GOOGLE APPS SCRIPT (ATUALIZADA)
+        // 🔧 URL DO GOOGLE APPS SCRIPT
         var GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxcG6GrOy8jIQQgn40n-MlAk5FMSc1KYJYiNeHupWzGMeT_zFhHYrbSPuzw4sSHsr1J/exec';
 
         // EMAILJS - SUAS CONFIGURAÇÕES
@@ -791,7 +780,7 @@
         }
 
         // ============================================
-        // LOGS APENAS NO CONSOLE (COLORIDOS)
+        // LOGS
         // ============================================
         function addLog(mensagem, tipo) {
             tipo = tipo || 'info';
@@ -816,9 +805,6 @@
             }
         }
 
-        // ============================================
-        // FUNÇÃO PARA LOG DE ETAPAS
-        // ============================================
         function logEtapa(etapa, descricao, status) {
             status = status || 'info';
             var cor = status === 'sucesso' ? '#00ff88' : 
@@ -830,9 +816,6 @@
             console.log('%c═══════════════════════════════════════════', 'color: #888;');
         }
 
-        // ============================================
-        // FUNÇÃO PARA DESABILITAR/REABILITAR BOTÃO
-        // ============================================
         function desabilitarBotao(mensagem) {
             var btn = document.getElementById('btn-confirmar');
             btn.disabled = true;
@@ -1167,9 +1150,10 @@
         }
 
         // ============================================
-        // TIPO DE ATENDIMENTO
+        // EVENTOS DOM
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
+            // Tipo de atendimento
             var tipoBtns = document.querySelectorAll('.tipo-btn');
             for (var i = 0; i < tipoBtns.length; i++) {
                 tipoBtns[i].addEventListener('click', function() {
@@ -1182,6 +1166,53 @@
                     document.getElementById('endereco-domicilio').style.display = tipo === 'domicilio' ? 'block' : 'none';
                     document.getElementById('endereco-presencial').style.display = tipo === 'presencial' ? 'block' : 'none';
                     addLog('📌 Tipo de atendimento selecionado: ' + tipo, 'info');
+                });
+            }
+
+            // Máscara CEP
+            var cepInput = document.getElementById('cep');
+            if (cepInput) {
+                cepInput.addEventListener('input', function() {
+                    var value = this.value.replace(/\D/g, '');
+                    if (value.length > 8) value = value.slice(0, 8);
+                    if (value.length > 5) {
+                        value = value.slice(0, 5) + '-' + value.slice(5);
+                    }
+                    this.value = value;
+                });
+            }
+
+            // Serviços
+            var servicoBtns = document.querySelectorAll('.servico-btn');
+            for (var k = 0; k < servicoBtns.length; k++) {
+                servicoBtns[k].addEventListener('click', function() {
+                    var btns = document.querySelectorAll('.servico-btn');
+                    for (var j = 0; j < btns.length; j++) {
+                        btns[j].classList.remove('selecionado');
+                    }
+                    this.classList.add('selecionado');
+                    agendamento.servico = this.dataset.servico;
+                    addLog('📌 Serviço selecionado: ' + agendamento.servico, 'info');
+                });
+            }
+
+            // Máscara Telefone
+            var telefoneInput = document.getElementById('telefone');
+            if (telefoneInput) {
+                telefoneInput.addEventListener('input', function() {
+                    var value = this.value.replace(/\D/g, '');
+                    if (value.length > 11) value = value.slice(0, 11);
+                    
+                    if (value.length > 0) {
+                        if (value.length <= 2) {
+                            value = '(' + value;
+                        } else if (value.length <= 6) {
+                            value = '(' + value.slice(0, 2) + ') ' + value.slice(2);
+                        } else {
+                            value = '(' + value.slice(0, 2) + ') ' + value.slice(2, 7) + '-' + value.slice(7);
+                        }
+                    }
+                    this.value = value;
                 });
             }
         });
@@ -1220,38 +1251,6 @@
                     mostrarToast('Erro ao buscar CEP.', 'erro');
                 });
         }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            var cepInput = document.getElementById('cep');
-            if (cepInput) {
-                cepInput.addEventListener('input', function() {
-                    var value = this.value.replace(/\D/g, '');
-                    if (value.length > 8) value = value.slice(0, 8);
-                    if (value.length > 5) {
-                        value = value.slice(0, 5) + '-' + value.slice(5);
-                    }
-                    this.value = value;
-                });
-            }
-        });
-
-        // ============================================
-        // SERVIÇOS
-        // ============================================
-        document.addEventListener('DOMContentLoaded', function() {
-            var servicoBtns = document.querySelectorAll('.servico-btn');
-            for (var i = 0; i < servicoBtns.length; i++) {
-                servicoBtns[i].addEventListener('click', function() {
-                    var btns = document.querySelectorAll('.servico-btn');
-                    for (var j = 0; j < btns.length; j++) {
-                        btns[j].classList.remove('selecionado');
-                    }
-                    this.classList.add('selecionado');
-                    agendamento.servico = this.dataset.servico;
-                    addLog('📌 Serviço selecionado: ' + agendamento.servico, 'info');
-                });
-            }
-        });
 
         // ============================================
         // DATAS E HORÁRIOS
@@ -1464,14 +1463,49 @@
         });
 
         // ============================================
-        // FUNÇÃO DE E-MAIL - RESERVA EFETUADA
+        // FUNÇÃO PARA CRIAR LINK DO GOOGLE CALENDAR MANUALMENTE
+        // ============================================
+        function criarLinkGoogleCalendar(dados) {
+            // Formatar data e hora para o formato do Google Calendar
+            var dataObj = new Date(dados.data + 'T' + dados.horario + ':00');
+            var start = dataObj.toISOString().replace(/-|:|\.\d+/g, '');
+            var end = new Date(dataObj.getTime() + 60 * 60 * 1000).toISOString().replace(/-|:|\.\d+/g, '');
+            
+            var title = '🦶 Levità - ' + dados.servico + ' - ' + dados.nome;
+            var description = 
+                'Cliente: ' + dados.nome + '\n' +
+                'Telefone: ' + dados.telefone + '\n' +
+                'E-mail: ' + dados.email + '\n' +
+                'Serviço: ' + dados.servico + '\n' +
+                'Tipo: ' + (dados.tipo === 'domicilio' ? 'Domiciliar' : 'Presencial') + '\n' +
+                'Endereço: ' + dados.endereco + '\n' +
+                'Protocolo: ' + dados.protocolo;
+            
+            var location = dados.endereco || 'Rua da Clínica, 123 - Centro, Guarulhos - SP';
+            
+            var url = 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
+                '&text=' + encodeURIComponent(title) +
+                '&dates=' + start + '/' + end +
+                '&details=' + encodeURIComponent(description) +
+                '&location=' + encodeURIComponent(location) +
+                '&add=' + encodeURIComponent(dados.email);
+            
+            return url;
+        }
+
+        // ============================================
+        // FUNÇÃO DE E-MAIL - COM LINK DO GOOGLE CALENDAR
         // ============================================
         async function enviarEmailReserva(para, dados) {
             try {
-                logEtapa('6', '📧 ENVIANDO E-MAIL DE RESERVA', 'info');
+                logEtapa('6', '📧 ENVIANDO E-MAIL DE RESERVA COM LINK DO CALENDAR', 'info');
                 addLog('📧 Enviando e-mail de reserva para: ' + para, 'info');
                 
-                // 🔧 E-mail de RESERVA (não confirmado)
+                // 🔧 Gerar link manual do Google Calendar
+                var calendarLink = criarLinkGoogleCalendar(dados);
+                addLog('🔗 Link do Google Calendar gerado manualmente: ' + calendarLink, 'info');
+                
+                // 🔧 E-mail de RESERVA com link do Google Calendar
                 var templateParams = {
                     to_email: para,
                     to_name: dados.nome || 'Cliente',
@@ -1481,7 +1515,8 @@
                     tipo: dados.tipo === 'domicilio' ? '🏠 Domiciliar' : '🏢 Presencial',
                     endereco: dados.endereco || 'Não informado',
                     status: '⏳ Aguardando Confirmação',
-                    protocolo: dados.protocolo || 'LEV-000000'
+                    protocolo: dados.protocolo || 'LEV-000000',
+                    calendar_link: calendarLink
                 };
                 
                 var response = await emailjs.send(
@@ -1493,21 +1528,21 @@
                 if (response.status === 200) {
                     addLog('✅ E-mail de reserva enviado para: ' + para, 'sucesso');
                     logEtapa('6', '✅ E-MAIL DE RESERVA ENVIADO PARA: ' + para, 'sucesso');
-                    return { sucesso: true };
+                    return { sucesso: true, calendarLink: calendarLink };
                 } else {
                     addLog('❌ Erro ao enviar e-mail: ' + response.text, 'erro');
-                    return { sucesso: false };
+                    return { sucesso: false, calendarLink: calendarLink };
                 }
             } catch (error) {
                 addLog('❌ Erro ao enviar e-mail: ' + error.message, 'erro');
-                return { sucesso: false, erro: error.message };
+                return { sucesso: false, erro: error.message, calendarLink: null };
             }
         }
 
         // ============================================
-        // NOTIFICAR ADMINISTRADOR SOBRE NOVA RESERVA
+        // NOTIFICAR ADMINISTRADOR
         // ============================================
-        async function notificarAdminNovaReserva(dados) {
+        async function notificarAdminNovaReserva(dados, calendarLink) {
             try {
                 addLog('📧 Notificando administrador sobre nova reserva...', 'info');
                 
@@ -1520,7 +1555,8 @@
                     tipo: dados.tipo === 'domicilio' ? '🏠 Domiciliar' : '🏢 Presencial',
                     endereco: dados.endereco || 'Não informado',
                     status: '⏳ AGUARDANDO CONFIRMAÇÃO',
-                    protocolo: dados.protocolo || 'LEV-000000'
+                    protocolo: dados.protocolo || 'LEV-000000',
+                    calendar_link: calendarLink || 'Não gerado'
                 };
                 
                 var response = await emailjs.send(
@@ -1540,14 +1576,12 @@
         }
 
         // ============================================
-        // FUNÇÃO GOOGLE CALENDAR VIA JSONP (GET)
-        // MESMO MÉTODO QUE FUNCIONOU NO TESTE
+        // FUNÇÃO GOOGLE CALENDAR VIA JSONP (TENTATIVA)
         // ============================================
         function criarEventoCalendarJSONP(dados) {
             return new Promise((resolve, reject) => {
                 const callbackName = 'jsonp_callback_' + Date.now();
                 
-                // 🔧 Preparar dados no formato que funcionou no teste
                 const params = new URLSearchParams({
                     callback: callbackName,
                     nome: dados.nome || '',
@@ -1562,8 +1596,6 @@
                 });
                 
                 const url = GOOGLE_APPS_SCRIPT_URL + '?' + params.toString();
-                
-                addLog('📋 JSONP URL: ' + url, 'info');
                 
                 window[callbackName] = function(response) {
                     delete window[callbackName];
@@ -1606,12 +1638,12 @@
         }
 
         // ============================================
-        // FUNÇÃO GOOGLE CALENDAR - USANDO JSONP (GET)
+        // FUNÇÃO GOOGLE CALENDAR (TENTA CRIAR, MAS NÃO TRAVA)
         // ============================================
         async function criarEventoCalendar(dados) {
             try {
-                logEtapa('7', '📅 CRIANDO EVENTO NO GOOGLE CALENDAR (GET/JSONP)', 'info');
-                addLog('📅 Criando evento no Google Calendar via GET/JSONP...', 'info');
+                logEtapa('7', '📅 TENTANDO CRIAR EVENTO NO GOOGLE CALENDAR...', 'info');
+                addLog('📅 Tentando criar evento no Google Calendar via JSONP...', 'info');
                 
                 const dadosEvento = {
                     nome: dados.nome || '',
@@ -1622,13 +1654,8 @@
                     horario: dados.horario || '',
                     tipo: dados.tipo || 'presencial',
                     endereco: dados.endereco || 'Rua da Clínica, 123 - Centro, Guarulhos - SP',
-                    protocolo: dados.protocolo || 'LEV-' + String(dados.id || Math.floor(Math.random() * 1000)).slice(-6)
+                    protocolo: dados.protocolo || 'LEV-' + String(Math.floor(Math.random() * 1000))
                 };
-                
-                addLog('📋 Dados enviados para o Apps Script:', 'info');
-                addLog('   👤 Nome: ' + dadosEvento.nome, 'info');
-                addLog('   📧 E-mail: ' + dadosEvento.email, 'info');
-                addLog('   📅 Data: ' + dadosEvento.data + ' às ' + dadosEvento.horario, 'info');
                 
                 const resultado = await criarEventoCalendarJSONP(dadosEvento);
                 
@@ -1638,18 +1665,15 @@
                         addLog('   🆔 ID: ' + resultado.evento.id, 'info');
                         addLog('   🔗 Link: ' + resultado.evento.link, 'info');
                     }
-                    logEtapa('7', '✅ EVENTO CRIADO PARA: ' + dadosEvento.email, 'sucesso');
-                    return { sucesso: true, resposta: resultado };
+                    return { sucesso: true, link: resultado.evento?.link || null };
                 } else {
-                    const erroMsg = resultado?.erro || resultado?.mensagem || 'Erro desconhecido';
-                    addLog('⚠️ Erro do Apps Script: ' + erroMsg, 'warning');
-                    return { sucesso: false, erro: erroMsg };
+                    addLog('⚠️ JSONP não criou o evento, mas continuamos...', 'warning');
+                    return { sucesso: false, link: null };
                 }
                 
             } catch (error) {
-                addLog('⚠️ Erro ao criar evento: ' + error.message, 'warning');
-                logEtapa('7', '⚠️ ERRO NO GOOGLE CALENDAR: ' + error.message, 'warning');
-                return { sucesso: false, erro: error.message };
+                addLog('⚠️ Erro ao criar evento (não crítico): ' + error.message, 'warning');
+                return { sucesso: false, link: null };
             }
         }
 
@@ -1667,7 +1691,6 @@
             
             addLog('💾 Salvando no Supabase...', 'info');
             
-            // 🔧 Status sempre como 'pendente' (aguardando confirmação)
             return supabaseClient
                 .from('agendamentos')
                 .insert([{
@@ -1682,7 +1705,7 @@
                     servico: dados.servico,
                     data: dados.data,
                     horario: dados.horario,
-                    status: 'pendente'  // 🔧 Status PENDENTE (não confirmado)
+                    status: 'pendente'
                 }])
                 .select()
                 .then(function(response) {
@@ -1766,7 +1789,6 @@
                 return;
             }
 
-            // 🔒 DESABILITAR BOTÃO
             desabilitarBotao('Verificando disponibilidade...');
             addLog('🔒 Botão desabilitado', 'info');
 
@@ -1821,11 +1843,8 @@
                             logEtapa('3', '✅ RESERVA SALVA! ID: ' + salvo.id, 'sucesso');
 
                             // ============================================
-                            // 📧 ENVIAR E-MAIL DE RESERVA (NÃO CONFIRMADO)
+                            // 📧 PREPARAR DADOS PARA O E-MAIL
                             // ============================================
-                            desabilitarBotao('Enviando e-mail de reserva...');
-                            addLog('📧 Preparando envio de e-mail de reserva...', 'info');
-
                             var dataFormatada = formatarData(salvo.data);
                             var protocolo = 'LEV-' + salvo.id.toString().slice(-6);
                             
@@ -1841,17 +1860,33 @@
                                 protocolo: protocolo
                             };
 
-                            // ✅ Enviar apenas e-mail de RESERVA (não confirmado)
-                            await enviarEmailReserva(salvo.email, dadosEmail);
-                            
-                            // ✅ Notificar administrador sobre nova reserva
-                            await notificarAdminNovaReserva(dadosEmail);
-
                             // ============================================
-                            // 📅 GOOGLE CALENDAR (USANDO JSONP - MESMO MÉTODO DO TESTE)
+                            // 📅 TENTAR CRIAR EVENTO NO GOOGLE CALENDAR (NÃO TRAVA)
                             // ============================================
                             desabilitarBotao('Criando evento no Google Calendar...');
-                            await criarEventoCalendar(salvo);
+                            var resultadoCalendar = await criarEventoCalendar(salvo);
+                            
+                            var calendarLink = null;
+                            if (resultadoCalendar && resultadoCalendar.sucesso) {
+                                calendarLink = resultadoCalendar.link;
+                                addLog('✅ Evento criado no Google Calendar!', 'sucesso');
+                            } else {
+                                // 🔧 Se falhou, gerar link manualmente
+                                calendarLink = criarLinkGoogleCalendar(dadosEmail);
+                                addLog('ℹ️ Link manual gerado: ' + calendarLink, 'info');
+                            }
+
+                            // ============================================
+                            // 📧 ENVIAR E-MAIL DE RESERVA COM LINK DO CALENDAR
+                            // ============================================
+                            desabilitarBotao('Enviando e-mail de reserva...');
+                            addLog('📧 Preparando envio de e-mail de reserva com link...', 'info');
+                            
+                            dadosEmail.calendar_link = calendarLink;
+                            await enviarEmailReserva(salvo.email, dadosEmail);
+                            
+                            // ✅ Notificar administrador com link
+                            await notificarAdminNovaReserva(dadosEmail, calendarLink);
 
                             // ============================================
                             // 🎉 FINALIZAR
@@ -1862,7 +1897,9 @@
                             addLog('   ✅ Reserva salva no Supabase (PENDENTE)', 'sucesso');
                             addLog('   📧 E-mail de reserva enviado para: ' + salvo.email, 'info');
                             addLog('   📧 Administrador notificado', 'info');
-                            addLog('   📅 Evento criado no Google Calendar (via JSONP)', 'sucesso');
+                            if (calendarLink) {
+                                addLog('   🔗 Link do Google Calendar: ' + calendarLink, 'info');
+                            }
                             console.log('%c═══════════════════════════════════════════', 'color: #888;');
                             
                             mostrarToast('✅ Reserva efetuada! Aguarde confirmação.', 'sucesso');
@@ -1873,7 +1910,6 @@
                             desabilitarBotao('Redirecionando...');
                             addLog('🔄 Redirecionando para obrigado.html...', 'info');
                             
-                            // Redirecionar para página de confirmação
                             window.location.href = 'obrigado.html';
                         })
                         .catch(function(error) {
@@ -1947,30 +1983,6 @@
             mostrarToast('Novo agendamento iniciado!', 'info');
             addLog('✅ Novo agendamento iniciado', 'sucesso');
         }
-
-        // ============================================
-        // INICIALIZAR MASCARAS DE TELEFONE
-        // ============================================
-        document.addEventListener('DOMContentLoaded', function() {
-            var telefoneInput = document.getElementById('telefone');
-            if (telefoneInput) {
-                telefoneInput.addEventListener('input', function() {
-                    var value = this.value.replace(/\D/g, '');
-                    if (value.length > 11) value = value.slice(0, 11);
-                    
-                    if (value.length > 0) {
-                        if (value.length <= 2) {
-                            value = '(' + value;
-                        } else if (value.length <= 6) {
-                            value = '(' + value.slice(0, 2) + ') ' + value.slice(2);
-                        } else {
-                            value = '(' + value.slice(0, 2) + ') ' + value.slice(2, 7) + '-' + value.slice(7);
-                        }
-                    }
-                    this.value = value;
-                });
-            }
-        });
     </script>
 </body>
 </html>
