@@ -3,13 +3,10 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
-    <title>Levita Podologia – Dra. Renata Kemp</title>
-    <meta name="description" content="Clínica de podologia com atendimento humanizado em Guarulhos. Especialistas em pé diabético, unha encravada e mais. Agende sua visita domiciliar com a Dra. Renata Kemp." />
+    <title>Levita Podologia – Podóloga Renata Kemp</title>
+    <meta name="description" content="Clínica de podologia com atendimento humanizado em Guarulhos. Especialistas em pé diabético, unha encravada e mais. Agende sua visita com a Podóloga Renata Kemp." />
     
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
-    
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     
     <style>
@@ -134,6 +131,33 @@
             color: #fff;
             transform: translateY(-3px);
         }
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.8rem;
+            min-width: auto;
+            border-radius: 30px;
+        }
+        .btn-success {
+            background: #28a745;
+            color: #fff;
+        }
+        .btn-success:hover {
+            background: #1e7e34;
+        }
+        .btn-danger {
+            background: #dc3545;
+            color: #fff;
+        }
+        .btn-danger:hover {
+            background: #bd2130;
+        }
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+        .btn-warning:hover {
+            background: #e0a800;
+        }
 
         /* ============================================
            HEADER
@@ -217,6 +241,36 @@
         .menu-mobile:active {
             transform: scale(0.9);
         }
+        .nav-agendar {
+            background: var(--dourado);
+            color: #fff !important;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .nav-agendar:hover {
+            background: #b8921f;
+            transform: translateY(-2px);
+        }
+        .nav-agendar::after {
+            display: none !important;
+        }
+        .nav-admin {
+            background: var(--petroleo);
+            color: #fff !important;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .nav-admin:hover {
+            background: var(--petroleo-escuro);
+            transform: translateY(-2px);
+        }
+        .nav-admin::after {
+            display: none !important;
+        }
 
         /* ============================================
            HERO
@@ -266,7 +320,7 @@
         }
 
         /* ============================================
-           BANNER DOMICÍLIO
+           BANNER
            ============================================ */
         .banner-home {
             background: var(--petroleo);
@@ -292,9 +346,6 @@
         .banner-home .highlight {
             color: var(--dourado);
             font-weight: 700;
-        }
-        .banner-home .btn-whatsapp {
-            margin-top: 20px;
         }
 
         /* ============================================
@@ -416,7 +467,7 @@
         }
 
         /* ============================================
-           GALERIA - CASOS SEPARADOS
+           GALERIA
            ============================================ */
         .caso-container {
             background: var(--branco);
@@ -427,17 +478,14 @@
             border: 1px solid rgba(168, 195, 160, 0.1);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-
         .caso-container:hover {
             transform: translateY(-4px);
             box-shadow: 0 20px 40px rgba(47, 93, 98, 0.08);
         }
-
         .caso-titulo {
             text-align: center;
             margin-bottom: 30px;
         }
-
         .badge-caso {
             display: inline-block;
             background: var(--dourado);
@@ -450,25 +498,21 @@
             letter-spacing: 1px;
             margin-bottom: 10px;
         }
-
         .caso-titulo h3 {
             font-family: 'Poppins', sans-serif;
             font-size: 1.8rem;
             color: var(--petroleo);
             margin-bottom: 8px;
         }
-
         .caso-titulo h3 i {
             margin-right: 12px;
         }
-
         .caso-descricao {
             color: #4a5f64;
             font-size: 1rem;
             max-width: 500px;
             margin: 0 auto;
         }
-
         .caso-grid {
             display: grid;
             grid-template-columns: 1fr auto 1fr;
@@ -476,7 +520,6 @@
             align-items: center;
             margin: 20px 0 16px;
         }
-
         .caso-item {
             border-radius: 16px;
             overflow: hidden;
@@ -485,14 +528,12 @@
             aspect-ratio: 1/1;
             background: var(--bege);
         }
-
         .caso-item img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             display: block;
         }
-
         .caso-label {
             position: absolute;
             top: 12px;
@@ -506,15 +547,12 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-
         .caso-item.antes .caso-label {
             background: rgba(220, 53, 69, 0.85);
         }
-
         .caso-item.depois .caso-label {
             background: rgba(40, 167, 69, 0.85);
         }
-
         .caso-legenda {
             padding: 12px 16px;
             font-size: 0.85rem;
@@ -522,11 +560,9 @@
             background: var(--cinza-claro);
             border-radius: 0 0 16px 16px;
         }
-
         .caso-legenda i {
             margin-right: 6px;
         }
-
         .caso-seta {
             font-size: 2.5rem;
             color: var(--dourado);
@@ -535,7 +571,6 @@
             align-items: center;
             justify-content: center;
         }
-
         .caso-resultado {
             background: var(--bege);
             padding: 16px 24px;
@@ -544,18 +579,16 @@
             margin-top: 16px;
             border-left: 4px solid var(--dourado);
         }
-
         .caso-resultado i {
             margin-right: 8px;
         }
-
         .caso-resultado span {
             font-size: 0.95rem;
             color: #2d4449;
         }
 
         /* ============================================
-           VÍDEOS - FORMATO CORRETO
+           VÍDEOS
            ============================================ */
         .videos-grid {
             display: grid;
@@ -564,7 +597,6 @@
             max-width: 1100px;
             margin: 30px auto 0;
         }
-
         .video-card {
             background: #f8f9fa;
             border-radius: 18px;
@@ -572,12 +604,10 @@
             box-shadow: var(--sombra);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-
         .video-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
         }
-
         .video-wrapper {
             position: relative;
             width: 100%;
@@ -585,7 +615,6 @@
             background: #111;
             overflow: hidden;
         }
-
         .video-wrapper video {
             display: block;
             width: 100%;
@@ -593,14 +622,12 @@
             object-fit: contain;
             background: #111;
         }
-
         .video-card h3 {
             padding: 20px 22px 8px;
             font-size: 1.15rem;
             font-family: 'Poppins', sans-serif;
             color: var(--petroleo);
         }
-
         .video-card p {
             padding: 0 22px 22px;
             font-size: 0.95rem;
@@ -839,18 +866,11 @@
             box-shadow: 0 6px 25px rgba(37, 211, 102, 0.4);
             transition: all 0.3s ease;
             cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
         }
         .whatsapp-float:hover {
             transform: scale(1.08);
         }
-        .whatsapp-float:active {
-            transform: scale(0.92);
-        }
 
-        /* ============================================
-           BACK TO TOP
-           ============================================ */
         .back-top {
             position: fixed;
             bottom: 100px;
@@ -870,7 +890,6 @@
             visibility: hidden;
             transition: all 0.3s ease;
             cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
         }
         .back-top.visivel {
             opacity: 1;
@@ -880,424 +899,120 @@
             background: var(--petroleo-escuro);
             transform: translateY(-4px);
         }
-        .back-top:active {
-            transform: scale(0.92);
-        }
 
         /* ============================================
            RESPONSIVIDADE
            ============================================ */
         @media (max-width: 1200px) {
-            .container {
-                padding: 0 20px;
-            }
-            .hero-content h1 {
-                font-size: 3rem;
-            }
+            .container { padding: 0 20px; }
+            .hero-content h1 { font-size: 3rem; }
         }
-
         @media (max-width: 992px) {
-            .hero .container {
-                grid-template-columns: 1fr;
-                text-align: center;
-                gap: 40px;
-            }
-            .hero-content p {
-                margin-left: auto;
-                margin-right: auto;
-                max-width: 100%;
-            }
-            .hero-buttons {
-                justify-content: center;
-            }
-            .hero-content h1 {
-                font-size: 2.8rem;
-            }
-            .sobre-grid {
-                grid-template-columns: 1fr;
-                text-align: center;
-                gap: 40px;
-            }
-            .sobre-texto .valores {
-                justify-content: center;
-            }
-            .servicos-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 20px;
-            }
-            .diferenciais-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 20px;
-            }
-            .depoimentos-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 20px;
-            }
-            .contato-grid {
-                grid-template-columns: 1fr;
-                gap: 40px;
-            }
-            .caso-grid {
-                grid-template-columns: 1fr auto 1fr;
-                gap: 16px;
-            }
-            .videos-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 25px;
-                max-width: 100%;
-            }
-            .section {
-                padding: 60px 0;
-            }
-            .section-title {
-                font-size: 2.2rem;
-            }
+            .hero .container { grid-template-columns: 1fr; text-align: center; gap: 40px; }
+            .hero-content p { margin: 0 auto 32px; max-width: 100%; }
+            .hero-buttons { justify-content: center; }
+            .hero-content h1 { font-size: 2.8rem; }
+            .sobre-grid { grid-template-columns: 1fr; text-align: center; gap: 40px; }
+            .sobre-texto .valores { justify-content: center; }
+            .servicos-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+            .diferenciais-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+            .depoimentos-grid { grid-template-columns: 1fr 1fr; gap: 20px; }
+            .contato-grid { grid-template-columns: 1fr; gap: 40px; }
+            .caso-grid { grid-template-columns: 1fr auto 1fr; gap: 16px; }
+            .videos-grid { grid-template-columns: 1fr 1fr; gap: 25px; max-width: 100%; }
+            .section { padding: 60px 0; }
+            .section-title { font-size: 2.2rem; }
         }
-
         @media (max-width: 768px) {
-            nav ul {
-                display: none;
-                flex-direction: column;
-                background: #fff;
-                position: absolute;
-                top: 70px;
-                left: 0;
-                width: 100%;
-                padding: 20px;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-                gap: 16px;
-                text-align: center;
-                border-top: 1px solid rgba(0, 0, 0, 0.05);
-            }
-            nav ul.aberto {
-                display: flex;
-            }
-            nav ul li a {
-                font-size: 1.1rem;
-                padding: 8px 0;
-                display: block;
-            }
-            .menu-mobile {
-                display: block;
-            }
-            .hero-content h1 {
-                font-size: 2.2rem;
-            }
-            .hero-content p {
-                font-size: 1rem;
-            }
-            .section-title {
-                font-size: 2rem;
-            }
-            .section-subtitle {
-                font-size: 1rem;
-                margin-bottom: 32px;
-            }
-            .servicos-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 16px;
-            }
-            .servico-card {
-                padding: 20px 16px;
-            }
-            .servico-card i {
-                font-size: 2rem;
-                padding: 12px;
-            }
-            .servico-card h3 {
-                font-size: 1rem;
-            }
-            .servico-card p {
-                font-size: 0.85rem;
-            }
-            .diferenciais-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 16px;
-            }
-            .diferencial-item {
-                padding: 20px 16px;
-            }
-            .depoimentos-grid {
-                grid-template-columns: 1fr;
-                gap: 16px;
-            }
-            .caso-grid {
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
-            .caso-seta {
-                transform: rotate(90deg);
-                padding: 4px 0;
-                font-size: 2rem;
-            }
-            .caso-container {
-                padding: 24px 16px;
-            }
-            .caso-titulo h3 {
-                font-size: 1.3rem;
-            }
-            .caso-legenda {
-                font-size: 0.8rem;
-                padding: 10px 12px;
-            }
-            .caso-resultado {
-                padding: 14px 16px;
-            }
-            .caso-resultado span {
-                font-size: 0.9rem;
-            }
-            .videos-grid {
-                grid-template-columns: 1fr;
-                gap: 25px;
-                max-width: 600px;
-                margin-left: auto;
-                margin-right: auto;
-            }
-            .video-card h3 {
-                padding: 16px 18px 6px;
-                font-size: 1rem;
-            }
-            .video-card p {
-                padding: 0 18px 18px;
-                font-size: 0.9rem;
-            }
-            .contato-info .item {
-                font-size: 0.95rem;
-            }
-            .logo img {
-                height: 32px;
-            }
-            .logo {
-                font-size: 1.2rem;
-            }
-            .banner-home h2 {
-                font-size: 1.5rem;
-            }
-            .banner-home p {
-                font-size: 1rem;
-            }
-            .section {
-                padding: 50px 0;
-            }
-            footer .row {
-                flex-direction: column;
-                gap: 24px;
-                text-align: center;
-            }
-            footer .social {
-                justify-content: center;
-            }
-            .container {
-                padding: 0 16px;
-            }
+            nav ul { display: none; flex-direction: column; background: #fff; position: absolute; top: 70px; left: 0; width: 100%; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); gap: 16px; text-align: center; border-top: 1px solid rgba(0,0,0,0.05); }
+            nav ul.aberto { display: flex; }
+            nav ul li a { font-size: 1.1rem; padding: 8px 0; display: block; }
+            .menu-mobile { display: block; }
+            .hero-content h1 { font-size: 2.2rem; }
+            .hero-content p { font-size: 1rem; }
+            .section-title { font-size: 2rem; }
+            .section-subtitle { font-size: 1rem; margin-bottom: 32px; }
+            .servicos-grid { grid-template-columns: 1fr 1fr; gap: 16px; }
+            .servico-card { padding: 20px 16px; }
+            .servico-card i { font-size: 2rem; padding: 12px; }
+            .servico-card h3 { font-size: 1rem; }
+            .servico-card p { font-size: 0.85rem; }
+            .diferenciais-grid { grid-template-columns: 1fr 1fr; gap: 16px; }
+            .diferencial-item { padding: 20px 16px; }
+            .depoimentos-grid { grid-template-columns: 1fr; gap: 16px; }
+            .caso-grid { grid-template-columns: 1fr; gap: 12px; }
+            .caso-seta { transform: rotate(90deg); padding: 4px 0; font-size: 2rem; }
+            .caso-container { padding: 24px 16px; }
+            .caso-titulo h3 { font-size: 1.3rem; }
+            .caso-legenda { font-size: 0.8rem; padding: 10px 12px; }
+            .caso-resultado { padding: 14px 16px; }
+            .caso-resultado span { font-size: 0.9rem; }
+            .videos-grid { grid-template-columns: 1fr; gap: 25px; max-width: 600px; margin: 30px auto 0; }
+            .video-card h3 { padding: 16px 18px 6px; font-size: 1rem; }
+            .video-card p { padding: 0 18px 18px; font-size: 0.9rem; }
+            .contato-info .item { font-size: 0.95rem; }
+            .logo img { height: 32px; }
+            .logo { font-size: 1.2rem; }
+            .banner-home h2 { font-size: 1.5rem; }
+            .banner-home p { font-size: 1rem; }
+            .section { padding: 50px 0; }
+            footer .row { flex-direction: column; gap: 24px; text-align: center; }
+            footer .social { justify-content: center; }
+            .container { padding: 0 16px; }
+            .nav-agendar, .nav-admin { padding: 6px 16px; font-size: 0.85rem; }
         }
-
         @media (max-width: 480px) {
-            .hero-content h1 {
-                font-size: 1.8rem;
-            }
-            .hero-buttons {
-                flex-direction: column;
-                width: 100%;
-            }
-            .hero-buttons .btn {
-                width: 100%;
-                text-align: center;
-            }
-            .btn {
-                padding: 12px 24px;
-                font-size: 0.9rem;
-                width: 100%;
-            }
-            .servicos-grid {
-                grid-template-columns: 1fr;
-                gap: 14px;
-            }
-            .diferenciais-grid {
-                grid-template-columns: 1fr;
-                gap: 14px;
-            }
-            .depoimentos-grid {
-                grid-template-columns: 1fr;
-                gap: 14px;
-            }
-            .caso-container {
-                padding: 18px 12px;
-                margin-bottom: 30px;
-            }
-            .caso-titulo h3 {
-                font-size: 1.1rem;
-            }
-            .caso-descricao {
-                font-size: 0.9rem;
-            }
-            .caso-seta {
-                font-size: 1.6rem;
-            }
-            .caso-item {
-                aspect-ratio: 4/3;
-            }
-            .caso-resultado span {
-                font-size: 0.85rem;
-            }
-            .videos-grid {
-                gap: 20px;
-                max-width: 100%;
-            }
-            .video-card h3 {
-                font-size: 0.95rem;
-                padding: 14px 16px 4px;
-            }
-            .video-card p {
-                font-size: 0.85rem;
-                padding: 0 16px 16px;
-            }
-            .section-title {
-                font-size: 1.6rem;
-            }
-            .section-subtitle {
-                font-size: 0.9rem;
-                margin-bottom: 24px;
-            }
-            .contato-info .item {
-                font-size: 0.9rem;
-                gap: 12px;
-            }
-            .contato-info .item i {
-                width: 36px;
-                height: 36px;
-                font-size: 1.1rem;
-            }
-            .contato-box {
-                padding: 16px 18px;
-            }
-            .contato-mapa {
-                padding: 24px 16px;
-                min-height: 180px;
-            }
-            .contato-mapa i {
-                font-size: 3rem;
-            }
-            .logo img {
-                height: 28px;
-            }
-            .logo {
-                font-size: 1rem;
-            }
-            .banner-home {
-                padding: 30px 0;
-            }
-            .banner-home h2 {
-                font-size: 1.2rem;
-            }
-            .banner-home p {
-                font-size: 0.95rem;
-            }
-            .section {
-                padding: 40px 0;
-            }
-            .whatsapp-float {
-                width: 50px;
-                height: 50px;
-                font-size: 1.8rem;
-                bottom: 16px;
-                right: 16px;
-            }
-            .back-top {
-                bottom: 76px;
-                right: 16px;
-                width: 38px;
-                height: 38px;
-                font-size: 1rem;
-            }
-            .container {
-                padding: 0 12px;
-            }
-            footer {
-                padding: 30px 0 16px;
-            }
-            footer .col h4 {
-                font-size: 1rem;
-            }
-            footer .col p,
-            footer .col a {
-                font-size: 0.85rem;
-            }
-            footer .copyright {
-                font-size: 0.75rem;
-            }
-            .sobre-texto p {
-                font-size: 0.95rem;
-            }
-            .sobre-texto .valores span {
-                font-size: 0.75rem;
-                padding: 4px 12px;
-            }
-            .faq-pergunta {
-                padding: 14px 16px;
-                font-size: 0.95rem;
-            }
-            .faq-resposta {
-                font-size: 0.9rem;
-            }
-            .faq-item.ativo .faq-resposta {
-                padding: 0 16px 14px 16px;
-            }
+            .hero-content h1 { font-size: 1.8rem; }
+            .hero-buttons { flex-direction: column; width: 100%; }
+            .hero-buttons .btn { width: 100%; text-align: center; }
+            .btn { padding: 12px 24px; font-size: 0.9rem; width: 100%; }
+            .servicos-grid { grid-template-columns: 1fr; gap: 14px; }
+            .diferenciais-grid { grid-template-columns: 1fr; gap: 14px; }
+            .depoimentos-grid { grid-template-columns: 1fr; gap: 14px; }
+            .caso-container { padding: 18px 12px; margin-bottom: 30px; }
+            .caso-titulo h3 { font-size: 1.1rem; }
+            .caso-descricao { font-size: 0.9rem; }
+            .caso-seta { font-size: 1.6rem; }
+            .caso-item { aspect-ratio: 4/3; }
+            .caso-resultado span { font-size: 0.85rem; }
+            .videos-grid { gap: 20px; max-width: 100%; }
+            .video-card h3 { font-size: 0.95rem; padding: 14px 16px 4px; }
+            .video-card p { font-size: 0.85rem; padding: 0 16px 16px; }
+            .section-title { font-size: 1.6rem; }
+            .section-subtitle { font-size: 0.9rem; margin-bottom: 24px; }
+            .contato-info .item { font-size: 0.9rem; gap: 12px; }
+            .contato-info .item i { width: 36px; height: 36px; font-size: 1.1rem; }
+            .contato-box { padding: 16px 18px; }
+            .contato-mapa { padding: 24px 16px; min-height: 180px; }
+            .contato-mapa i { font-size: 3rem; }
+            .logo img { height: 28px; }
+            .logo { font-size: 1rem; }
+            .banner-home { padding: 30px 0; }
+            .banner-home h2 { font-size: 1.2rem; }
+            .banner-home p { font-size: 0.95rem; }
+            .section { padding: 40px 0; }
+            .whatsapp-float { width: 50px; height: 50px; font-size: 1.8rem; bottom: 16px; right: 16px; }
+            .back-top { bottom: 76px; right: 16px; width: 38px; height: 38px; font-size: 1rem; }
+            .container { padding: 0 12px; }
+            footer { padding: 30px 0 16px; }
+            footer .col h4 { font-size: 1rem; }
+            footer .col p, footer .col a { font-size: 0.85rem; }
+            footer .copyright { font-size: 0.75rem; }
+            .sobre-texto p { font-size: 0.95rem; }
+            .sobre-texto .valores span { font-size: 0.75rem; padding: 4px 12px; }
+            .faq-pergunta { padding: 14px 16px; font-size: 0.95rem; }
+            .faq-resposta { font-size: 0.9rem; }
+            .faq-item.ativo .faq-resposta { padding: 0 16px 14px 16px; }
         }
-
         @media (max-width: 380px) {
-            .hero-content h1 {
-                font-size: 1.5rem;
-            }
-            .section-title {
-                font-size: 1.4rem;
-            }
-            .logo img {
-                height: 24px;
-            }
-            .logo {
-                font-size: 0.9rem;
-                gap: 6px;
-            }
-            .container {
-                padding: 0 8px;
-            }
-            .video-card h3 {
-                font-size: 0.85rem;
-            }
-            .video-card p {
-                font-size: 0.8rem;
-            }
-            .caso-item {
-                aspect-ratio: 1/1;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .hide-mobile {
-                display: none !important;
-            }
-            .show-mobile {
-                display: block !important;
-            }
-            .text-center-mobile {
-                text-align: center !important;
-            }
-            .flex-column-mobile {
-                flex-direction: column !important;
-            }
-            .gap-mobile-16 {
-                gap: 16px !important;
-            }
-        }
-
-        @media (min-width: 769px) {
-            .hide-desktop {
-                display: none !important;
-            }
-            .show-desktop {
-                display: block !important;
-            }
+            .hero-content h1 { font-size: 1.5rem; }
+            .section-title { font-size: 1.4rem; }
+            .logo img { height: 24px; }
+            .logo { font-size: 0.9rem; gap: 6px; }
+            .container { padding: 0 8px; }
+            .video-card h3 { font-size: 0.85rem; }
+            .video-card p { font-size: 0.8rem; }
+            .caso-item { aspect-ratio: 1/1; }
         }
     </style>
 </head>
@@ -1306,8 +1021,8 @@
     <!-- ===== HEADER ===== -->
     <header>
         <div class="container">
-            <a href="#" class="logo">
-                <img src="images/Logo.jpeg" alt="Levità Podologia - Dra. Renata Kemp" />
+            <a href="index.html" class="logo">
+                <img src="images/Logo.jpeg" alt="Levità Podologia - Podóloga Renata Kemp" />
                 Levità<span>.</span>
             </a>
             <nav>
@@ -1320,6 +1035,8 @@
                     <li><a href="#depoimentos">Depoimentos</a></li>
                     <li><a href="#faq">FAQ</a></li>
                     <li><a href="#contato">Contato</a></li>
+                    <li><a href="agendamento.html" class="nav-agendar"><i class="fas fa-calendar-check"></i> Agendar</a></li>
+                    <li><a href="admin.html" class="nav-admin"><i class="fas fa-lock"></i> Admin</a></li>
                 </ul>
                 <div class="menu-mobile" id="menu-toggle">
                     <i class="fas fa-bars"></i>
@@ -1334,32 +1051,32 @@
             <div class="hero-content">
                 <h1>Leveza para <span>cada passo</span></h1>
                 <p>
-                    Com a <strong>Dra. Renata Kemp</strong>, seus pés recebem o cuidado que merecem.
+                    Com a <strong>Podóloga Renata Kemp</strong>, seus pés recebem o cuidado que merecem.
                     Atendimento humanizado, técnicas modernas e todo o carinho para você caminhar com conforto e segurança.
                 </p>
                 <div class="hero-buttons">
-                    <a href="#" class="btn btn-whatsapp" id="whatsapp-hero">
-                        <i class="fab fa-whatsapp"></i> Agendar com Renata
+                    <a href="agendamento.html" class="btn btn-primario">
+                        <i class="fas fa-calendar-check"></i> Agendar Agora
                     </a>
                     <a href="#servicos" class="btn btn-secundario">Conheça os Tratamentos</a>
                 </div>
             </div>
             <div class="hero-image">
-                <img src="images/hero.png" alt="Dra. Renata Kemp - Cuidado com os pés" />
+                <img src="images/hero.png" alt="Podóloga Renata Kemp - Cuidado com os pés" />
             </div>
         </div>
     </section>
 
-    <!-- ===== BANNER ATENDIMENTO DOMICILIAR ===== -->
+    <!-- ===== BANNER ===== -->
     <section class="banner-home">
         <div class="container">
-            <h2><i class="fas fa-home"></i> Atendimento Domiciliar com a Dra. Renata Kemp</h2>
+            <h2><i class="fas fa-home"></i> Atendimento Domiciliar ou Presencial</h2>
             <p>
-                <strong>Agende seu horário e <span class="highlight">Renata vai até você</span>!</strong><br />
-                Atendimento em Guarulhos e região com conforto, segurança e todo o cuidado que você merece.
+                <strong>Escolha a melhor opção para você:</strong><br />
+                Atendimento <span class="highlight">domiciliar</span> com conforto e segurança, ou <span class="highlight">presencial</span> em nossa clínica em Guarulhos.
             </p>
-            <a href="#" class="btn btn-whatsapp" id="whatsapp-banner">
-                <i class="fab fa-whatsapp"></i> Agendar Visita Domiciliar
+            <a href="agendamento.html" class="btn btn-whatsapp" style="margin-top:20px;">
+                <i class="fas fa-calendar-check"></i> Agendar Agora
             </a>
         </div>
     </section>
@@ -1367,37 +1084,20 @@
     <!-- ===== SOBRE ===== -->
     <section class="section" id="sobre">
         <div class="container">
-            <h2 class="section-title">Sobre a <span>Dra. Renata Kemp</span></h2>
+            <h2 class="section-title">Sobre a <span>Podóloga Renata Kemp</span></h2>
             <p class="section-subtitle">Conheça a profissional que cuida dos seus pés com dedicação e excelência.</p>
             <div class="sobre-grid">
                 <div class="sobre-texto">
-                    <p>
-                        <strong>Dra. Renata Kemp</strong> é a profissional por trás da <strong>Levitatà Podologia</strong>.
-                        Com anos de experiência em podologia clínica e podogeriatria, Renata dedica sua carreira a
-                        promover saúde, conforto e qualidade de vida através do cuidado com os pés.
-                    </p>
-                    <p>
-                        Especialista em pé diabético, unha encravada, calos e calosidades, Renata atende com
-                        técnicas modernas, equipamentos esterilizados e um olhar humanizado para cada paciente.
-                        Acredita que cuidar dos pés é cuidar da liberdade de viver.
-                    </p>
-                    <p>
-                        <i class="fas fa-home" style="color: var(--dourado);"></i>
-                        <strong>Atendimento Domiciliar</strong> – Renata leva todo o cuidado e estrutura até você em Guarulhos e região.
-                    </p>
+                    <p><strong>Renata Kemp</strong> é a podóloga por trás da <strong>Levitatà Podologia</strong>. Com anos de experiência em podologia clínica e podogeriatria, Renata dedica sua carreira a promover saúde, conforto e qualidade de vida através do cuidado com os pés.</p>
+                    <p>Especialista em pé diabético, unha encravada, calos e calosidades, Renata atende com técnicas modernas, equipamentos esterilizados e um olhar humanizado para cada paciente. Acredita que cuidar dos pés é cuidar da liberdade de viver.</p>
+                    <p><i class="fas fa-home" style="color: var(--dourado);"></i> <strong>Atendimento Domiciliar</strong> – Renata leva todo o cuidado e estrutura até você em Guarulhos e região.<br /><i class="fas fa-building" style="color: var(--dourado);"></i> <strong>Atendimento Presencial</strong> – Atendimento em nossa clínica em Guarulhos.</p>
                     <div class="valores">
-                        <span>Humanização</span>
-                        <span>Ética</span>
-                        <span>Empatia</span>
-                        <span>Excelência</span>
-                        <span>Biossegurança</span>
-                        <span>Respeito</span>
-                        <span>Atualização</span>
-                        <span>Transparência</span>
+                        <span>Humanização</span><span>Ética</span><span>Empatia</span><span>Excelência</span>
+                        <span>Biossegurança</span><span>Respeito</span><span>Atualização</span><span>Transparência</span>
                     </div>
                 </div>
                 <div class="sobre-imagem">
-                    <img src="images/sobre.png" alt="Dra. Renata Kemp - Podóloga" />
+                    <img src="images/sobre.png" alt="Podóloga Renata Kemp" />
                 </div>
             </div>
         </div>
@@ -1406,49 +1106,17 @@
     <!-- ===== SERVIÇOS ===== -->
     <section class="section" id="servicos" style="background: var(--cinza-claro);">
         <div class="container">
-            <h2 class="section-title">Tratamentos da <span>Dra. Renata Kemp</span></h2>
+            <h2 class="section-title">Tratamentos da <span>Podóloga Renata Kemp</span></h2>
             <p class="section-subtitle">Cuidados especializados para a saúde dos seus pés.</p>
             <div class="servicos-grid">
-                <div class="servico-card">
-                    <i class="fas fa-user-md"></i>
-                    <h3>Podologia Clínica</h3>
-                    <p>Avaliação e tratamento de alterações nos pés com técnicas modernas.</p>
-                </div>
-                <div class="servico-card">
-                    <i class="fas fa-heartbeat"></i>
-                    <h3>Pé Diabético</h3>
-                    <p>Cuidados preventivos e tratamento especializado para diabéticos.</p>
-                </div>
-                <div class="servico-card">
-                    <i class="fas fa-user-plus"></i>
-                    <h3>Podogeriatria</h3>
-                    <p>Atendimento voltado à terceira idade com todo cuidado e atenção.</p>
-                </div>
-                <div class="servico-card">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <h3>Unha Encravada</h3>
-                    <p>Tratamento eficaz e minimamente invasivo com a Dra. Renata Kemp.</p>
-                </div>
-                <div class="servico-card">
-                    <i class="fas fa-circle"></i>
-                    <h3>Calos e Calosidades</h3>
-                    <p>Remoção segura com orientação preventiva personalizada.</p>
-                </div>
-                <div class="servico-card">
-                    <i class="fas fa-biohazard"></i>
-                    <h3>Verrugas Plantares</h3>
-                    <p>Tratamento com técnicas indolores e alta eficácia.</p>
-                </div>
-                <div class="servico-card">
-                    <i class="fas fa-spa"></i>
-                    <h3>Micose</h3>
-                    <p>Diagnóstico e tratamento para infecções fúngicas com acompanhamento.</p>
-                </div>
-                <div class="servico-card">
-                    <i class="fas fa-shoe-prints"></i>
-                    <h3>Órteses</h3>
-                    <p>Palmilhas e dispositivos personalizados para melhorar a pisada.</p>
-                </div>
+                <div class="servico-card"><i class="fas fa-user-md"></i><h3>Podologia Clínica</h3><p>Avaliação e tratamento de alterações nos pés com técnicas modernas.</p></div>
+                <div class="servico-card"><i class="fas fa-heartbeat"></i><h3>Pé Diabético</h3><p>Cuidados preventivos e tratamento especializado para diabéticos.</p></div>
+                <div class="servico-card"><i class="fas fa-user-plus"></i><h3>Podogeriatria</h3><p>Atendimento voltado à terceira idade com todo cuidado e atenção.</p></div>
+                <div class="servico-card"><i class="fas fa-exclamation-triangle"></i><h3>Unha Encravada</h3><p>Tratamento eficaz e minimamente invasivo com a Podóloga Renata Kemp.</p></div>
+                <div class="servico-card"><i class="fas fa-circle"></i><h3>Calos e Calosidades</h3><p>Remoção segura com orientação preventiva personalizada.</p></div>
+                <div class="servico-card"><i class="fas fa-biohazard"></i><h3>Verrugas Plantares</h3><p>Tratamento com técnicas indolores e alta eficácia.</p></div>
+                <div class="servico-card"><i class="fas fa-spa"></i><h3>Micose</h3><p>Diagnóstico e tratamento para infecções fúngicas com acompanhamento.</p></div>
+                <div class="servico-card"><i class="fas fa-shoe-prints"></i><h3>Órteses</h3><p>Palmilhas e dispositivos personalizados para melhorar a pisada.</p></div>
             </div>
         </div>
     </section>
@@ -1456,152 +1124,63 @@
     <!-- ===== DIFERENCIAIS ===== -->
     <section class="section" id="diferenciais">
         <div class="container">
-            <h2 class="section-title">Diferenciais da <span>Dra. Renata Kemp</span></h2>
+            <h2 class="section-title">Diferenciais da <span>Podóloga Renata Kemp</span></h2>
             <p class="section-subtitle">O que faz o cuidado da Renata ser único e especial.</p>
             <div class="diferenciais-grid">
-                <div class="diferencial-item">
-                    <i class="fas fa-hand-holding-heart"></i>
-                    <h4>Atendimento Humanizado</h4>
-                    <p>Renata trata cada paciente com atenção única, respeito e acolhimento.</p>
-                </div>
-                <div class="diferencial-item">
-                    <i class="fas fa-home"></i>
-                    <h4>Atendimento Domiciliar</h4>
-                    <p>Renata vai até sua casa com toda estrutura e cuidado necessários.</p>
-                </div>
-                <div class="diferencial-item">
-                    <i class="fas fa-shield-alt"></i>
-                    <h4>Equipamentos Esterilizados</h4>
-                    <p>Biossegurança rigorosa em todos os procedimentos realizados por Renata.</p>
-                </div>
-                <div class="diferencial-item">
-                    <i class="fas fa-user-circle"></i>
-                    <h4>Atendimento Personalizado</h4>
-                    <p>Planos de cuidado adaptados às necessidades de cada paciente.</p>
-                </div>
-                <div class="diferencial-item">
-                    <i class="fas fa-graduation-cap"></i>
-                    <h4>Técnicas Atualizadas</h4>
-                    <p>Renata se mantém sempre atualizada com as melhores práticas da podologia.</p>
-                </div>
-                <div class="diferencial-item">
-                    <i class="fas fa-smile"></i>
-                    <h4>Experiência Leve</h4>
-                    <p>Atendimento pensado para seu conforto, bem-estar e tranquilidade.</p>
-                </div>
+                <div class="diferencial-item"><i class="fas fa-hand-holding-heart"></i><h4>Atendimento Humanizado</h4><p>Renata trata cada paciente com atenção única, respeito e acolhimento.</p></div>
+                <div class="diferencial-item"><i class="fas fa-home"></i><h4>Atendimento Domiciliar</h4><p>Renata vai até sua casa com toda estrutura e cuidado necessários.</p></div>
+                <div class="diferencial-item"><i class="fas fa-building"></i><h4>Atendimento Presencial</h4><p>Atendimento em clínica com toda infraestrutura e conforto.</p></div>
+                <div class="diferencial-item"><i class="fas fa-shield-alt"></i><h4>Equipamentos Esterilizados</h4><p>Biossegurança rigorosa em todos os procedimentos realizados por Renata.</p></div>
+                <div class="diferencial-item"><i class="fas fa-user-circle"></i><h4>Atendimento Personalizado</h4><p>Planos de cuidado adaptados às necessidades de cada paciente.</p></div>
+                <div class="diferencial-item"><i class="fas fa-graduation-cap"></i><h4>Técnicas Atualizadas</h4><p>Renata se mantém sempre atualizada com as melhores práticas da podologia.</p></div>
+                <div class="diferencial-item"><i class="fas fa-smile"></i><h4>Experiência Leve</h4><p>Atendimento pensado para seu conforto, bem-estar e tranquilidade.</p></div>
+                <div class="diferencial-item"><i class="fas fa-clock"></i><h4>Flexibilidade de Horários</h4><p>Horários adaptados à sua rotina, inclusive finais de semana.</p></div>
             </div>
         </div>
     </section>
 
-    <!-- ===== GALERIA ANTES E DEPOIS ===== -->
+    <!-- ===== GALERIA ===== -->
     <section class="section" id="galeria" style="background: var(--cinza-claro);">
         <div class="container">
             <h2 class="section-title">Antes e <span>Depois</span></h2>
-            <p class="section-subtitle">Resultados reais dos tratamentos realizados pela <strong>Dra. Renata Kemp</strong>.</p>
-            
-            <!-- ===== CASO 1 - UNHA ENCRAVADA ===== -->
+            <p class="section-subtitle">Resultados reais dos tratamentos realizados pela <strong>Podóloga Renata Kemp</strong>.</p>
             <div class="caso-container">
-                <div class="caso-titulo">
-                    <span class="badge-caso">CASO 1</span>
-                    <h3><i class="fas fa-exclamation-triangle" style="color: var(--dourado);"></i> Unha Encravada</h3>
-                    <p class="caso-descricao">Tratamento de unha encravada (onicocriptose) com técnica minimamente invasiva.</p>
-                </div>
+                <div class="caso-titulo"><span class="badge-caso">CASO 1</span><h3><i class="fas fa-exclamation-triangle" style="color: var(--dourado);"></i> Unha Encravada</h3><p class="caso-descricao">Tratamento de unha encravada (onicocriptose) com técnica minimamente invasiva.</p></div>
                 <div class="caso-grid">
-                    <div class="caso-item antes">
-                        <div class="caso-label">ANTES</div>
-                        <img src="images/antes1.png" alt="Unha encravada - Antes do tratamento" loading="lazy" />
-                        <div class="caso-legenda">
-                            <i class="fas fa-exclamation-circle" style="color: #dc3545;"></i>
-                            Unha encravada com inflamação e dor
-                        </div>
-                    </div>
-                    <div class="caso-seta">
-                        <i class="fas fa-arrow-right"></i>
-                    </div>
-                    <div class="caso-item depois">
-                        <div class="caso-label">DEPOIS</div>
-                        <img src="images/depois1.png" alt="Unha encravada - Depois do tratamento" loading="lazy" />
-                        <div class="caso-legenda">
-                            <i class="fas fa-check-circle" style="color: #28a745;"></i>
-                            Unha corrigida, pele saudável e sem dor
-                        </div>
-                    </div>
+                    <div class="caso-item antes"><div class="caso-label">ANTES</div><img src="images/antes1.png" alt="Unha encravada - Antes" loading="lazy" /><div class="caso-legenda"><i class="fas fa-exclamation-circle" style="color: #dc3545;"></i> Unha encravada com inflamação e dor</div></div>
+                    <div class="caso-seta"><i class="fas fa-arrow-right"></i></div>
+                    <div class="caso-item depois"><div class="caso-label">DEPOIS</div><img src="images/depois1.png" alt="Unha encravada - Depois" loading="lazy" /><div class="caso-legenda"><i class="fas fa-check-circle" style="color: #28a745;"></i> Unha corrigida, pele saudável e sem dor</div></div>
                 </div>
-                <div class="caso-resultado">
-                    <i class="fas fa-star" style="color: var(--dourado);"></i>
-                    <span>Resultado: Paciente com alívio imediato da dor e recuperação completa em 7 dias.</span>
-                </div>
+                <div class="caso-resultado"><i class="fas fa-star" style="color: var(--dourado);"></i><span>Resultado: Paciente com alívio imediato da dor e recuperação completa em 7 dias.</span></div>
             </div>
-
-            <!-- ===== CASO 2 - CALOSIDADE ===== -->
             <div class="caso-container">
-                <div class="caso-titulo">
-                    <span class="badge-caso">CASO 2</span>
-                    <h3><i class="fas fa-circle" style="color: var(--dourado);"></i> Calosidade</h3>
-                    <p class="caso-descricao">Remoção de calosidade (hiperqueratose) com técnica indolor e resultados duradouros.</p>
-                </div>
+                <div class="caso-titulo"><span class="badge-caso">CASO 2</span><h3><i class="fas fa-circle" style="color: var(--dourado);"></i> Calosidade</h3><p class="caso-descricao">Remoção de calosidade (hiperqueratose) com técnica indolor e resultados duradouros.</p></div>
                 <div class="caso-grid">
-                    <div class="caso-item antes">
-                        <div class="caso-label">ANTES</div>
-                        <img src="images/antes2.png" alt="Calosidade - Antes do tratamento" loading="lazy" />
-                        <div class="caso-legenda">
-                            <i class="fas fa-exclamation-circle" style="color: #dc3545;"></i>
-                            Calosidade espessa, amarelada e ressecada
-                        </div>
-                    </div>
-                    <div class="caso-seta">
-                        <i class="fas fa-arrow-right"></i>
-                    </div>
-                    <div class="caso-item depois">
-                        <div class="caso-label">DEPOIS</div>
-                        <img src="images/depois2.png" alt="Calosidade - Depois do tratamento" loading="lazy" />
-                        <div class="caso-legenda">
-                            <i class="fas fa-check-circle" style="color: #28a745;"></i>
-                            Pele lisa, hidratada e saudável
-                        </div>
-                    </div>
+                    <div class="caso-item antes"><div class="caso-label">ANTES</div><img src="images/antes2.png" alt="Calosidade - Antes" loading="lazy" /><div class="caso-legenda"><i class="fas fa-exclamation-circle" style="color: #dc3545;"></i> Calosidade espessa, amarelada e ressecada</div></div>
+                    <div class="caso-seta"><i class="fas fa-arrow-right"></i></div>
+                    <div class="caso-item depois"><div class="caso-label">DEPOIS</div><img src="images/depois2.png" alt="Calosidade - Depois" loading="lazy" /><div class="caso-legenda"><i class="fas fa-check-circle" style="color: #28a745;"></i> Pele lisa, hidratada e saudável</div></div>
                 </div>
-                <div class="caso-resultado">
-                    <i class="fas fa-star" style="color: var(--dourado);"></i>
-                    <span>Resultado: Paciente com desconforto eliminado e recuperação da textura natural da pele.</span>
-                </div>
+                <div class="caso-resultado"><i class="fas fa-star" style="color: var(--dourado);"></i><span>Resultado: Paciente com desconforto eliminado e recuperação da textura natural da pele.</span></div>
             </div>
-
-            <p style="text-align:center; font-size:0.85rem; margin-top:40px; color:#4a5f64;">
-                <i class="fas fa-lock" style="margin-right:6px;"></i> Imagens com autorização dos pacientes da <strong>Dra. Renata Kemp</strong>.
-            </p>
+            <p style="text-align:center; font-size:0.85rem; margin-top:40px; color:#4a5f64;"><i class="fas fa-lock" style="margin-right:6px;"></i> Imagens com autorização dos pacientes da <strong>Podóloga Renata Kemp</strong>.</p>
         </div>
     </section>
 
-    <!-- ===== VÍDEOS - FORMATO CORRETO ===== -->
+    <!-- ===== VÍDEOS ===== -->
     <section class="section" id="videos" style="background: var(--cinza-claro);">
         <div class="container">
-            <h2 class="section-title">Vídeos da <span>Dra. Renata Kemp</span></h2>
+            <h2 class="section-title">Vídeos da <span>Podóloga Renata Kemp</span></h2>
             <p class="section-subtitle">Conheça um pouco mais sobre o trabalho de Renata e veja depoimentos de quem já confiou em seu cuidado.</p>
-            
             <div class="videos-grid">
-                <!-- Vídeo 1 - Relato de Experiência -->
                 <div class="video-card">
-                    <div class="video-wrapper">
-                        <video controls preload="metadata" playsinline>
-                            <source src="https://raw.githubusercontent.com/LevitaPodologia/website/main/videos/video1.mp4" type="video/mp4">
-                            Seu navegador não suporta a reprodução de vídeos.
-                        </video>
-                    </div>
+                    <div class="video-wrapper"><video controls preload="metadata" playsinline><source src="videos/video1.mp4" type="video/mp4">Seu navegador não suporta a reprodução de vídeos.</video></div>
                     <h3><i class="fas fa-star" style="color: var(--dourado);"></i> Relato de Experiência</h3>
-                    <p>Depoimento emocionante de uma paciente sobre o atendimento da <strong>Dra. Renata Kemp</strong> e os resultados transformadores do tratamento.</p>
+                    <p>Depoimento emocionante de uma paciente sobre o atendimento da <strong>Podóloga Renata Kemp</strong> e os resultados transformadores do tratamento.</p>
                 </div>
-                
-                <!-- Vídeo 2 - Trabalhando -->
                 <div class="video-card">
-                    <div class="video-wrapper">
-                        <video controls preload="metadata" playsinline>
-                            <source src="https://raw.githubusercontent.com/LevitaPodologia/website/main/videos/video2.mp4" type="video/mp4">
-                            Seu navegador não suporta a reprodução de vídeos.
-                        </video>
-                    </div>
+                    <div class="video-wrapper"><video controls preload="metadata" playsinline><source src="videos/video2.mp4" type="video/mp4">Seu navegador não suporta a reprodução de vídeos.</video></div>
                     <h3><i class="fas fa-play-circle" style="color: var(--dourado);"></i> Nosso Trabalho</h3>
-                    <p>Veja a <strong>Dra. Renata Kemp</strong> em ação, realizando atendimentos com cuidado, dedicação e profissionalismo.</p>
+                    <p>Veja a <strong>Podóloga Renata Kemp</strong> em ação, realizando atendimentos com cuidado, dedicação e profissionalismo.</p>
                 </div>
             </div>
         </div>
@@ -1610,24 +1189,12 @@
     <!-- ===== DEPOIMENTOS ===== -->
     <section class="section" id="depoimentos">
         <div class="container">
-            <h2 class="section-title">O que dizem sobre a <span>Dra. Renata Kemp</span></h2>
+            <h2 class="section-title">O que dizem sobre a <span>Podóloga Renata Kemp</span></h2>
             <p class="section-subtitle">Depoimentos reais de pacientes que confiaram no trabalho de Renata.</p>
             <div class="depoimentos-grid">
-                <div class="depoimento-card">
-                    <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-                    <p>"Excelente atendimento! A Renata veio até minha casa e resolveu meu problema com unha encravada. Super recomendo!"</p>
-                    <div class="autor">— Maria A.</div>
-                </div>
-                <div class="depoimento-card">
-                    <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-                    <p>"Sou diabética e sempre tive receio de cuidar dos pés. O atendimento domiciliar da Renata me trouxe muita segurança e confiança."</p>
-                    <div class="autor">— Helena S.</div>
-                </div>
-                <div class="depoimento-card">
-                    <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-                    <p>"Minha mãe de 82 anos foi atendida em casa com todo carinho. Profissionalismo e dedicação que emocionam."</p>
-                    <div class="autor">— Roberto C.</div>
-                </div>
+                <div class="depoimento-card"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><p>"Excelente atendimento! A Renata veio até minha casa e resolveu meu problema com unha encravada. Super recomendo!"</p><div class="autor">— Maria A.</div></div>
+                <div class="depoimento-card"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><p>"Sou diabética e sempre tive receio de cuidar dos pés. O atendimento domiciliar da Renata me trouxe muita segurança e confiança."</p><div class="autor">— Helena S.</div></div>
+                <div class="depoimento-card"><div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><p>"Minha mãe de 82 anos foi atendida em casa com todo carinho. Profissionalismo e dedicação que emocionam."</p><div class="autor">— Roberto C.</div></div>
             </div>
         </div>
     </section>
@@ -1636,53 +1203,14 @@
     <section class="section" id="faq" style="background: var(--cinza-claro);">
         <div class="container">
             <h2 class="section-title">Perguntas <span>Frequentes</span></h2>
-            <p class="section-subtitle">Tire suas dúvidas sobre os atendimentos da Dra. Renata Kemp.</p>
+            <p class="section-subtitle">Tire suas dúvidas sobre os atendimentos da Podóloga Renata Kemp.</p>
             <div class="faq-lista">
-                <div class="faq-item ativo">
-                    <div class="faq-pergunta">
-                        <span>Como funciona o atendimento domiciliar com a Renata?</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-resposta">
-                        <p>Você agenda seu horário e a <strong>Dra. Renata Kemp</strong> vai até sua casa com todos os equipamentos necessários para um atendimento completo, seguro e personalizado.</p>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-pergunta">
-                        <span>Quais regiões a Renata atende?</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-resposta">
-                        <p>A <strong>Dra. Renata Kemp</strong> atende Guarulhos e toda região metropolitana. Consulte disponibilidade para outras áreas.</p>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-pergunta">
-                        <span>Unha encravada pode voltar após o tratamento?</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-resposta">
-                        <p>Com o tratamento adequado da <strong>Dra. Renata Kemp</strong> e orientações de cuidados domiciliares, o retorno é raro. Acompanhamos cada caso para garantir a resolução definitiva.</p>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-pergunta">
-                        <span>Quem tem diabetes deve consultar a Renata?</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-resposta">
-                        <p>Sim! A <strong>Dra. Renata Kemp</strong> é especialista em pé diabético e recomenda acompanhamento regular para prevenir complicações como úlceras e infecções.</p>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-pergunta">
-                        <span>O tratamento com a Renata é doloroso?</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div class="faq-resposta">
-                        <p>A <strong>Dra. Renata Kemp</strong> utiliza técnicas modernas e minimamente invasivas para garantir o máximo de conforto. A maioria dos procedimentos é indolor ou com desconforto mínimo.</p>
-                    </div>
-                </div>
+                <div class="faq-item ativo"><div class="faq-pergunta"><span>Como funciona o atendimento domiciliar com a Renata?</span><i class="fas fa-chevron-down"></i></div><div class="faq-resposta"><p>Você agenda seu horário e a <strong>Podóloga Renata Kemp</strong> vai até sua casa com todos os equipamentos necessários para um atendimento completo, seguro e personalizado.</p></div></div>
+                <div class="faq-item"><div class="faq-pergunta"><span>Quais regiões a Renata atende para domicílio?</span><i class="fas fa-chevron-down"></i></div><div class="faq-resposta"><p>A <strong>Podóloga Renata Kemp</strong> atende Guarulhos e toda região metropolitana. Consulte disponibilidade para outras áreas.</p></div></div>
+                <div class="faq-item"><div class="faq-pergunta"><span>Onde fica a clínica para atendimento presencial?</span><i class="fas fa-chevron-down"></i></div><div class="faq-resposta"><p>Nossa clínica está localizada em Guarulhos - SP. Ao escolher o atendimento presencial, você receberá o endereço completo por WhatsApp.</p></div></div>
+                <div class="faq-item"><div class="faq-pergunta"><span>Unha encravada pode voltar após o tratamento?</span><i class="fas fa-chevron-down"></i></div><div class="faq-resposta"><p>Com o tratamento adequado da <strong>Podóloga Renata Kemp</strong> e orientações de cuidados domiciliares, o retorno é raro. Acompanhamos cada caso para garantir a resolução definitiva.</p></div></div>
+                <div class="faq-item"><div class="faq-pergunta"><span>Quem tem diabetes deve consultar a Renata?</span><i class="fas fa-chevron-down"></i></div><div class="faq-resposta"><p>Sim! A <strong>Podóloga Renata Kemp</strong> é especialista em pé diabético e recomenda acompanhamento regular para prevenir complicações como úlceras e infecções.</p></div></div>
+                <div class="faq-item"><div class="faq-pergunta"><span>O tratamento com a Renata é doloroso?</span><i class="fas fa-chevron-down"></i></div><div class="faq-resposta"><p>A <strong>Podóloga Renata Kemp</strong> utiliza técnicas modernas e minimamente invasivas para garantir o máximo de conforto. A maioria dos procedimentos é indolor ou com desconforto mínimo.</p></div></div>
             </div>
         </div>
     </section>
@@ -1691,46 +1219,18 @@
     <section class="section" id="contato">
         <div class="container">
             <h2 class="section-title">Entre em <span>contato</span></h2>
-            <p class="section-subtitle">Agende sua consulta com a Dra. Renata Kemp ou tire suas dúvidas.</p>
+            <p class="section-subtitle">Agende sua consulta com a Podóloga Renata Kemp ou tire suas dúvidas.</p>
             <div class="contato-grid">
                 <div class="contato-info">
-                    <div class="contato-box">
-                        <h4><i class="fas fa-home" style="color: var(--dourado);"></i> Atendimento Domiciliar</h4>
-                        <p>Agende seu horário e a <strong>Dra. Renata Kemp</strong> vai até você!</p>
-                        <p style="font-size: 0.95rem; margin-top: 4px;">
-                            <i class="fas fa-map-marker-alt" style="color: var(--dourado);"></i>
-                            <strong>Guarulhos e região</strong>
-                        </p>
-                    </div>
-                    <div class="item">
-                        <i class="fas fa-phone-alt"></i>
-                        <span>(11) 97830-3833</span>
-                    </div>
-                    <div class="item">
-                        <i class="fab fa-whatsapp"></i>
-                        <span>(11) 97830-3833</span>
-                    </div>
-                    <div class="item">
-                        <i class="fas fa-envelope"></i>
-                        <span>contato@levitapodologia.com.br</span>
-                    </div>
-                    <div class="item">
-                        <i class="fas fa-clock"></i>
-                        <span>Seg–Sex: 8h–19h | Sáb: 8h–13h</span>
-                    </div>
-                    <a href="#" class="btn btn-whatsapp" id="whatsapp-contato">
-                        <i class="fab fa-whatsapp"></i> Agendar com Renata
-                    </a>
+                    <div class="contato-box"><h4><i class="fas fa-home" style="color: var(--dourado);"></i> Atendimento Domiciliar</h4><p>Agende seu horário e a <strong>Podóloga Renata Kemp</strong> vai até você!</p><p style="font-size: 0.95rem; margin-top: 4px;"><i class="fas fa-map-marker-alt" style="color: var(--dourado);"></i> <strong>Guarulhos e região</strong></p></div>
+                    <div class="contato-box" style="border-left-color: var(--petroleo);"><h4><i class="fas fa-building" style="color: var(--petroleo);"></i> Atendimento Presencial</h4><p>Agende seu horário e venha à clínica em Guarulhos.</p><p style="font-size: 0.95rem; margin-top: 4px;"><i class="fas fa-map-marker-alt" style="color: var(--petroleo);"></i> <strong>Guarulhos - SP</strong></p></div>
+                    <div class="item"><i class="fas fa-phone-alt"></i><span>(11) 97830-3833</span></div>
+                    <div class="item"><i class="fab fa-whatsapp"></i><span>(11) 97830-3833</span></div>
+                    <div class="item"><i class="fas fa-envelope"></i><span>contato@levitapodologia.com.br</span></div>
+                    <div class="item"><i class="fas fa-clock"></i><span>Seg–Sex: 8h–19h | Sáb: 8h–13h</span></div>
+                    <a href="agendamento.html" class="btn btn-primario"><i class="fas fa-calendar-check"></i> Agendar Agora</a>
                 </div>
-                <div class="contato-mapa">
-                    <i class="fas fa-home"></i>
-                    <h3>Atendimento Domiciliar</h3>
-                    <p>A <strong>Dra. Renata Kemp</strong> leva todo o cuidado e estrutura até você em Guarulhos e região.</p>
-                    <p style="margin-top: 12px; font-size: 0.9rem; color: var(--petroleo);">
-                        <i class="fas fa-whatsapp" style="color: #25D366;"></i>
-                        Agende pelo WhatsApp e receba a visita da Renata!
-                    </p>
-                </div>
+                <div class="contato-mapa"><i class="fas fa-map-pin"></i><h3>Atendimento em Guarulhos</h3><p><strong>Domiciliar:</strong> Renata vai até você.</p><p><strong>Presencial:</strong> Clínica em Guarulhos - SP.</p><p style="margin-top: 12px; font-size: 0.9rem; color: var(--petroleo);"><i class="fas fa-whatsapp" style="color: #25D366;"></i> Agende pelo WhatsApp e escolha a melhor opção!</p></div>
             </div>
         </div>
     </section>
@@ -1739,44 +1239,15 @@
     <footer>
         <div class="container">
             <div class="row">
-                <div class="col">
-                    <h4><i class="fas fa-leaf" style="color:var(--salvia);"></i> Levità Podologia</h4>
-                    <p>Leveza para cada passo.<br />Cuidando dos seus pés com dedicação e excelência.</p>
-                    <p><strong>Dra. Renata Kemp</strong></p>
-                    <p><i class="fas fa-home" style="color: var(--dourado);"></i> Atendimento Domiciliar</p>
-                    <p><i class="fas fa-map-marker-alt" style="color: var(--dourado);"></i> Guarulhos e região</p>
-                    <div class="social">
-                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
-                    </div>
-                </div>
-                <div class="col">
-                    <h4>Links rápidos</h4>
-                    <a href="#sobre">Sobre</a><br />
-                    <a href="#servicos">Serviços</a><br />
-                    <a href="#galeria">Galeria</a><br />
-                    <a href="#videos">Vídeos</a><br />
-                    <a href="#depoimentos">Depoimentos</a><br />
-                    <a href="#faq">FAQ</a>
-                </div>
-                <div class="col">
-                    <h4>Contato</h4>
-                    <p><i class="fas fa-phone-alt" style="width:20px;"></i> (11) 97830-3833</p>
-                    <p><i class="fab fa-whatsapp" style="width:20px;"></i> (11) 97830-3833</p>
-                    <p><i class="fas fa-envelope" style="width:20px;"></i> contato@levitapodologia.com.br</p>
-                    <p><i class="fas fa-clock" style="width:20px;"></i> Seg–Sex: 8h–19h</p>
-                    <p><strong>Dra. Renata Kemp</strong></p>
-                </div>
+                <div class="col"><h4><i class="fas fa-leaf" style="color:var(--salvia);"></i> Levità Podologia</h4><p>Leveza para cada passo.<br />Cuidando dos seus pés com dedicação e excelência.</p><p><strong>Podóloga Renata Kemp</strong></p><p><i class="fas fa-home" style="color: var(--dourado);"></i> Atendimento Domiciliar</p><p><i class="fas fa-building" style="color: var(--dourado);"></i> Atendimento Presencial</p><p><i class="fas fa-map-marker-alt" style="color: var(--dourado);"></i> Guarulhos e região</p><div class="social"><a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a><a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a><a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a></div></div>
+                <div class="col"><h4>Links rápidos</h4><a href="#sobre">Sobre</a><br /><a href="#servicos">Serviços</a><br /><a href="#galeria">Galeria</a><br /><a href="#videos">Vídeos</a><br /><a href="#depoimentos">Depoimentos</a><br /><a href="#faq">FAQ</a></div>
+                <div class="col"><h4>Contato</h4><p><i class="fas fa-phone-alt" style="width:20px;"></i> (11) 97830-3833</p><p><i class="fab fa-whatsapp" style="width:20px;"></i> (11) 97830-3833</p><p><i class="fas fa-envelope" style="width:20px;"></i> contato@levitapodologia.com.br</p><p><i class="fas fa-clock" style="width:20px;"></i> Seg–Sex: 8h–19h</p><p><strong>Podóloga Renata Kemp</strong></p></div>
             </div>
-            <div class="copyright">
-                &copy; 2026 Levità Podologia - <strong>Dra. Renata Kemp</strong>. Todos os direitos reservados.<br />
-                <span style="font-size: 0.8rem; opacity: 0.7;">Atendimento Domiciliar em Guarulhos e região</span>
-            </div>
+            <div class="copyright">&copy; 2026 Levità Podologia - <strong>Podóloga Renata Kemp</strong>. Todos os direitos reservados.<br /><span style="font-size: 0.8rem; opacity: 0.7;">Atendimento Domiciliar e Presencial em Guarulhos</span></div>
         </div>
     </footer>
 
-    <!-- ===== WHATSAPP FLUTUANTE ===== -->
+    <!-- ===== WHATSAPP FLOAT ===== -->
     <a href="#" class="whatsapp-float" id="whatsapp-float" aria-label="WhatsApp">
         <i class="fab fa-whatsapp"></i>
     </a>
@@ -1786,26 +1257,20 @@
         <i class="fas fa-arrow-up"></i>
     </div>
 
-    <!-- ===== JAVASCRIPT ===== -->
     <script>
         // ============================================
-        // WHATSAPP COM MENSAGEM PERSONALIZADA
+        // WHATSAPP FLOAT - PEDIR MAIS INFORMAÇÕES
         // ============================================
-        const numeroWhatsApp = '5511978303833';
-        const mensagemPersonalizada = 'Olá, vim pelo site e gostaria de agendar uma consulta com a Dra. Renata Kemp.';
-
-        function abrirWhatsApp() {
-            const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensagemPersonalizada)}`;
-            window.open(url, '_blank');
-        }
-
         document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('#whatsapp-hero, #whatsapp-banner, #whatsapp-contato, #whatsapp-float').forEach(function(btn) {
-                btn.addEventListener('click', function(e) {
+            const whatsappFloat = document.getElementById('whatsapp-float');
+            if (whatsappFloat) {
+                whatsappFloat.addEventListener('click', function(e) {
                     e.preventDefault();
-                    abrirWhatsApp();
+                    const mensagem = 'Olá! 👋 Vim pelo site e gostaria de mais informações sobre os atendimentos da Podóloga Renata Kemp.';
+                    const url = 'https://wa.me/5511978303833?text=' + encodeURIComponent(mensagem);
+                    window.open(url, '_blank');
                 });
-            });
+            }
         });
 
         // ============================================
@@ -1900,7 +1365,7 @@
         });
 
         // ============================================
-        // ANIMAÇÕES DE ENTRADA
+        // ANIMAÇÕES
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
             const elementos = document.querySelectorAll(
@@ -1938,32 +1403,6 @@
                 }, 200);
             }
         });
-
-        // ============================================
-        // OTIMIZAÇÃO PARA DISPOSITIVOS MÓVEIS
-        // ============================================
-        document.addEventListener('DOMContentLoaded', function() {
-            let lastTouch = 0;
-            document.addEventListener('touchend', function(e) {
-                const now = Date.now();
-                if (now - lastTouch < 300) {
-                    e.preventDefault();
-                }
-                lastTouch = now;
-            }, { passive: false });
-
-            function ajustarHero() {
-                const hero = document.querySelector('.hero');
-                if (hero && window.innerWidth < 768) {
-                    const vh = window.innerHeight * 0.01;
-                    document.documentElement.style.setProperty('--vh', vh + 'px');
-                    hero.style.minHeight = 'calc(90vh - 80px)';
-                }
-            }
-            ajustarHero();
-            window.addEventListener('resize', ajustarHero);
-        });
     </script>
-
 </body>
 </html>
