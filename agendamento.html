@@ -689,15 +689,12 @@
         var SUPABASE_URL = 'https://euktsrczpxejezkeyqoh.supabase.co';
         var SUPABASE_ANON_KEY = 'sb_publishable_vH11tBYAWHlKNoCeQG-oMQ_r1fOxcRf';
         
-        // 🔧 URL DO GOOGLE APPS SCRIPT
         var GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxcG6GrOy8jIQQgn40n-MlAk5FMSc1KYJYiNeHupWzGMeT_zFhHYrbSPuzw4sSHsr1J/exec';
 
-        // EMAILJS - SUAS CONFIGURAÇÕES
         var EMAILJS_USER_ID = 'rRmq87DuOwPzW-3Eo';
         var EMAILJS_SERVICE_ID = 'service_4gybw6a';
         var EMAILJS_TEMPLATE_ID = 'template_zjwgg1g';
 
-        // Inicializar EmailJS
         emailjs.init(EMAILJS_USER_ID);
 
         var supabaseClient;
@@ -710,19 +707,12 @@
         }
 
         console.log('✅ Supabase inicializado:', supabaseClient ? 'OK' : 'FALHOU');
-        console.log('✅ Google Apps Script URL:', GOOGLE_APPS_SCRIPT_URL);
 
-        // ============================================
-        // CONFIGURAÇÕES
-        // ============================================
         var HORARIOS_BASE = ['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
         var DIAS_SEMANA = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
         var MESES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
         var API_CEP_URL = 'https://viacep.com.br/ws/';
 
-        // ============================================
-        // ESTADO
-        // ============================================
         var agendamento = {
             nome: '',
             telefone: '',
@@ -1153,7 +1143,6 @@
         // EVENTOS DOM
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
-            // Tipo de atendimento
             var tipoBtns = document.querySelectorAll('.tipo-btn');
             for (var i = 0; i < tipoBtns.length; i++) {
                 tipoBtns[i].addEventListener('click', function() {
@@ -1169,7 +1158,6 @@
                 });
             }
 
-            // Máscara CEP
             var cepInput = document.getElementById('cep');
             if (cepInput) {
                 cepInput.addEventListener('input', function() {
@@ -1182,7 +1170,6 @@
                 });
             }
 
-            // Serviços
             var servicoBtns = document.querySelectorAll('.servico-btn');
             for (var k = 0; k < servicoBtns.length; k++) {
                 servicoBtns[k].addEventListener('click', function() {
@@ -1196,7 +1183,6 @@
                 });
             }
 
-            // Máscara Telefone
             var telefoneInput = document.getElementById('telefone');
             if (telefoneInput) {
                 telefoneInput.addEventListener('input', function() {
@@ -1463,45 +1449,71 @@
         });
 
         // ============================================
-        // FUNÇÃO PARA CRIAR LINK DO GOOGLE CALENDAR MANUALMENTE
+        // FUNÇÃO PARA CRIAR LINK DO GOOGLE CALENDAR (CORRIGIDA)
         // ============================================
         function criarLinkGoogleCalendar(dados) {
-            var dataObj = new Date(dados.data + 'T' + dados.horario + ':00');
-            var start = dataObj.toISOString().replace(/-|:|\.\d+/g, '');
-            var end = new Date(dataObj.getTime() + 60 * 60 * 1000).toISOString().replace(/-|:|\.\d+/g, '');
-            
-            var title = '🦶 Levità - ' + dados.servico + ' - ' + dados.nome;
-            var description = 
-                'Cliente: ' + dados.nome + '\n' +
-                'Telefone: ' + dados.telefone + '\n' +
-                'E-mail: ' + dados.email + '\n' +
-                'Serviço: ' + dados.servico + '\n' +
-                'Tipo: ' + (dados.tipo === 'domicilio' ? 'Domiciliar' : 'Presencial') + '\n' +
-                'Endereço: ' + dados.endereco + '\n' +
-                'Protocolo: ' + dados.protocolo;
-            
-            var location = dados.endereco || 'Rua da Clínica, 123 - Centro, Guarulhos - SP';
-            
-            var url = 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
-                '&text=' + encodeURIComponent(title) +
-                '&dates=' + start + '/' + end +
-                '&details=' + encodeURIComponent(description) +
-                '&location=' + encodeURIComponent(location) +
-                '&add=' + encodeURIComponent(dados.email);
-            
-            return url;
+            try {
+                var dataStr = dados.data || '';
+                var horarioStr = dados.horario || '10:00';
+                
+                if (!dataStr) {
+                    var hoje = new Date();
+                    dataStr = hoje.getFullYear() + '-' + 
+                             String(hoje.getMonth() + 1).padStart(2, '0') + '-' + 
+                             String(hoje.getDate()).padStart(2, '0');
+                }
+                
+                var dataHora = new Date(dataStr + 'T' + horarioStr + ':00');
+                
+                if (isNaN(dataHora.getTime())) {
+                    var hoje = new Date();
+                    dataStr = hoje.getFullYear() + '-' + 
+                             String(hoje.getMonth() + 1).padStart(2, '0') + '-' + 
+                             String(hoje.getDate()).padStart(2, '0');
+                    dataHora = new Date(dataStr + 'T' + horarioStr + ':00');
+                }
+                
+                var start = dataHora.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+                var dataFim = new Date(dataHora.getTime() + 60 * 60 * 1000);
+                var end = dataFim.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+                
+                var title = 'Levità - ' + (dados.servico || 'Consulta') + ' - ' + (dados.nome || 'Cliente');
+                var description = 
+                    'Cliente: ' + (dados.nome || '') + '\n' +
+                    'Telefone: ' + (dados.telefone || '') + '\n' +
+                    'E-mail: ' + (dados.email || '') + '\n' +
+                    'Serviço: ' + (dados.servico || '') + '\n' +
+                    'Tipo: ' + (dados.tipo === 'domicilio' ? 'Domiciliar' : 'Presencial') + '\n' +
+                    'Endereço: ' + (dados.endereco || '') + '\n' +
+                    'Protocolo: ' + (dados.protocolo || '');
+                
+                var location = dados.endereco || 'Rua da Clínica, 123 - Centro, Guarulhos - SP';
+                
+                var url = 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
+                    '&text=' + encodeURIComponent(title) +
+                    '&dates=' + start + '/' + end +
+                    '&details=' + encodeURIComponent(description.substring(0, 1000)) +
+                    '&location=' + encodeURIComponent(location) +
+                    '&add=' + encodeURIComponent(dados.email || '');
+                
+                return url;
+                
+            } catch (error) {
+                console.error('❌ Erro ao gerar link do Google Calendar:', error);
+                return 'https://calendar.google.com/calendar/render';
+            }
         }
 
         // ============================================
-        // FUNÇÃO DE E-MAIL - COM LINK DO GOOGLE CALENDAR
+        // ENVIAR E-MAIL DE RESERVA (APENAS 1 E-MAIL)
         // ============================================
         async function enviarEmailReserva(para, dados) {
             try {
-                logEtapa('6', '📧 ENVIANDO E-MAIL DE RESERVA COM LINK DO CALENDAR', 'info');
+                logEtapa('6', '📧 ENVIANDO E-MAIL DE RESERVA', 'info');
                 addLog('📧 Enviando e-mail de reserva para: ' + para, 'info');
                 
                 var calendarLink = criarLinkGoogleCalendar(dados);
-                addLog('🔗 Link do Google Calendar gerado manualmente: ' + calendarLink, 'info');
+                addLog('🔗 Link do Google Calendar: ' + calendarLink, 'info');
                 
                 var templateParams = {
                     to_email: para,
@@ -1509,9 +1521,8 @@
                     servico: dados.servico || 'Não informado',
                     data: dados.data || 'Não informada',
                     horario: dados.horario || 'Não informado',
-                    tipo: dados.tipo === 'domicilio' ? '🏠 Domiciliar' : '🏢 Presencial',
+                    tipo: dados.tipo === 'domicilio' ? 'Domiciliar' : 'Presencial',
                     endereco: dados.endereco || 'Não informado',
-                    status: '⏳ Aguardando Confirmação',
                     protocolo: dados.protocolo || 'LEV-000000',
                     calendar_link: calendarLink
                 };
@@ -1524,22 +1535,21 @@
 
                 if (response.status === 200) {
                     addLog('✅ E-mail de reserva enviado para: ' + para, 'sucesso');
-                    logEtapa('6', '✅ E-MAIL DE RESERVA ENVIADO PARA: ' + para, 'sucesso');
                     return { sucesso: true, calendarLink: calendarLink };
                 } else {
                     addLog('❌ Erro ao enviar e-mail: ' + response.text, 'erro');
-                    return { sucesso: false, calendarLink: calendarLink };
+                    return { sucesso: false };
                 }
             } catch (error) {
                 addLog('❌ Erro ao enviar e-mail: ' + error.message, 'erro');
-                return { sucesso: false, erro: error.message, calendarLink: null };
+                return { sucesso: false };
             }
         }
 
         // ============================================
         // NOTIFICAR ADMINISTRADOR
         // ============================================
-        async function notificarAdminNovaReserva(dados, calendarLink) {
+        async function notificarAdminNovaReserva(dados) {
             try {
                 addLog('📧 Notificando administrador sobre nova reserva...', 'info');
                 
@@ -1549,11 +1559,9 @@
                     servico: dados.servico || 'Não informado',
                     data: dados.data || 'Não informada',
                     horario: dados.horario || 'Não informado',
-                    tipo: dados.tipo === 'domicilio' ? '🏠 Domiciliar' : '🏢 Presencial',
+                    tipo: dados.tipo === 'domicilio' ? 'Domiciliar' : 'Presencial',
                     endereco: dados.endereco || 'Não informado',
-                    status: '⏳ AGUARDANDO CONFIRMAÇÃO',
-                    protocolo: dados.protocolo || 'LEV-000000',
-                    calendar_link: calendarLink || 'Não gerado'
+                    protocolo: dados.protocolo || 'LEV-000000'
                 };
                 
                 var response = await emailjs.send(
@@ -1569,108 +1577,6 @@
                 }
             } catch (error) {
                 addLog('⚠️ Erro ao notificar administrador: ' + error.message, 'warning');
-            }
-        }
-
-        // ============================================
-        // FUNÇÃO GOOGLE CALENDAR VIA JSONP (TENTATIVA)
-        // ============================================
-        function criarEventoCalendarJSONP(dados) {
-            return new Promise((resolve, reject) => {
-                var callbackName = 'jsonp_callback_' + Date.now();
-                
-                var params = new URLSearchParams({
-                    callback: callbackName,
-                    nome: dados.nome || '',
-                    email: dados.email || '',
-                    telefone: dados.telefone || '',
-                    servico: dados.servico || '',
-                    data: dados.data || '',
-                    horario: dados.horario || '',
-                    tipo: dados.tipo || 'presencial',
-                    endereco: dados.endereco || 'Rua da Clínica, 123 - Centro, Guarulhos - SP',
-                    protocolo: dados.protocolo || 'LEV-' + String(Math.floor(Math.random() * 1000))
-                });
-                
-                var url = GOOGLE_APPS_SCRIPT_URL + '?' + params.toString();
-                
-                window[callbackName] = function(response) {
-                    delete window[callbackName];
-                    if (document.body.contains(script)) {
-                        document.body.removeChild(script);
-                    }
-                    if (response && response.sucesso) {
-                        resolve(response);
-                    } else {
-                        reject(new Error(response?.erro || response?.mensagem || 'Erro desconhecido'));
-                    }
-                };
-                
-                var script = document.createElement('script');
-                script.src = url;
-                script.onerror = function() {
-                    delete window[callbackName];
-                    if (document.body.contains(script)) {
-                        document.body.removeChild(script);
-                    }
-                    reject(new Error('Falha ao carregar o script JSONP.'));
-                };
-                
-                var timeout = setTimeout(function() {
-                    delete window[callbackName];
-                    if (document.body.contains(script)) {
-                        document.body.removeChild(script);
-                    }
-                    reject(new Error('Timeout: O Google Apps Script não respondeu.'));
-                }, 30000);
-                
-                var originalResolve = resolve;
-                resolve = function(value) {
-                    clearTimeout(timeout);
-                    originalResolve(value);
-                };
-                
-                document.body.appendChild(script);
-            });
-        }
-
-        // ============================================
-        // FUNÇÃO GOOGLE CALENDAR (TENTA CRIAR, MAS NÃO TRAVA)
-        // ============================================
-        async function criarEventoCalendar(dados) {
-            try {
-                logEtapa('7', '📅 TENTANDO CRIAR EVENTO NO GOOGLE CALENDAR...', 'info');
-                addLog('📅 Tentando criar evento no Google Calendar via JSONP...', 'info');
-                
-                var dadosEvento = {
-                    nome: dados.nome || '',
-                    email: dados.email || '',
-                    telefone: dados.telefone || '',
-                    servico: dados.servico || '',
-                    data: dados.data || '',
-                    horario: dados.horario || '',
-                    tipo: dados.tipo || 'presencial',
-                    endereco: dados.endereco || 'Rua da Clínica, 123 - Centro, Guarulhos - SP',
-                    protocolo: dados.protocolo || 'LEV-' + String(Math.floor(Math.random() * 1000))
-                };
-                
-                var resultado = await criarEventoCalendarJSONP(dadosEvento);
-                
-                if (resultado && resultado.sucesso) {
-                    addLog('✅ Evento criado com sucesso via JSONP!', 'sucesso');
-                    if (resultado.evento) {
-                        addLog('   🆔 ID: ' + resultado.evento.id, 'info');
-                        addLog('   🔗 Link: ' + resultado.evento.link, 'info');
-                    }
-                    return { sucesso: true, link: resultado.evento?.link || null };
-                } else {
-                    addLog('⚠️ JSONP não criou o evento, mas continuamos...', 'warning');
-                    return { sucesso: false, link: null };
-                }
-                
-            } catch (error) {
-                addLog('⚠️ Erro ao criar evento (não crítico): ' + error.message, 'warning');
-                return { sucesso: false, link: null };
             }
         }
 
@@ -1858,32 +1764,17 @@
                             };
 
                             // ============================================
-                            // 📅 TENTAR CRIAR EVENTO NO GOOGLE CALENDAR (NÃO TRAVA)
-                            // ============================================
-                            desabilitarBotao('Criando evento no Google Calendar...');
-                            var resultadoCalendar = await criarEventoCalendar(salvo);
-                            
-                            var calendarLink = null;
-                            if (resultadoCalendar && resultadoCalendar.sucesso) {
-                                calendarLink = resultadoCalendar.link;
-                                addLog('✅ Evento criado no Google Calendar!', 'sucesso');
-                            } else {
-                                // 🔧 Se falhou, gerar link manualmente
-                                calendarLink = criarLinkGoogleCalendar(dadosEmail);
-                                addLog('ℹ️ Link manual gerado: ' + calendarLink, 'info');
-                            }
-
-                            // ============================================
-                            // 📧 ENVIAR E-MAIL DE RESERVA COM LINK DO CALENDAR
+                            // 📧 ENVIAR E-MAIL DE RESERVA (APENAS 1)
                             // ============================================
                             desabilitarBotao('Enviando e-mail de reserva...');
-                            addLog('📧 Preparando envio de e-mail de reserva com link...', 'info');
+                            addLog('📧 Preparando envio de e-mail de reserva...', 'info');
                             
-                            dadosEmail.calendar_link = calendarLink;
-                            await enviarEmailReserva(salvo.email, dadosEmail);
+                            var resultEmail = await enviarEmailReserva(salvo.email, dadosEmail);
                             
-                            // ✅ Notificar administrador com link
-                            await notificarAdminNovaReserva(dadosEmail, calendarLink);
+                            // ============================================
+                            // 📧 NOTIFICAR ADMINISTRADOR
+                            // ============================================
+                            await notificarAdminNovaReserva(dadosEmail);
 
                             // ============================================
                             // 🎉 FINALIZAR
@@ -1894,9 +1785,6 @@
                             addLog('   ✅ Reserva salva no Supabase (PENDENTE)', 'sucesso');
                             addLog('   📧 E-mail de reserva enviado para: ' + salvo.email, 'info');
                             addLog('   📧 Administrador notificado', 'info');
-                            if (calendarLink) {
-                                addLog('   🔗 Link do Google Calendar: ' + calendarLink, 'info');
-                            }
                             console.log('%c═══════════════════════════════════════════', 'color: #888;');
                             
                             mostrarToast('✅ Reserva efetuada! Aguarde confirmação.', 'sucesso');
