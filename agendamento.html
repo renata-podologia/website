@@ -1005,17 +1005,59 @@
             <div class="form-group">
 
                 <label>
-                    <i class="fas fa-calendar-day"></i>
-                    Dia do atendimento <span class="obrigatorio">*</span>
+                    <i class="fas fa-calendar-alt"></i>
+                    Mês <span class="obrigatorio">*</span>
                 </label>
 
                 <div class="input-icon">
 
-                    <select id="dia-agendamento">
-                        <option value="">Carregando dias disponíveis...</option>
+                    <select id="mes-agendamento">
+                        <option value="">Carregando meses disponíveis...</option>
                     </select>
 
                     <i class="fas fa-calendar-alt"></i>
+
+                </div>
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+                    <i class="fas fa-calendar-day"></i>
+                    Dia da semana <span class="obrigatorio">*</span>
+                </label>
+
+                <div class="input-icon">
+
+                    <select id="dia-semana-agendamento" disabled>
+                        <option value="">Selecione o mês primeiro...</option>
+                    </select>
+
+                    <i class="fas fa-calendar-day"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="form-row">
+
+            <div class="form-group">
+
+                <label>
+                    <i class="fas fa-calendar-check"></i>
+                    Data do atendimento <span class="obrigatorio">*</span>
+                </label>
+
+                <div class="input-icon">
+
+                    <select id="dia-agendamento" disabled>
+                        <option value="">Selecione o dia da semana primeiro...</option>
+                    </select>
+
+                    <i class="fas fa-calendar-check"></i>
 
                 </div>
 
@@ -2139,59 +2181,120 @@ function renderizarServicos() {
 
 function configurarData() {
 
-    const select =
+    const selectMes =
+        document.getElementById('mes-agendamento');
+
+    const selectDiaSemana =
+        document.getElementById('dia-semana-agendamento');
+
+    const selectData =
         document.getElementById('dia-agendamento');
 
     const dataTexto =
         document.getElementById('data-selecionada');
 
-    if (!select) return;
+    if (!selectMes || !selectDiaSemana || !selectData) return;
 
-    select.innerHTML =
-        '<option value="">Selecione um dia...</option>';
+    const meses = obterMesesDisponiveis();
 
-    const opcoes = obterProximosDiasDisponiveis();
+    selectMes.innerHTML =
+        '<option value="">Selecione o mês...</option>';
 
-    if (!opcoes.length) {
+    meses.forEach(function(mes) {
+        const option = document.createElement('option');
+        option.value = mes.valor;
+        option.textContent = mes.nome;
+        selectMes.appendChild(option);
+    });
 
-        select.innerHTML =
-            '<option value="">Nenhum dia disponível encontrado</option>';
-
-        select.disabled = true;
-        agendamento.data = '';
-        agendamento.horario = '';
-
-        const grid = document.getElementById('horarios-grid');
-        if (grid) {
-            grid.innerHTML =
-                '<p style="grid-column:1/-1;text-align:center;padding:20px;color:#dc3545;font-weight:600;">' +
-                '⚠️ Não há datas e horários disponíveis nos próximos 90 dias.' +
-                '</p>';
-        }
-
+    if (!meses.length) {
+        selectMes.innerHTML =
+            '<option value="">Nenhum mês disponível encontrado</option>';
+        selectMes.disabled = true;
         return;
     }
 
-    opcoes.forEach(function(opcao, indice) {
+    selectMes.disabled = false;
 
-        const option = document.createElement('option');
-        option.value = opcao.data;
-        option.textContent =
-            opcao.dia + ' • ' + opcao.dataFormatada;
+    function limparDiaSemana() {
+        selectDiaSemana.innerHTML =
+            '<option value="">Selecione o dia da semana...</option>';
+        selectDiaSemana.disabled = true;
+        limparDatas();
+    }
 
-        select.appendChild(option);
+    function limparDatas() {
+        selectData.innerHTML =
+            '<option value="">Selecione a data...</option>';
+        selectData.disabled = true;
+        agendamento.data = '';
+        agendamento.horario = '';
+        if (dataTexto) dataTexto.textContent = '';
+        gerarHorarios('');
+    }
 
-        // A primeira opção encontrada é a próxima data realmente disponível.
-        if (indice === 0) {
-            select.value = opcao.data;
+    function carregarDiasDaSemana() {
+        const valorMes = selectMes.value;
+        limparDiaSemana();
+
+        if (!valorMes) return;
+
+        const [ano, mes] = valorMes.split('-').map(Number);
+        const diasEncontrados = obterDiasDaSemanaDoMes(ano, mes);
+
+        if (!diasEncontrados.length) {
+            selectDiaSemana.innerHTML =
+                '<option value="">Nenhum dia disponível neste mês</option>';
+            return;
         }
-    });
 
-    select.disabled = false;
+        diasEncontrados.forEach(function(dia) {
+            const option = document.createElement('option');
+            option.value = dia.indice;
+            option.textContent = dia.nome;
+            selectDiaSemana.appendChild(option);
+        });
 
-    function aplicarDiaSelecionado() {
+        selectDiaSemana.disabled = false;
+    }
 
-        const data = select.value;
+    function carregarDatasDoDiaSemana() {
+        limparDatas();
+
+        const valorMes = selectMes.value;
+        const indiceDia = Number(selectDiaSemana.value);
+
+        if (!valorMes || isNaN(indiceDia)) return;
+
+        const [ano, mes] = valorMes.split('-').map(Number);
+        const datas = obterDatasDisponiveisDoDiaDaSemana(
+            ano,
+            mes,
+            indiceDia
+        );
+
+        if (!datas.length) {
+            selectData.innerHTML =
+                '<option value="">Nenhuma data disponível</option>';
+            return;
+        }
+
+        datas.forEach(function(item) {
+            const option = document.createElement('option');
+            option.value = item.data;
+            option.textContent = item.dataFormatada;
+            selectData.appendChild(option);
+        });
+
+        selectData.disabled = false;
+
+        // Não escolhe automaticamente uma data. O cliente decide qual
+        // ocorrência do dia da semana deseja dentro do mês.
+        selectData.value = '';
+    }
+
+    function aplicarDataSelecionada() {
+        const data = selectData.value;
 
         agendamento.data = data;
         agendamento.horario = '';
@@ -2202,30 +2305,144 @@ function configurarData() {
             return;
         }
 
-        const opcao = opcoes.find(item => item.data === data);
-
-        if (dataTexto && opcao) {
+        if (dataTexto) {
             dataTexto.textContent =
-                'Próxima data: ' + opcao.dataFormatada;
+                'Data selecionada: ' + formatarDataExibicao(data);
         }
 
         addLog(
-            '📅 Dia escolhido: ' +
-            (opcao ? opcao.dia : data) +
-            ' (' + data + ')',
+            '📅 Data escolhida: ' + data,
             'sucesso'
         );
 
         gerarHorarios(data);
     }
 
-    select.addEventListener(
-        'change',
-        aplicarDiaSelecionado
-    );
+    selectMes.addEventListener('change', carregarDiasDaSemana);
+    selectDiaSemana.addEventListener('change', carregarDatasDoDiaSemana);
+    selectData.addEventListener('change', aplicarDataSelecionada);
 
-    // Mostra imediatamente a próxima data disponível.
-    aplicarDiaSelecionado();
+    // Abre o mês atual se houver pelo menos uma data futura disponível.
+    const hoje = new Date();
+    const mesAtual =
+        hoje.getFullYear() + '-' +
+        String(hoje.getMonth() + 1).padStart(2, '0');
+
+    const mesInicial = meses.find(function(item) {
+        return item.valor === mesAtual;
+    });
+
+    selectMes.value = mesInicial
+        ? mesAtual
+        : meses[0].valor;
+
+    carregarDiasDaSemana();
+}
+
+function obterMesesDisponiveis() {
+
+    const meses = [];
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+
+    // O sistema pode consultar o mês inteiro. O limite abaixo é apenas
+    // visual, para não criar um select infinito. A agenda de cada mês
+    // é analisada integralmente, sem limite de dias dentro do mês.
+    const quantidadeMeses = 24;
+
+    for (let deslocamento = 0; deslocamento < quantidadeMeses; deslocamento++) {
+
+        const data = new Date(
+            hoje.getFullYear(),
+            hoje.getMonth() + deslocamento,
+            1
+        );
+
+        const ano = data.getFullYear();
+        const mes = data.getMonth() + 1;
+
+        if (obterDiasDisponiveisDoMes(ano, mes).length) {
+            meses.push({
+                valor: ano + '-' + String(mes).padStart(2, '0'),
+                nome: MESES[mes - 1] + ' de ' + ano
+            });
+        }
+    }
+
+    return meses;
+}
+
+function obterDiasDisponiveisDoMes(ano, mes) {
+
+    const encontrados = [];
+    const ultimoDia = new Date(ano, mes, 0).getDate();
+
+    for (let dia = 1; dia <= ultimoDia; dia++) {
+
+        const data = new Date(ano, mes - 1, dia);
+        data.setHours(0, 0, 0, 0);
+
+        if (!dataEhFuturaOuHoje(data)) continue;
+        if (!diaEstaAtivo(data)) continue;
+
+        const iso = criarISOData(data);
+        const horarios = obterHorariosDisponiveisLocal(iso);
+
+        if (!horarios.length) continue;
+
+        encontrados.push({
+            data: iso,
+            dataFormatada: formatarDataExibicao(iso),
+            indiceDia: data.getDay(),
+            dia: DIAS_SEMANA[data.getDay()],
+            horarios: horarios
+        });
+    }
+
+    return encontrados;
+}
+
+function obterDiasDaSemanaDoMes(ano, mes) {
+
+    const dias = [];
+    const vistos = {};
+    const datas = obterDiasDisponiveisDoMes(ano, mes);
+
+    datas.forEach(function(item) {
+        if (vistos[item.indiceDia]) return;
+
+        vistos[item.indiceDia] = true;
+
+        dias.push({
+            indice: item.indiceDia,
+            nome: item.dia
+        });
+    });
+
+    // Mantém a ordem cronológica em que os dias aparecem no mês.
+    dias.sort(function(a, b) {
+        const primeiraA = datas.find(item => item.indiceDia === a.indice);
+        const primeiraB = datas.find(item => item.indiceDia === b.indice);
+        return primeiraA.data.localeCompare(primeiraB.data);
+    });
+
+    return dias;
+}
+
+function obterDatasDisponiveisDoDiaDaSemana(ano, mes, indiceDia) {
+
+    return obterDiasDisponiveisDoMes(ano, mes)
+        .filter(function(item) {
+            return item.indiceDia === indiceDia;
+        });
+}
+
+function dataEhFuturaOuHoje(data) {
+
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+
+    return data >= hoje;
 }
 
 function hojeLocalISO() {
