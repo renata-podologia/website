@@ -1,1690 +1,2618 @@
 <!DOCTYPE html>
-
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendamento | Levità Podologia</title>
 
-```
-<title>Agendamento | Levità Podologia</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
-<link
-    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap"
-    rel="stylesheet"
->
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-<link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
->
-
-<style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-
-    html {
-        scroll-behavior: smooth;
-    }
-
-    body {
-        font-family: 'Inter', sans-serif;
-        background: #f7f8fa;
-        color: #1e2b2f;
-        min-height: 100vh;
-        padding: 20px;
-    }
-
-    button,
-    input {
-        font-family: inherit;
-    }
-
-    .container {
-        max-width: 900px;
-        margin: 0 auto;
-        background: #ffffff;
-        border-radius: 28px;
-        padding: 40px;
-        box-shadow: 0 20px 60px rgba(0,0,0,.07);
-        position: relative;
-        overflow: hidden;
-    }
-
-    .container::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 5px;
-        background: linear-gradient(
-            90deg,
-            #2f5d62,
-            #c9a227,
-            #2f5d62
-        );
-    }
-
-    .header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 20px;
-        margin-bottom: 10px;
-    }
-
-    .header-title {
-        font-family: 'Poppins', sans-serif;
-        font-size: 2rem;
-        color: #2f5d62;
-        font-weight: 700;
-    }
-
-    .header-title span {
-        color: #c9a227;
-    }
-
-    .back-link {
-        color: #2f5d62;
-        text-decoration: none;
-        font-weight: 600;
-    }
-
-    .header-subtitle {
-        color: #6d7c80;
-        margin-bottom: 30px;
-    }
-
-    .passo-indicador {
-        display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        gap: 8px;
-        margin-bottom: 30px;
-    }
-
-    .passo {
-        padding: 10px 6px;
-        border-radius: 12px;
-        background: #f0f3f4;
-        color: #829095;
-        text-align: center;
-        font-size: .78rem;
-        font-weight: 600;
-    }
-
-    .passo.ativo {
-        background: #2f5d62;
-        color: white;
-    }
-
-    .passo.concluido {
-        background: #dceaea;
-        color: #2f5d62;
-    }
-
-    .numero {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        background: rgba(255,255,255,.3);
-        margin-right: 4px;
-    }
-
-    .passo-conteudo {
-        display: none;
-    }
-
-    .passo-conteudo.ativo {
-        display: block;
-    }
-
-    .passo-title {
-        font-family: 'Poppins', sans-serif;
-        color: #2f5d62;
-        margin-bottom: 24px;
-        font-size: 1.35rem;
-    }
-
-    .form-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-    }
-
-    .form-group {
-        margin-bottom: 20px;
-    }
-
-    label {
-        display: block;
-        font-weight: 600;
-        margin-bottom: 8px;
-        color: #34484d;
-    }
-
-    .obrigatorio {
-        color: #c0392b;
-    }
-
-    input {
-        width: 100%;
-        padding: 14px 16px;
-        border: 1px solid #d9e0e2;
-        border-radius: 12px;
-        outline: none;
-        font-size: 1rem;
-        background: white;
-    }
-
-    input:focus {
-        border-color: #2f5d62;
-        box-shadow: 0 0 0 3px rgba(47,93,98,.08);
-    }
-
-    .input-icon {
-        position: relative;
-    }
-
-    .input-icon input {
-        padding-left: 44px;
-    }
-
-    .input-icon i {
-        position: absolute;
-        left: 15px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #8a9ea3;
-    }
-
-    .tipo-atendimento-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-    }
-
-    .tipo-btn,
-    .servico-btn {
-        border: 2px solid #e1e7e8;
-        background: white;
-        border-radius: 16px;
-        padding: 22px;
-        cursor: pointer;
-        transition: .2s;
-        color: #34484d;
-        text-align: left;
-    }
-
-    .tipo-btn:hover,
-    .servico-btn:hover {
-        border-color: #2f5d62;
-    }
-
-    .tipo-btn.selecionado,
-    .servico-btn.selecionado {
-        border-color: #2f5d62;
-        background: #f0f7f7;
-        color: #2f5d62;
-    }
-
-    .tipo-btn i,
-    .servico-btn i {
-        font-size: 1.5rem;
-        margin-bottom: 10px;
-        display: block;
-    }
-
-    .tipo-btn strong,
-    .servico-btn strong {
-        display: block;
-        font-size: 1rem;
-        margin-bottom: 5px;
-    }
-
-    .tipo-btn span,
-    .servico-btn span {
-        font-size: .85rem;
-        color: #78888c;
-    }
-
-    .servicos-escolha {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-    }
-
-    .servico-btn {
-        padding: 16px;
-    }
-
-    .servico-btn i {
-        font-size: 1.1rem;
-        margin-bottom: 6px;
-    }
-
-    .horarios-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
-        gap: 12px;
-        margin-top: 10px;
-    }
-
-    .horario-btn {
-        border: 2px solid #d9e3e4;
-        background: white;
-        border-radius: 12px;
-        padding: 14px 10px;
-        font-size: 1rem;
-        font-weight: 700;
-        color: #2f5d62;
-        cursor: pointer;
-        transition: .2s;
-    }
-
-    .horario-btn:hover {
-        border-color: #2f5d62;
-        transform: translateY(-1px);
-    }
-
-    .horario-btn.selecionado {
-        background: #2f5d62;
-        color: white;
-        border-color: #2f5d62;
-    }
-
-    .horario-btn.ocupado,
-    .horario-btn.passado {
-        background: #eef0f1;
-        color: #9aa5a8;
-        border-color: #dce1e2;
-        cursor: not-allowed;
-    }
-
-    .horario-btn.ocupado {
-        text-decoration: line-through;
-    }
-
-    .legenda-horarios {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 15px;
-        margin-top: 16px;
-        color: #758488;
-        font-size: .8rem;
-    }
-
-    .legenda-horarios .item {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .bola {
-        width: 9px;
-        height: 9px;
-        border-radius: 50%;
-        display: inline-block;
-    }
-
-    .bola.disponivel {
-        background: #28a745;
-    }
-
-    .bola.ocupado {
-        background: #dc3545;
-    }
-
-    .bola.passado {
-        background: #9aa5a8;
-    }
-
-    .form-actions {
-        display: flex;
-        justify-content: space-between;
-        gap: 12px;
-        margin-top: 30px;
-    }
-
-    .btn {
-        border: none;
-        border-radius: 50px;
-        padding: 14px 28px;
-        cursor: pointer;
-        font-weight: 700;
-        transition: .2s;
-    }
-
-    .btn-primario {
-        background: #2f5d62;
-        color: white;
-    }
-
-    .btn-primario:hover {
-        background: #24484c;
-    }
-
-    .btn-voltar {
-        background: #eef1f2;
-        color: #42565a;
-    }
-
-    .btn-success {
-        background: #2f7d4a;
-        color: white;
-    }
-
-    .btn:disabled {
-        opacity: .6;
-        cursor: not-allowed;
-    }
-
-    .info-reserva {
-        background: #fff8e1;
-        border-left: 4px solid #c9a227;
-        padding: 16px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-        display: flex;
-        gap: 12px;
-    }
-
-    .resumo-agendamento {
-        border: 1px solid #e1e6e7;
-        border-radius: 16px;
-        overflow: hidden;
-    }
-
-    .linha-resumo {
-        display: flex;
-        justify-content: space-between;
-        gap: 20px;
-        padding: 14px 18px;
-        border-bottom: 1px solid #edf0f1;
-    }
-
-    .linha-resumo:last-child {
-        border-bottom: none;
-    }
-
-    .rotulo {
-        color: #7a888c;
-    }
-
-    .valor {
-        font-weight: 600;
-        text-align: right;
-    }
-
-    /* LOG */
-
-    .debug-box {
-        margin-top: 35px;
-        border: 1px solid #d7dfe1;
-        border-radius: 16px;
-        overflow: hidden;
-        background: #11181a;
-    }
-
-    .debug-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 12px 16px;
-        background: #1e292c;
-        color: white;
-    }
-
-    .debug-header strong {
-        font-family: 'Poppins', sans-serif;
-    }
-
-    .debug-actions button {
-        border: 0;
-        border-radius: 8px;
-        padding: 6px 10px;
-        cursor: pointer;
-        font-size: .75rem;
-    }
-
-    #debug-log {
-        height: 260px;
-        overflow-y: auto;
-        padding: 14px;
-        font-family: Consolas, monospace;
-        font-size: 12px;
-        line-height: 1.6;
-        color: #d7e1e3;
-    }
-
-    .log-linha {
-        border-bottom: 1px solid rgba(255,255,255,.05);
-        padding: 3px 0;
-    }
-
-    .log-info {
-        color: #8fd3ff;
-    }
-
-    .log-sucesso {
-        color: #8be28b;
-    }
-
-    .log-erro {
-        color: #ff8585;
-    }
-
-    .log-warning {
-        color: #ffd479;
-    }
-
-    .loading {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,.35);
-        z-index: 9999;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .loading.ativo {
-        display: flex;
-    }
-
-    .loading-card {
-        background: white;
-        border-radius: 18px;
-        padding: 30px;
-        text-align: center;
-        min-width: 260px;
-    }
-
-    .loading-card i {
-        font-size: 2rem;
-        color: #2f5d62;
-        margin-bottom: 12px;
-    }
-
-    .toast {
-        position: fixed;
-        right: 20px;
-        bottom: 20px;
-        z-index: 10000;
-        max-width: 380px;
-        padding: 15px 18px;
-        background: #2f5d62;
-        color: white;
-        border-radius: 12px;
-        box-shadow: 0 10px 30px rgba(0,0,0,.2);
-        display: none;
-    }
-
-    .toast.ativo {
-        display: block;
-    }
-
-    .toast.erro {
-        background: #b52b2b;
-    }
-
-    .toast.sucesso {
-        background: #287746;
-    }
-
-    @media(max-width: 700px) {
         body {
-            padding: 8px;
+            margin: 0;
+            padding: 30px 15px;
+            background: #f4f7f7;
+            color: #1e2b2f;
+            font-family: 'Inter', sans-serif;
         }
 
         .container {
-            padding: 22px 16px;
-            border-radius: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 35px;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,.08);
         }
 
         .header {
-            flex-direction: column;
-            align-items: flex-start;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2rem;
+            color: #2F5D62;
+            margin: 0 0 8px;
+        }
+
+        .header-title span {
+            color: #C9A227;
+        }
+
+        .header-subtitle {
+            color: #5c7075;
+            margin: 0;
         }
 
         .passo-indicador {
-            grid-template-columns: 1fr;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 35px;
         }
 
-        .form-row,
-        .tipo-atendimento-grid,
+        .passo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 16px;
+            border-radius: 30px;
+            background: #f3f5f6;
+            color: #8a9ea3;
+            font-size: .85rem;
+            font-weight: 600;
+        }
+
+        .passo.ativo {
+            background: #2F5D62;
+            color: white;
+        }
+
+        .passo .numero {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,.2);
+        }
+
+        .passo-conteudo {
+            display: none;
+        }
+
+        .passo-conteudo.ativo {
+            display: block;
+            animation: fade .3s ease;
+        }
+
+        @keyframes fade {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .passo-title {
+            color: #2F5D62;
+            font-family: 'Poppins', sans-serif;
+            margin: 0 0 22px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            color: #2F5D62;
+            font-weight: 600;
+        }
+
+        .obrigatorio {
+            color: #dc3545;
+        }
+
+        .input-icon {
+            position: relative;
+        }
+
+        .input-icon i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8a9ea3;
+            pointer-events: none;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 13px 15px 13px 45px;
+            border: 2px solid #e7ecee;
+            border-radius: 12px;
+            background: #fafbfb;
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        input:focus,
+        textarea:focus {
+            border-color: #2F5D62;
+            background: white;
+        }
+
+        .tipo-atendimento-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .tipo-btn,
+        .servico-btn,
+        .horario-btn {
+            cursor: pointer;
+            border: 2px solid #e5eaeb;
+            background: white;
+            border-radius: 14px;
+            transition: .2s;
+        }
+
+        .tipo-btn {
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: #2F5D62;
+        }
+
+        .tipo-btn i {
+            font-size: 2.5rem;
+            color: #C9A227;
+        }
+
+        .tipo-btn span {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .tipo-btn small {
+            color: #718287;
+        }
+
+        .tipo-btn:hover,
+        .tipo-btn.selecionado,
+        .servico-btn:hover,
+        .servico-btn.selecionado {
+            border-color: #2F5D62;
+            background: #f3f8f8;
+        }
+
+        .endereco-completo {
+            display: none;
+            margin-top: 20px;
+            padding: 18px;
+            border-radius: 12px;
+            background: #f4f8f8;
+        }
+
+        .endereco-completo.visivel {
+            display: block;
+        }
+
+        .endereco-completo p {
+            margin: 7px 0;
+        }
+
+        .endereco-completo .label {
+            font-weight: 700;
+            color: #2F5D62;
+        }
+
+        .cep-busca-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .cep-busca-group .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
         .servicos-escolha {
-            grid-template-columns: 1fr;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .servico-btn {
+            padding: 17px;
+            text-align: left;
+            color: #2F5D62;
+            font-weight: 600;
+        }
+
+        .servico-btn i {
+            color: #C9A227;
+            margin-right: 7px;
+        }
+
+        .servico-descricao {
+            display: block;
+            margin-top: 7px;
+            color: #718287;
+            font-size: .82rem;
+            font-weight: 400;
+        }
+
+        .horarios-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
+            gap: 10px;
+        }
+
+        .horario-btn {
+            padding: 14px 8px;
+            font-weight: 700;
+            color: #2F5D62;
+        }
+
+        .horario-btn:hover:not(:disabled),
+        .horario-btn.selecionado {
+            background: #2F5D62;
+            color: white;
+            border-color: #2F5D62;
+        }
+
+        .horario-btn:disabled {
+            cursor: not-allowed;
+            opacity: .55;
+        }
+
+        .horario-btn.ocupado {
+            background: #fbeaea;
+            border-color: #e5b5b5;
+            color: #a33;
+        }
+
+        .horario-btn.passado {
+            background: #f1f3f4;
+            color: #8a9ea3;
+        }
+
+        .legenda-horarios {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+            font-size: .82rem;
+            color: #66787c;
+        }
+
+        .legenda-horarios .item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .bola {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .bola.disponivel {
+            background: #28a745;
+        }
+
+        .bola.confirmado {
+            background: #dc3545;
+        }
+
+        .bola.passado {
+            background: #8a9ea3;
         }
 
         .form-actions {
-            flex-direction: column;
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 25px;
         }
 
         .btn {
-            width: 100%;
+            border: 0;
+            border-radius: 12px;
+            padding: 13px 22px;
+            font-family: inherit;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
-    }
-</style>
-```
 
+        .btn-primario {
+            background: #2F5D62;
+            color: white;
+        }
+
+        .btn-primario:hover {
+            background: #24494d;
+        }
+
+        .btn-outline {
+            border: 2px solid #2F5D62;
+            color: #2F5D62;
+            background: white;
+        }
+
+        .btn-voltar {
+            background: #edf1f2;
+            color: #40575b;
+        }
+
+        .btn-success {
+            background: #198754;
+            color: white;
+        }
+
+        .info-reserva {
+            padding: 17px;
+            background: #fff8df;
+            border-left: 4px solid #C9A227;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .info-reserva i {
+            color: #C9A227;
+            font-size: 1.4rem;
+        }
+
+        .resumo-agendamento {
+            border: 1px solid #e5eaeb;
+            border-radius: 14px;
+            padding: 18px;
+        }
+
+        .resumo-agendamento .linha {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #edf0f1;
+        }
+
+        .resumo-agendamento .linha:last-child {
+            border-bottom: 0;
+        }
+
+        .rotulo {
+            font-weight: 700;
+            color: #2F5D62;
+        }
+
+        .valor {
+            text-align: right;
+        }
+
+        .badge-status {
+            background: #f0ad4e;
+            color: white;
+            padding: 5px 13px;
+            border-radius: 30px;
+            font-size: .8rem;
+            font-weight: 700;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(255,255,255,.92);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-overlay.oculto {
+            display: none;
+        }
+
+        .spinner {
+            width: 42px;
+            height: 42px;
+            border: 4px solid #dce5e6;
+            border-top-color: #2F5D62;
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .toast {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            max-width: 380px;
+            padding: 15px 18px;
+            background: #2F5D62;
+            color: white;
+            border-radius: 12px;
+            z-index: 10000;
+            display: none;
+            box-shadow: 0 8px 25px rgba(0,0,0,.2);
+        }
+
+        .toast.visivel {
+            display: block;
+        }
+
+        .toast.erro {
+            background: #dc3545;
+        }
+
+        .toast.sucesso {
+            background: #198754;
+        }
+
+        .log-panel {
+            margin-top: 35px;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid #dbe3e5;
+            background: #11191b;
+            color: #dce8e9;
+        }
+
+        .log-header {
+            padding: 12px 15px;
+            background: #1d292c;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .log-header strong {
+            color: white;
+        }
+
+        .log-clear {
+            border: 0;
+            background: #394b4f;
+            color: white;
+            padding: 6px 10px;
+            border-radius: 7px;
+            cursor: pointer;
+        }
+
+        #log {
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 12px 15px;
+            font-family: Consolas, monospace;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .log-item {
+            padding: 2px 0;
+        }
+
+        .log-item.sucesso {
+            color: #7ee2a8;
+        }
+
+        .log-item.erro {
+            color: #ff8989;
+        }
+
+        .log-item.warning {
+            color: #ffd166;
+        }
+
+        .log-item.info {
+            color: #b9dfe5;
+        }
+
+        .api-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            margin-top: 10px;
+            padding: 6px 11px;
+            border-radius: 20px;
+            background: #f0f4f4;
+            color: #607276;
+            font-size: .8rem;
+        }
+
+        .api-status.ok {
+            background: #e7f7ed;
+            color: #198754;
+        }
+
+        .api-status.erro {
+            background: #fbeaea;
+            color: #dc3545;
+        }
+
+        @media(max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 20px 15px;
+            }
+
+            .form-row,
+            .tipo-atendimento-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .servicos-escolha {
+                grid-template-columns: 1fr;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .form-actions .btn {
+                width: 100%;
+            }
+
+            .resumo-agendamento .linha {
+                flex-direction: column;
+            }
+
+            .valor {
+                text-align: left;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
+<div class="loading-overlay" id="loading-overlay">
+    <div class="spinner"></div>
+    <p id="loading-text">Carregando agenda...</p>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <div class="container">
 
-```
-<div class="header">
-    <div>
-        <h1 class="header-title">Levità <span>.</span></h1>
-    </div>
-
-    <a href="index.html" class="back-link">
-        <i class="fas fa-arrow-left"></i>
-        Voltar ao site
-    </a>
-</div>
-
-<p class="header-subtitle">
-    Agende sua consulta com a <strong>Podóloga Renata Kemp</strong>
-</p>
-
-<div class="passo-indicador">
-    <div class="passo ativo" data-passo="1">
-        <span class="numero">1</span>
-        Dados
-    </div>
-
-    <div class="passo" data-passo="2">
-        <span class="numero">2</span>
-        Atendimento
-    </div>
-
-    <div class="passo" data-passo="3">
-        <span class="numero">3</span>
-        Serviço
-    </div>
-
-    <div class="passo" data-passo="4">
-        <span class="numero">4</span>
-        Data/Hora
-    </div>
-
-    <div class="passo" data-passo="5">
-        <span class="numero">5</span>
-        Confirmar
-    </div>
-</div>
-
-
-<!-- PASSO 1 -->
-
-<div class="passo-conteudo ativo" id="passo-1">
-
-    <h3 class="passo-title">
-        <i class="fas fa-user-circle"></i>
-        Seus dados
-    </h3>
-
-    <div class="form-row">
-
-        <div class="form-group">
-            <label>
-                Nome completo
-                <span class="obrigatorio">*</span>
-            </label>
-
-            <div class="input-icon">
-                <input
-                    type="text"
-                    id="nome"
-                    placeholder="Digite seu nome completo"
-                >
-
-                <i class="fas fa-user"></i>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label>
-                Telefone
-                <span class="obrigatorio">*</span>
-            </label>
-
-            <div class="input-icon">
-                <input
-                    type="tel"
-                    id="telefone"
-                    placeholder="(11) 99999-9999"
-                >
-
-                <i class="fas fa-phone"></i>
-            </div>
-        </div>
-
-    </div>
-
-    <div class="form-group">
-
-        <label>
-            E-mail
-            <span class="obrigatorio">*</span>
-        </label>
-
-        <div class="input-icon">
-            <input
-                type="email"
-                id="email"
-                placeholder="Digite seu e-mail"
-            >
-
-            <i class="fas fa-envelope"></i>
-        </div>
-
-    </div>
-
-    <div class="form-actions">
-
-        <span></span>
-
-        <button
-            type="button"
-            class="btn btn-primario"
-            onclick="proximoPasso(2)"
-        >
-            Próximo
-            <i class="fas fa-arrow-right"></i>
-        </button>
-
-    </div>
-
-</div>
-
-
-<!-- PASSO 2 -->
-
-<div class="passo-conteudo" id="passo-2">
-
-    <h3 class="passo-title">
-        <i class="fas fa-location-dot"></i>
-        Tipo de Atendimento
-    </h3>
-
-    <p style="margin-bottom:20px;color:#758488;">
-        Escolha como deseja ser atendido:
-    </p>
-
-    <div class="tipo-atendimento-grid">
-
-        <button
-            type="button"
-            class="tipo-btn"
-            data-tipo="domiciliar"
-        >
-            <i class="fas fa-house"></i>
-
-            <strong>Domiciliar</strong>
-
-            <span>
-                Renata vai até você
-            </span>
-        </button>
-
-        <button
-            type="button"
-            class="tipo-btn"
-            data-tipo="presencial"
-        >
-            <i class="fas fa-clinic-medical"></i>
-
-            <strong>Presencial</strong>
-
-            <span>
-                Você vai à clínica
-            </span>
-        </button>
-
-    </div>
-
-    <div class="form-actions">
-
-        <button
-            type="button"
-            class="btn btn-voltar"
-            onclick="passoAnterior(1)"
-        >
-            <i class="fas fa-arrow-left"></i>
-            Voltar
-        </button>
-
-        <button
-            type="button"
-            class="btn btn-primario"
-            onclick="proximoPasso(3)"
-        >
-            Próximo
-            <i class="fas fa-arrow-right"></i>
-        </button>
-
-    </div>
-
-</div>
-
-
-<!-- PASSO 3 -->
-
-<div class="passo-conteudo" id="passo-3">
-
-    <h3 class="passo-title">
-        <i class="fas fa-stethoscope"></i>
-        Escolha o serviço
-    </h3>
-
-    <div
-        class="servicos-escolha"
-        id="servicos-container"
-    >
-        <p>
-            Carregando serviços...
+    <div class="header">
+        <h1 class="header-title">Agende seu <span>atendimento</span></h1>
+        <p class="header-subtitle">
+            Escolha o serviço, a data e o horário mais conveniente para você.
         </p>
+
+        <div class="api-status" id="api-status">
+            <i class="fas fa-circle"></i>
+            <span>Conectando à agenda...</span>
+        </div>
     </div>
 
-    <div class="form-actions">
+    <div class="passo-indicador">
 
-        <button
-            type="button"
-            class="btn btn-voltar"
-            onclick="passoAnterior(2)"
-        >
-            <i class="fas fa-arrow-left"></i>
-            Voltar
-        </button>
+        <div class="passo ativo" data-passo="1">
+            <span class="numero">1</span>
+            <i class="fas fa-user"></i>
+            Seus dados
+        </div>
 
-        <button
-            type="button"
-            class="btn btn-primario"
-            onclick="proximoPasso(4)"
-        >
-            Próximo
-            <i class="fas fa-arrow-right"></i>
-        </button>
+        <div class="passo" data-passo="2">
+            <span class="numero">2</span>
+            <i class="fas fa-map-marker-alt"></i>
+            Atendimento
+        </div>
+
+        <div class="passo" data-passo="3">
+            <span class="numero">3</span>
+            <i class="fas fa-spa"></i>
+            Serviço
+        </div>
+
+        <div class="passo" data-passo="4">
+            <span class="numero">4</span>
+            <i class="fas fa-calendar-alt"></i>
+            Data/Hora
+        </div>
+
+        <div class="passo" data-passo="5">
+            <span class="numero">5</span>
+            <i class="fas fa-check-circle"></i>
+            Confirmar
+        </div>
 
     </div>
 
-</div>
+    <!-- PASSO 1 -->
+    <div class="passo-conteudo ativo" id="passo-1">
 
+        <h3 class="passo-title">
+            <i class="fas fa-user-circle"></i>
+            Seus dados
+        </h3>
 
-<!-- PASSO 4 -->
+        <div class="form-row">
 
-<div class="passo-conteudo" id="passo-4">
+            <div class="form-group">
+                <label>
+                    Nome completo <span class="obrigatorio">*</span>
+                </label>
 
-    <h3 class="passo-title">
-        <i class="fas fa-calendar-alt"></i>
-        Escolha data e horário
-    </h3>
+                <div class="input-icon">
+                    <input
+                        type="text"
+                        id="nome"
+                        placeholder="Digite seu nome completo">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
 
-    <div class="form-row">
+            <div class="form-group">
+                <label>
+                    Telefone <span class="obrigatorio">*</span>
+                </label>
+
+                <div class="input-icon">
+                    <input
+                        type="tel"
+                        id="telefone"
+                        placeholder="(11) 99999-9999">
+                    <i class="fas fa-phone"></i>
+                </div>
+            </div>
+
+        </div>
 
         <div class="form-group">
 
             <label>
-                <i class="fas fa-calendar-day"></i>
-                Data
-                <span class="obrigatorio">*</span>
+                E-mail <span class="obrigatorio">*</span>
             </label>
 
             <div class="input-icon">
-
                 <input
-                    type="date"
-                    id="data-agendamento"
-                >
-
-                <i class="fas fa-calendar-alt"></i>
-
+                    type="email"
+                    id="email"
+                    placeholder="Digite seu e-mail">
+                <i class="fas fa-envelope"></i>
             </div>
 
         </div>
 
-        <div class="form-group">
+        <div class="form-actions">
 
-            <label>
-                <i class="fas fa-clock"></i>
-                Horário
-                <span class="obrigatorio">*</span>
-            </label>
+            <a href="index.html" class="btn btn-outline">
+                <i class="fas fa-home"></i>
+                Início
+            </a>
 
-            <div
-                class="horarios-grid"
-                id="horarios-grid"
-            >
+            <button
+                type="button"
+                class="btn btn-primario"
+                onclick="proximoPasso(2)">
+                Próximo
+                <i class="fas fa-arrow-right"></i>
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- PASSO 2 -->
+    <div class="passo-conteudo" id="passo-2">
+
+        <h3 class="passo-title">
+            <i class="fas fa-map-marker-alt"></i>
+            Tipo de Atendimento
+        </h3>
+
+        <p style="color:#4a5f64;margin-bottom:18px;">
+            Escolha como deseja ser atendido:
+        </p>
+
+        <div class="tipo-atendimento-grid">
+
+            <button
+                type="button"
+                class="tipo-btn"
+                data-tipo="domicilio">
+
+                <i class="fas fa-home"></i>
+
+                <span>Domiciliar</span>
+
+                <small>
+                    <i class="fas fa-arrow-right"></i>
+                    Renata vai até você
+                </small>
+
+            </button>
+
+            <button
+                type="button"
+                class="tipo-btn"
+                data-tipo="presencial">
+
+                <i class="fas fa-building"></i>
+
+                <span>Presencial</span>
+
+                <small>
+                    <i class="fas fa-arrow-right"></i>
+                    Você vai à clínica
+                </small>
+
+            </button>
+
+        </div>
+
+        <div id="endereco-domicilio" style="display:none;margin-top:20px;">
+
+            <div class="form-group">
+
+                <label>
+                    <i class="fas fa-home"></i>
+                    Endereço para atendimento
+                    <span class="obrigatorio">*</span>
+                </label>
+
+                <div class="cep-busca-group">
+
+                    <div class="form-group">
+
+                        <div class="input-icon">
+
+                            <input
+                                type="text"
+                                id="cep"
+                                placeholder="Digite seu CEP"
+                                maxlength="9">
+
+                            <i class="fas fa-search-location"></i>
+
+                        </div>
+
+                    </div>
+
+                    <button
+                        type="button"
+                        class="btn btn-primario"
+                        onclick="buscarCEP()">
+
+                        <i class="fas fa-search"></i>
+                        Buscar
+
+                    </button>
+
+                </div>
+
+            </div>
+
+            <div class="endereco-completo" id="endereco-completo">
+
                 <p>
-                    Selecione uma data.
+                    <span class="label">Logradouro:</span>
+                    <span id="end-logradouro">-</span>
                 </p>
-            </div>
 
-            <div class="legenda-horarios">
+                <p>
+                    <span class="label">Bairro:</span>
+                    <span id="end-bairro">-</span>
+                </p>
 
-                <span class="item">
-                    <span class="bola disponivel"></span>
-                    Disponível
-                </span>
+                <p>
+                    <span class="label">Cidade:</span>
+                    <span id="end-cidade">-</span>
+                </p>
 
-                <span class="item">
-                    <span class="bola ocupado"></span>
-                    Ocupado
-                </span>
+                <p>
+                    <span class="label">Estado:</span>
+                    <span id="end-uf">-</span>
+                </p>
 
-                <span class="item">
-                    <span class="bola passado"></span>
-                    Horário passado
-                </span>
+                <div class="form-row" style="margin-top:15px;">
+
+                    <div class="form-group">
+                        <label>Número *</label>
+                        <input
+                            type="text"
+                            id="numero-endereco"
+                            placeholder="Número"
+                            style="padding-left:15px;">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Complemento</label>
+                        <input
+                            type="text"
+                            id="complemento-endereco"
+                            placeholder="Apartamento, casa..."
+                            style="padding-left:15px;">
+                    </div>
+
+                </div>
 
             </div>
 
         </div>
 
+        <div id="endereco-presencial"
+             style="display:none;margin-top:20px;">
+
+            <div class="info-reserva">
+
+                <i class="fas fa-building"></i>
+
+                <div>
+                    <strong>Atendimento presencial</strong>
+                    <p style="margin:4px 0 0;">
+                        O atendimento será realizado na clínica.
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="form-actions">
+
+            <button
+                type="button"
+                class="btn btn-voltar"
+                onclick="passoAnterior(1)">
+
+                <i class="fas fa-arrow-left"></i>
+                Voltar
+
+            </button>
+
+            <button
+                type="button"
+                class="btn btn-primario"
+                onclick="proximoPasso(3)">
+
+                Próximo
+                <i class="fas fa-arrow-right"></i>
+
+            </button>
+
+        </div>
+
     </div>
 
-    <div class="form-actions">
+    <!-- PASSO 3 -->
+    <div class="passo-conteudo" id="passo-3">
 
-        <button
-            type="button"
-            class="btn btn-voltar"
-            onclick="passoAnterior(3)"
-        >
-            <i class="fas fa-arrow-left"></i>
-            Voltar
-        </button>
+        <h3 class="passo-title">
+            <i class="fas fa-spa"></i>
+            Escolha o serviço
+        </h3>
 
-        <button
-            type="button"
-            class="btn btn-primario"
-            onclick="proximoPasso(5)"
-        >
-            Revisar Agendamento
-            <i class="fas fa-arrow-right"></i>
-        </button>
+        <p style="color:#4a5f64;margin-bottom:18px;">
+            Selecione o serviço desejado:
+        </p>
+
+        <div
+            class="servicos-escolha"
+            id="servicos-escolha">
+
+            <p style="grid-column:1/-1;text-align:center;">
+                Carregando serviços...
+            </p>
+
+        </div>
+
+        <div class="form-actions">
+
+            <button
+                type="button"
+                class="btn btn-voltar"
+                onclick="passoAnterior(2)">
+
+                <i class="fas fa-arrow-left"></i>
+                Voltar
+
+            </button>
+
+            <button
+                type="button"
+                class="btn btn-primario"
+                onclick="proximoPasso(4)">
+
+                Próximo
+                <i class="fas fa-arrow-right"></i>
+
+            </button>
+
+        </div>
 
     </div>
 
-</div>
+    <!-- PASSO 4 -->
+    <div class="passo-conteudo" id="passo-4">
 
+        <h3 class="passo-title">
+            <i class="fas fa-calendar-alt"></i>
+            Escolha data e horário
+        </h3>
 
-<!-- PASSO 5 -->
+        <div class="form-row">
 
-<div class="passo-conteudo" id="passo-5">
+            <div class="form-group">
 
-    <h3 class="passo-title">
-        <i class="fas fa-check-circle"></i>
-        Confirme seus dados
-    </h3>
+                <label>
+                    <i class="fas fa-calendar-day"></i>
+                    Data <span class="obrigatorio">*</span>
+                </label>
 
-    <div class="info-reserva">
+                <div class="input-icon">
 
-        <i class="fas fa-clock"></i>
+                    <input
+                        type="date"
+                        id="data-agendamento">
 
-        <div>
+                    <i class="fas fa-calendar-alt"></i>
+
+                </div>
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+                    <i class="fas fa-clock"></i>
+                    Horário <span class="obrigatorio">*</span>
+                </label>
+
+                <div
+                    class="horarios-grid"
+                    id="horarios-grid">
+
+                    <p style="grid-column:1/-1;text-align:center;padding:20px;">
+                        Carregando horários...
+                    </p>
+
+                </div>
+
+                <div class="legenda-horarios">
+
+                    <span class="item">
+                        <span class="bola disponivel"></span>
+                        Disponível
+                    </span>
+
+                    <span class="item">
+                        <span class="bola confirmado"></span>
+                        Ocupado
+                    </span>
+
+                    <span class="item">
+                        <span class="bola passado"></span>
+                        Já passou
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="form-actions">
+
+            <button
+                type="button"
+                class="btn btn-voltar"
+                onclick="passoAnterior(3)">
+
+                <i class="fas fa-arrow-left"></i>
+                Voltar
+
+            </button>
+
+            <button
+                type="button"
+                class="btn btn-primario"
+                onclick="proximoPasso(5)">
+
+                Revisar Agendamento
+                <i class="fas fa-arrow-right"></i>
+
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- PASSO 5 -->
+    <div class="passo-conteudo" id="passo-5">
+
+        <h3 class="passo-title">
+            <i class="fas fa-check-circle"></i>
+            Confirme seus dados
+        </h3>
+
+        <div class="info-reserva">
+
+            <i class="fas fa-clock"></i>
+
+            <div>
+
+                <strong>Reserva aguardando confirmação</strong>
+
+                <p style="margin:4px 0 0;">
+                    Sua reserva será registrada e ficará aguardando
+                    confirmação da equipe.
+                </p>
+
+            </div>
+
+        </div>
+
+        <div
+            class="resumo-agendamento"
+            id="resumo-agendamento">
+        </div>
+
+        <div class="form-actions">
+
+            <button
+                type="button"
+                class="btn btn-voltar"
+                onclick="passoAnterior(4)">
+
+                <i class="fas fa-arrow-left"></i>
+                Voltar
+
+            </button>
+
+            <button
+                type="button"
+                class="btn btn-success"
+                id="btn-confirmar"
+                onclick="confirmarAgendamento()">
+
+                <i class="fas fa-save"></i>
+                Efetuar Reserva
+
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- LOG -->
+    <div class="log-panel">
+
+        <div class="log-header">
 
             <strong>
-                Reserva Aguardando Confirmação
+                <i class="fas fa-terminal"></i>
+                Log de diagnóstico da agenda
             </strong>
 
-            Sua reserva será efetuada e aguardará confirmação da nossa equipe.
+            <button
+                type="button"
+                class="log-clear"
+                onclick="limparLog()">
 
-        </div>
-
-    </div>
-
-    <div
-        class="resumo-agendamento"
-        id="resumo-agendamento"
-    ></div>
-
-    <div class="form-actions">
-
-        <button
-            type="button"
-            class="btn btn-voltar"
-            onclick="passoAnterior(4)"
-        >
-            <i class="fas fa-arrow-left"></i>
-            Voltar
-        </button>
-
-        <button
-            type="button"
-            class="btn btn-success"
-            id="btn-confirmar"
-            onclick="confirmarAgendamento()"
-        >
-            <i class="fas fa-save"></i>
-            Efetuar Reserva
-        </button>
-
-    </div>
-
-</div>
-
-
-<!-- LOG DE DEBUG -->
-
-<div class="debug-box">
-
-    <div class="debug-header">
-
-        <strong>
-            <i class="fas fa-terminal"></i>
-            Log de conexão com Google Planilhas
-        </strong>
-
-        <div class="debug-actions">
-
-            <button onclick="limparLog()">
                 Limpar
-            </button>
 
-            <button onclick="testarAPI()">
-                Testar API
             </button>
 
         </div>
 
-    </div>
+        <div id="log"></div>
 
-    <div id="debug-log"></div>
-
-</div>
-```
-
-</div>
-
-<!-- LOADING -->
-
-<div
-    class="loading"
-    id="loading"
->
-
-```
-<div class="loading-card">
-
-    <i class="fas fa-spinner fa-spin"></i>
-
-    <div id="loading-text">
-        Carregando...
     </div>
 
 </div>
-```
-
-</div>
-
-<!-- TOAST -->
-
-<div
-    class="toast"
-    id="toast"
-></div>
 
 <script>
+/* ============================================================
+   CONFIGURAÇÃO
+   ============================================================ */
 
-    /*
-    ============================================================
-    CONFIGURAÇÃO
-    ============================================================
-    */
+const GOOGLE_APPS_SCRIPT_URL =
+    'https://script.google.com/macros/s/AKfycbyiPk-bI4sXUezIQPzIo-Ga6rtMXrjy2upmYPJ_IgDLuE58Rxbs33Mh7JAR1h7t7ZI/exec';
 
-    const API_URL =
-        'https://script.google.com/macros/s/AKfycbyiPk-bI4sXUezIQPzIo-Ga6rtMXrjy2upmYPJ_IgDLuE58Rxbs33Mh7JAR1h7t7ZI/exec';
+const API_CEP_URL =
+    'https://viacep.com.br/ws/';
 
+const DIAS_SEMANA = [
+    'Domingo',
+    'Segunda-feira',
+    'Terça-feira',
+    'Quarta-feira',
+    'Quinta-feira',
+    'Sexta-feira',
+    'Sábado'
+];
 
-    /*
-    ============================================================
-    DADOS DO AGENDAMENTO
-    ============================================================
-    */
+const MESES = [
+    'Janeiro',
+    'Fevereiro',
+    'Março',
+    'Abril',
+    'Maio',
+    'Junho',
+    'Julho',
+    'Agosto',
+    'Setembro',
+    'Outubro',
+    'Novembro',
+    'Dezembro'
+];
 
-    const agendamento = {
+let CONFIG = {
+    dias: [],
+    horarios: [],
+    servicos: [],
+    agendamentos: []
+};
 
-        id: null,
+let agendamento = {
+    id: '',
+    data: '',
+    horario: '',
+    nome: '',
+    telefone: '',
+    email: '',
+    tipo: '',
+    servico: '',
+    endereco: '',
+    numero: '',
+    complemento: '',
+    cep: '',
+    status: 'Pendente'
+};
 
-        nome: '',
-        telefone: '',
-        email: '',
+/* ============================================================
+   LOG
+   ============================================================ */
 
-        tipo: '',
-        servico: '',
+function addLog(mensagem, tipo = 'info') {
 
-        data: '',
-        horario: '',
+    const log = document.getElementById('log');
 
-        status: 'Pendente'
+    if (!log) return;
 
-    };
+    const agora = new Date();
 
+    const hora =
+        String(agora.getHours()).padStart(2, '0') +
+        ':' +
+        String(agora.getMinutes()).padStart(2, '0') +
+        ':' +
+        String(agora.getSeconds()).padStart(2, '0');
 
-    /*
-    ============================================================
-    CACHE DA PLANILHA
-    ============================================================
-    */
+    const item = document.createElement('div');
 
-    let CONFIG = {
+    item.className = 'log-item ' + tipo;
 
-        dias: [],
-        horarios: [],
-        servicos: [],
-        agendamentos: []
+    item.textContent =
+        '[' + hora + '] ' + mensagem;
 
-    };
+    log.appendChild(item);
 
+    log.scrollTop = log.scrollHeight;
 
-    /*
-    ============================================================
-    LOG
-    ============================================================
-    */
+    console.log(
+        '[' + tipo.toUpperCase() + ']',
+        mensagem
+    );
+}
 
-    function addLog(mensagem, tipo = 'info') {
+function limparLog() {
+    const log = document.getElementById('log');
 
-        const log = document.getElementById('debug-log');
-
-        if (!log) {
-            return;
-        }
-
-        const agora = new Date();
-
-        const hora =
-            String(agora.getHours()).padStart(2, '0') +
-            ':' +
-            String(agora.getMinutes()).padStart(2, '0') +
-            ':' +
-            String(agora.getSeconds()).padStart(2, '0');
-
-        const linha =
-            document.createElement('div');
-
-        linha.className =
-            'log-linha log-' + tipo;
-
-        linha.textContent =
-            '[' + hora + '] ' + mensagem;
-
-        log.appendChild(linha);
-
-        log.scrollTop =
-            log.scrollHeight;
-
-        console.log(
-            '[' + tipo + ']',
-            mensagem
-        );
-    }
-
-
-    function limparLog() {
-
-        const log =
-            document.getElementById('debug-log');
-
+    if (log) {
         log.innerHTML = '';
+    }
+}
+
+function logObjeto(titulo, objeto) {
+
+    try {
 
         addLog(
-            'Log limpo.',
+            titulo + ': ' +
+            JSON.stringify(objeto),
             'info'
         );
 
-    }
+    } catch (e) {
 
-
-    /*
-    ============================================================
-    LOADING
-    ============================================================
-    */
-
-    function mostrarLoading(texto) {
-
-        document
-            .getElementById('loading-text')
-            .textContent = texto || 'Carregando...';
-
-        document
-            .getElementById('loading')
-            .classList.add('ativo');
+        addLog(
+            titulo + ': [objeto não serializável]',
+            'warning'
+        );
 
     }
+}
 
+/* ============================================================
+   LOADING
+   ============================================================ */
 
-    function esconderLoading() {
+function mostrarLoading(texto) {
 
-        document
-            .getElementById('loading')
-            .classList.remove('ativo');
+    const overlay =
+        document.getElementById('loading-overlay');
 
+    const textoEl =
+        document.getElementById('loading-text');
+
+    if (textoEl) {
+        textoEl.textContent =
+            texto || 'Carregando...';
     }
 
+    if (overlay) {
+        overlay.classList.remove('oculto');
+    }
+}
 
-    /*
-    ============================================================
-    TOAST
-    ============================================================
-    */
+function esconderLoading() {
 
-    function mostrarToast(
-        mensagem,
-        tipo = 'info'
-    ) {
+    const overlay =
+        document.getElementById('loading-overlay');
 
-        const toast =
-            document.getElementById('toast');
+    if (overlay) {
+        overlay.classList.add('oculto');
+    }
+}
 
-        toast.textContent =
-            mensagem;
+/* ============================================================
+   TOAST
+   ============================================================ */
 
-        toast.className =
-            'toast ativo ' + tipo;
+function mostrarToast(mensagem, tipo = 'info') {
 
-        setTimeout(function() {
+    const toast =
+        document.getElementById('toast');
 
-            toast.classList.remove(
-                'ativo'
+    if (!toast) return;
+
+    toast.textContent = mensagem;
+
+    toast.className =
+        'toast visivel ' + tipo;
+
+    setTimeout(function() {
+        toast.classList.remove('visivel');
+    }, 4000);
+}
+
+/* ============================================================
+   STATUS DA API
+   ============================================================ */
+
+function atualizarStatusAPI(ok, texto) {
+
+    const status =
+        document.getElementById('api-status');
+
+    if (!status) return;
+
+    status.className =
+        'api-status ' +
+        (ok ? 'ok' : 'erro');
+
+    status.innerHTML =
+        '<i class="fas fa-circle"></i>' +
+        '<span>' +
+        texto +
+        '</span>';
+}
+
+/* ============================================================
+   API GET
+   ============================================================ */
+
+async function apiGet(acao, parametros = {}) {
+
+    const url =
+        new URL(GOOGLE_APPS_SCRIPT_URL);
+
+    url.searchParams.set(
+        'acao',
+        acao
+    );
+
+    Object.keys(parametros).forEach(function(chave) {
+
+        if (
+            parametros[chave] !== undefined &&
+            parametros[chave] !== null
+        ) {
+
+            url.searchParams.set(
+                chave,
+                parametros[chave]
             );
 
-        }, 4000);
+        }
 
-    }
+    });
 
+    addLog(
+        '📡 GET ' + url.toString(),
+        'info'
+    );
 
-    /*
-    ============================================================
-    API GOOGLE APPS SCRIPT
-    ============================================================
-    */
-
-    async function chamarAPI(
-        parametros = {}
-    ) {
-
-        let url =
-            API_URL;
-
-        const query =
-            new URLSearchParams();
-
-        Object.keys(parametros).forEach(
-            function(chave) {
-
-                if (
-                    parametros[chave] !== undefined &&
-                    parametros[chave] !== null
-                ) {
-
-                    query.append(
-                        chave,
-                        parametros[chave]
-                    );
-
-                }
-
+    const response =
+        await fetch(
+            url.toString(),
+            {
+                method: 'GET',
+                cache: 'no-store'
             }
         );
 
-        if (query.toString()) {
+    addLog(
+        '📡 HTTP ' + response.status,
+        response.ok ? 'sucesso' : 'erro'
+    );
 
-            url +=
-                '?' +
-                query.toString();
+    const texto =
+        await response.text();
 
-        }
+    addLog(
+        '📥 Resposta recebida: ' +
+        texto.substring(0, 500),
+        'info'
+    );
 
-        addLog(
-            '🌐 Consultando API: ' + url,
-            'info'
+    if (!response.ok) {
+
+        throw new Error(
+            'HTTP ' +
+            response.status +
+            ': ' +
+            texto
         );
-
-        const resposta =
-            await fetch(
-                url,
-                {
-                    method: 'GET',
-                    cache: 'no-store'
-                }
-            );
-
-        addLog(
-            '📡 HTTP ' + resposta.status,
-            resposta.ok
-                ? 'sucesso'
-                : 'erro'
-        );
-
-        if (!resposta.ok) {
-
-            throw new Error(
-                'HTTP ' +
-                resposta.status
-            );
-
-        }
-
-        const texto =
-            await resposta.text();
-
-        addLog(
-            '📥 Resposta recebida: ' +
-            texto.substring(0, 500),
-            'info'
-        );
-
-        let dados;
-
-        try {
-
-            dados =
-                JSON.parse(texto);
-
-        } catch (erro) {
-
-            throw new Error(
-                'A API não retornou JSON válido. ' +
-                'Resposta: ' +
-                texto.substring(0, 300)
-            );
-
-        }
-
-        return dados;
 
     }
 
+    let dados;
 
-    /*
-    ============================================================
-    NORMALIZAÇÃO
-    ============================================================
-    */
+    try {
 
-    function normalizarTexto(valor) {
+        dados = JSON.parse(texto);
 
-        if (
-            valor === undefined ||
-            valor === null
-        ) {
+    } catch (e) {
 
-            return '';
-
-        }
-
-        return String(valor)
-            .trim();
+        throw new Error(
+            'A API não retornou JSON válido.'
+        );
 
     }
 
+    return dados;
+}
 
-    function estaAtivo(valor) {
+/* ============================================================
+   API POST
+   ============================================================ */
 
-        const texto =
-            normalizarTexto(valor)
-                .toLowerCase();
+async function apiPost(acao, dados) {
+
+    addLog(
+        '📡 POST para Apps Script, ação: ' +
+        acao,
+        'info'
+    );
+
+    const payload = Object.assign(
+        {},
+        dados,
+        {
+            acao: acao
+        }
+    );
+
+    logObjeto(
+        '📤 Dados enviados',
+        payload
+    );
+
+    const response =
+        await fetch(
+            GOOGLE_APPS_SCRIPT_URL,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type':
+                        'text/plain;charset=utf-8'
+                },
+                body: JSON.stringify(payload)
+            }
+        );
+
+    addLog(
+        '📡 POST HTTP ' +
+        response.status,
+        response.ok ? 'sucesso' : 'erro'
+    );
+
+    const texto =
+        await response.text();
+
+    addLog(
+        '📥 Resposta POST: ' +
+        texto.substring(0, 500),
+        'info'
+    );
+
+    if (!response.ok) {
+
+        throw new Error(
+            'HTTP ' +
+            response.status +
+            ': ' +
+            texto
+        );
+
+    }
+
+    try {
+
+        return JSON.parse(texto);
+
+    } catch (e) {
+
+        throw new Error(
+            'A API não retornou JSON válido após o POST.'
+        );
+
+    }
+}
+
+/* ============================================================
+   NORMALIZAÇÃO
+   ============================================================ */
+
+function normalizarTexto(valor) {
+
+    if (
+        valor === null ||
+        valor === undefined
+    ) {
+        return '';
+    }
+
+    return String(valor)
+        .trim();
+
+}
+
+function normalizarAtivo(valor) {
+
+    const texto =
+        normalizarTexto(valor)
+            .toLowerCase();
+
+    return (
+        texto === 'sim' ||
+        texto === 'ativo' ||
+        texto === 'true' ||
+        texto === '1'
+    );
+}
+
+function normalizarHora(valor) {
+
+    if (
+        valor === null ||
+        valor === undefined
+    ) {
+        return '';
+    }
+
+    if (
+        Object.prototype.toString.call(valor) ===
+        '[object Date]'
+    ) {
 
         return (
-            texto === 'sim' ||
-            texto === 'ativo' ||
-            texto === 'true' ||
-            texto === '1'
+            String(valor.getHours()).padStart(2, '0') +
+            ':' +
+            String(valor.getMinutes()).padStart(2, '0')
         );
 
     }
 
+    const texto =
+        String(valor).trim();
 
-    function normalizarHora(valor) {
+    const match =
+        texto.match(/(\d{1,2}):(\d{2})/);
 
-        let hora =
-            normalizarTexto(valor);
+    if (!match) {
+        return texto.substring(0, 5);
+    }
 
-        if (!hora) {
-            return '';
-        }
+    return (
+        String(match[1]).padStart(2, '0') +
+        ':' +
+        match[2]
+    );
+}
 
-        /*
-        Caso a API devolva algo como:
-        10:00:00
-        */
+function normalizarData(valor) {
+
+    if (
+        valor === null ||
+        valor === undefined
+    ) {
+        return '';
+    }
+
+    if (
+        Object.prototype.toString.call(valor) ===
+        '[object Date]'
+    ) {
+
+        return (
+            valor.getFullYear() +
+            '-' +
+            String(valor.getMonth() + 1).padStart(2, '0') +
+            '-' +
+            String(valor.getDate()).padStart(2, '0')
+        );
+
+    }
+
+    const texto =
+        String(valor).trim();
+
+    if (/^\d{4}-\d{2}-\d{2}/.test(texto)) {
+
+        return texto.substring(0, 10);
+
+    }
+
+    const br =
+        texto.match(
+            /^(\d{1,2})\/(\d{1,2})\/(\d{4})/
+        );
+
+    if (br) {
+
+        return (
+            br[3] +
+            '-' +
+            String(br[2]).padStart(2, '0') +
+            '-' +
+            String(br[1]).padStart(2, '0')
+        );
+
+    }
+
+    return texto;
+}
+
+/* ============================================================
+   CARREGAR CONFIGURAÇÕES
+   ============================================================ */
+
+async function carregarConfiguracoes() {
+
+    logEtapa(
+        '0',
+        '🚀 INICIANDO CONEXÃO COM GOOGLE PLANILHAS',
+        'info'
+    );
+
+    addLog(
+        '🔗 Endpoint Apps Script configurado.',
+        'info'
+    );
+
+    addLog(
+        '📊 Banco de dados: Google Planilhas',
+        'info'
+    );
+
+    addLog(
+        '📑 Abas esperadas: Dias, Horarios, Servicos, Agendamentos',
+        'info'
+    );
+
+    mostrarLoading(
+        'Carregando configurações da agenda...'
+    );
+
+    try {
+
+        const resposta =
+            await apiGet('config');
+
+        logObjeto(
+            '📦 Configuração recebida',
+            resposta
+        );
 
         if (
-            hora.match(
-                /^\d{1,2}:\d{2}:\d{2}$/
-            )
+            resposta &&
+            resposta.sucesso === false
+        ) {
+
+            throw new Error(
+                resposta.mensagem ||
+                'Apps Script informou um erro.'
+            );
+
+        }
+
+        const dados =
+            resposta.dados ||
+            resposta.config ||
+            resposta;
+
+        CONFIG.dias =
+            dados.dias ||
+            dados.Dias ||
+            [];
+
+        CONFIG.horarios =
+            dados.horarios ||
+            dados.Horarios ||
+            [];
+
+        CONFIG.servicos =
+            dados.servicos ||
+            dados.Servicos ||
+            [];
+
+        CONFIG.agendamentos =
+            dados.agendamentos ||
+            dados.Agendamentos ||
+            [];
+
+        addLog(
+            '📅 Dias recebidos: ' +
+            CONFIG.dias.length,
+            'sucesso'
+        );
+
+        addLog(
+            '🕐 Horários recebidos: ' +
+            CONFIG.horarios.length,
+            'sucesso'
+        );
+
+        addLog(
+            '💆 Serviços recebidos: ' +
+            CONFIG.servicos.length,
+            'sucesso'
+        );
+
+        addLog(
+            '📋 Agendamentos recebidos: ' +
+            CONFIG.agendamentos.length,
+            'sucesso'
+        );
+
+        prepararDias();
+
+        prepararHorarios();
+
+        renderizarServicos();
+
+        configurarData();
+
+        atualizarStatusAPI(
+            true,
+            'Google Planilhas conectado'
+        );
+
+        logEtapa(
+            '0',
+            '✅ CONFIGURAÇÃO CARREGADA COM SUCESSO',
+            'sucesso'
+        );
+
+        esconderLoading();
+
+    } catch (erro) {
+
+        esconderLoading();
+
+        atualizarStatusAPI(
+            false,
+            'Erro ao conectar à agenda'
+        );
+
+        addLog(
+            '❌ ERRO AO CARREGAR CONFIGURAÇÕES: ' +
+            erro.message,
+            'erro'
+        );
+
+        logEtapa(
+            '0',
+            '❌ FALHA AO CARREGAR CONFIGURAÇÕES',
+            'erro'
+        );
+
+        mostrarToast(
+            'Não foi possível carregar as configurações da agenda. Verifique o log abaixo.',
+            'erro'
+        );
+
+    }
+}
+
+/* ============================================================
+   DIAS
+   ============================================================ */
+
+function prepararDias() {
+
+    const diasAtivos = [];
+
+    for (
+        let i = 0;
+        i < CONFIG.dias.length;
+        i++
+    ) {
+
+        const item =
+            CONFIG.dias[i];
+
+        let nome = '';
+        let ativo = false;
+
+        if (
+            typeof item === 'object' &&
+            item !== null
+        ) {
+
+            nome =
+                item.dia ||
+                item.Dia ||
+                item.nome ||
+                item.nomeDia ||
+                item.valor ||
+                '';
+
+            ativo =
+                normalizarAtivo(
+                    item.ativo ??
+                    item.Ativo ??
+                    item.status
+                );
+
+        } else {
+
+            nome =
+                normalizarTexto(item);
+
+            ativo = true;
+        }
+
+        if (ativo) {
+
+            diasAtivos.push(
+                normalizarDia(nome)
+            );
+
+        }
+
+    }
+
+    CONFIG.diasAtivos =
+        diasAtivos;
+
+    addLog(
+        '📅 Dias ATIVOS: ' +
+        (
+            diasAtivos.length
+                ? diasAtivos.join(', ')
+                : 'nenhum'
+        ),
+        diasAtivos.length
+            ? 'sucesso'
+            : 'warning'
+    );
+}
+
+function normalizarDia(nome) {
+
+    const texto =
+        normalizarTexto(nome)
+            .toLowerCase();
+
+    const mapa = {
+        'segunda': 'Segunda-feira',
+        'segunda-feira': 'Segunda-feira',
+        'terça': 'Terça-feira',
+        'terca': 'Terça-feira',
+        'terça-feira': 'Terça-feira',
+        'terca-feira': 'Terça-feira',
+        'quarta': 'Quarta-feira',
+        'quarta-feira': 'Quarta-feira',
+        'quinta': 'Quinta-feira',
+        'quinta-feira': 'Quinta-feira',
+        'sexta': 'Sexta-feira',
+        'sexta-feira': 'Sexta-feira',
+        'sábado': 'Sábado',
+        'sabado': 'Sábado',
+        'domingo': 'Domingo'
+    };
+
+    return mapa[texto] || nome;
+}
+
+function diaEstaAtivo(data) {
+
+    const nome =
+        DIAS_SEMANA[
+            data.getDay()
+        ];
+
+    return (
+        CONFIG.diasAtivos &&
+        CONFIG.diasAtivos.includes(nome)
+    );
+}
+
+/* ============================================================
+   HORÁRIOS
+   ============================================================ */
+
+function prepararHorarios() {
+
+    const horariosAtivos = [];
+
+    for (
+        let i = 0;
+        i < CONFIG.horarios.length;
+        i++
+    ) {
+
+        const item =
+            CONFIG.horarios[i];
+
+        let hora = '';
+        let ativo = false;
+
+        if (
+            typeof item === 'object' &&
+            item !== null
         ) {
 
             hora =
-                hora.substring(
-                    0,
-                    5
+                item.hora ||
+                item.Hora ||
+                item.horario ||
+                item.Horario ||
+                item.valor ||
+                '';
+
+            ativo =
+                normalizarAtivo(
+                    item.ativo ??
+                    item.Ativo ??
+                    item.status
                 );
 
-        }
+        } else {
 
-        /*
-        Caso devolva:
-        10:00
-        */
+            hora =
+                item;
 
-        if (
-            hora.match(
-                /^\d{1,2}:\d{2}$/
-            )
-        ) {
-
-            const partes =
-                hora.split(':');
-
-            return (
-                String(
-                    partes[0]
-                ).padStart(2, '0') +
-                ':' +
-                partes[1]
-            );
+            ativo = true;
 
         }
 
-        return hora;
+        if (ativo) {
+
+            const horaNormalizada =
+                normalizarHora(hora);
+
+            if (horaNormalizada) {
+
+                horariosAtivos.push(
+                    horaNormalizada
+                );
+
+            }
+
+        }
 
     }
 
+    horariosAtivos.sort();
 
-    /*
-    ============================================================
-    CARREGAR CONFIGURAÇÃO
-    ============================================================
-    */
+    CONFIG.horariosAtivos =
+        horariosAtivos;
 
-    async function carregarConfiguracao() {
+    addLog(
+        '🕐 Horários ATIVOS: ' +
+        (
+            horariosAtivos.length
+                ? horariosAtivos.join(', ')
+                : 'nenhum'
+        ),
+        horariosAtivos.length
+            ? 'sucesso'
+            : 'warning'
+    );
+}
 
-        try {
+/* ============================================================
+   SERVIÇOS
+   ============================================================ */
 
-            mostrarLoading(
-                'Lendo horários da planilha...'
+function renderizarServicos() {
+
+    const container =
+        document.getElementById(
+            'servicos-escolha'
+        );
+
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    if (
+        !CONFIG.servicos ||
+        CONFIG.servicos.length === 0
+    ) {
+
+        container.innerHTML =
+            '<p style="grid-column:1/-1;text-align:center;color:#dc3545;">' +
+            'Nenhum serviço disponível.' +
+            '</p>';
+
+        return;
+    }
+
+    for (
+        let i = 0;
+        i < CONFIG.servicos.length;
+        i++
+    ) {
+
+        const item =
+            CONFIG.servicos[i];
+
+        let nome = '';
+        let descricao = '';
+
+        if (
+            typeof item === 'object' &&
+            item !== null
+        ) {
+
+            nome =
+                item.servico ||
+                item.Serviço ||
+                item.Servico ||
+                item.nome ||
+                item.Nome ||
+                item.valor ||
+                '';
+
+            descricao =
+                item.descricao ||
+                item.Descrição ||
+                item.description ||
+                '';
+
+        } else {
+
+            nome =
+                String(item);
+
+        }
+
+        if (!nome) continue;
+
+        const botao =
+            document.createElement('button');
+
+        botao.type = 'button';
+
+        botao.className =
+            'servico-btn';
+
+        botao.dataset.servico =
+            nome;
+
+        botao.innerHTML =
+            '<i class="fas fa-shoe-prints"></i>' +
+            escapeHTML(nome) +
+            (
+                descricao
+                    ? '<span class="servico-descricao">' +
+                      escapeHTML(descricao) +
+                      '</span>'
+                    : ''
             );
 
+        botao.addEventListener(
+            'click',
+            function() {
+
+                document
+                    .querySelectorAll(
+                        '.servico-btn'
+                    )
+                    .forEach(function(btn) {
+
+                        btn.classList.remove(
+                            'selecionado'
+                        );
+
+                    });
+
+                this.classList.add(
+                    'selecionado'
+                );
+
+                agendamento.servico =
+                    this.dataset.servico;
+
+                addLog(
+                    '💆 Serviço selecionado: ' +
+                    agendamento.servico,
+                    'sucesso'
+                );
+
+            }
+        );
+
+        container.appendChild(
+            botao
+        );
+    }
+
+    addLog(
+        '✅ Serviços renderizados na tela.',
+        'sucesso'
+    );
+}
+
+/* ============================================================
+   DATA
+   ============================================================ */
+
+function configurarData() {
+
+    const input =
+        document.getElementById(
+            'data-agendamento'
+        );
+
+    if (!input) return;
+
+    const hoje =
+        hojeLocalISO();
+
+    input.min = hoje;
+
+    const proxima =
+        buscarProximaDataDisponivelLocal();
+
+    if (proxima) {
+
+        input.value =
+            proxima;
+
+        agendamento.data =
+            proxima;
+
+        gerarHorarios(
+            proxima
+        );
+
+        addLog(
+            '📅 Próxima data disponível: ' +
+            proxima,
+            'sucesso'
+        );
+
+    } else {
+
+        input.value =
+            hoje;
+
+        agendamento.data =
+            hoje;
+
+        gerarHorarios(
+            hoje
+        );
+
+    }
+
+    input.addEventListener(
+        'change',
+        function() {
+
+            agendamento.data =
+                this.value;
+
+            agendamento.horario =
+                '';
+
             addLog(
-                '🚀 Iniciando leitura do Google Planilhas.',
+                '📅 Data escolhida: ' +
+                this.value,
                 'info'
             );
 
-            /*
-            Ação principal da API.
-            */
-
-            const dados =
-                await chamarAPI({
-                    acao: 'config'
-                });
-
-            addLog(
-                '🔎 Estrutura recebida da API:',
-                'info'
+            gerarHorarios(
+                this.value
             );
 
-            console.log(
-                'CONFIG API:',
-                dados
+        }
+    );
+}
+
+function hojeLocalISO() {
+
+    const hoje =
+        new Date();
+
+    return (
+        hoje.getFullYear() +
+        '-' +
+        String(
+            hoje.getMonth() + 1
+        ).padStart(2, '0') +
+        '-' +
+        String(
+            hoje.getDate()
+        ).padStart(2, '0')
+    );
+}
+
+function buscarProximaDataDisponivelLocal() {
+
+    const hoje =
+        new Date();
+
+    for (
+        let i = 0;
+        i < 90;
+        i++
+    ) {
+
+        const data =
+            new Date(hoje);
+
+        data.setDate(
+            data.getDate() + i
+        );
+
+        data.setHours(
+            0, 0, 0, 0
+        );
+
+        if (!diaEstaAtivo(data)) {
+            continue;
+        }
+
+        const iso =
+            data.getFullYear() +
+            '-' +
+            String(
+                data.getMonth() + 1
+            ).padStart(2, '0') +
+            '-' +
+            String(
+                data.getDate()
+            ).padStart(2, '0');
+
+        const disponiveis =
+            obterHorariosDisponiveis(
+                iso
             );
 
-            /*
-            Algumas versões do Apps Script
-            retornam diretamente:
-            
-            {
-                dias: [],
-                horarios: [],
-                servicos: []
-            }
+        if (
+            disponiveis.length > 0
+        ) {
 
-            Outras retornam:
-            
-            {
-                sucesso: true,
-                dados: {
-                    dias: [],
-                    horarios: [],
-                    servicos: []
-                }
-            }
-            */
+            return iso;
 
-            let fonte =
-                dados;
+        }
+
+    }
+
+    return null;
+}
+
+/* ============================================================
+   HORÁRIOS DISPONÍVEIS
+   ============================================================ */
+
+function obterAgendamentosDaData(data) {
+
+    const encontrados = [];
+
+    for (
+        let i = 0;
+        i < CONFIG.agendamentos.length;
+        i++
+    ) {
+
+        const item =
+            CONFIG.agendamentos[i];
+
+        if (
+            typeof item !== 'object' ||
+            item === null
+        ) {
+            continue;
+        }
+
+        const itemData =
+            normalizarData(
+                item.data ||
+                item.Data ||
+                item.date
+            );
+
+        if (
+            itemData !== data
+        ) {
+            continue;
+        }
+
+        const status =
+            normalizarTexto(
+                item.status ||
+                item.Status ||
+                ''
+            ).toLowerCase();
+
+        if (
+            status === 'cancelado' ||
+            status === 'cancelada' ||
+            status === 'cancelled'
+        ) {
+            continue;
+        }
+
+        const horario =
+            normalizarHora(
+                item.horario ||
+                item.Hora ||
+                item.hora ||
+                ''
+            );
+
+        if (horario) {
+
+            encontrados.push(
+                horario
+            );
+
+        }
+
+    }
+
+    return encontrados;
+}
+
+function obterHorariosDisponiveis(dataStr) {
+
+    if (!dataStr) {
+        return [];
+    }
+
+    const partes =
+        dataStr.split('-');
+
+    const data =
+        new Date(
+            Number(partes[0]),
+            Number(partes[1]) - 1,
+            Number(partes[2])
+        );
+
+    if (!diaEstaAtivo(data)) {
+        return [];
+    }
+
+    const ocupados =
+        obterAgendamentosDaData(
+            dataStr
+        );
+
+    const hoje =
+        hojeLocalISO();
+
+    const agora =
+        new Date();
+
+    return CONFIG.horariosAtivos.filter(
+        function(horario) {
 
             if (
-                dados &&
-                dados.dados
+                ocupados.includes(
+                    horario
+                )
+            ) {
+                return false;
+            }
+
+            if (
+                dataStr === hoje
             ) {
 
-                fonte =
-                    dados.dados;
+                const partesHora =
+                    horario.split(':');
+
+                const hora =
+                    Number(partesHora[0]);
+
+                const minuto =
+                    Number(partesHora[1]);
+
+                if (
+                    hora < agora.getHours() ||
+                    (
+                        hora === agora.getHours() &&
+                        minuto <= agora.getMinutes()
+                    )
+                ) {
+
+                    return false;
+
+                }
 
             }
 
-            CONFIG.dias =
-                fonte.dias ||
-                fonte.Dias ||
-                [];
-
-            CONFIG.horarios =
-                fonte.horarios ||
-                fonte.Horarios ||
-                [];
-
-            CONFIG.servicos =
-                fonte.servicos ||
-                fonte.Servicos ||
-                [];
-
-            CONFIG.agendamentos =
-                fonte.agendamentos ||
-                fonte.Agendamentos ||
-                [];
-
-            addLog(
-                '📅 Dias recebidos: ' +
-                CONFIG.dias.length,
-                'sucesso'
-            );
-
-            addLog(
-                '⏰ Horários recebidos: ' +
-                CONFIG.horarios.length,
-                'sucesso'
-            );
-
-            addLog(
-                '🩺 Serviços recebidos: ' +
-                CONFIG.servicos.length,
-                'sucesso'
-            );
-
-            addLog(
-                '📋 Agendamentos recebidos: ' +
-                CONFIG.agendamentos.length,
-                'sucesso'
-            );
-
-            /*
-            Mostra exatamente os dados recebidos.
-            */
-
-            console.table(
-                CONFIG.dias
-            );
-
-            console.table(
-                CONFIG.horarios
-            );
-
-            console.table(
-                CONFIG.servicos
-            );
-
-            renderizarServicos();
-
-            configurarDataMinima();
-
-            esconderLoading();
-
-            addLog(
-                '✅ Configuração carregada com sucesso.',
-                'sucesso'
-            );
-
-        } catch (erro) {
-
-            esconderLoading();
-
-            addLog(
-                '❌ ERRO AO CARREGAR PLANILHA: ' +
-                erro.message,
-                'erro'
-            );
-
-            console.error(
-                erro
-            );
-
-            mostrarToast(
-                'Não foi possível carregar os dados da planilha.',
-                'erro'
-            );
+            return true;
 
         }
+    );
+}
 
+/* ============================================================
+   RENDERIZAR HORÁRIOS
+   ============================================================ */
+
+function gerarHorarios(dataStr) {
+
+    const grid =
+        document.getElementById(
+            'horarios-grid'
+        );
+
+    if (!grid) return;
+
+    grid.innerHTML = '';
+
+    agendamento.horario =
+        '';
+
+    if (!dataStr) {
+
+        grid.innerHTML =
+            '<p style="grid-column:1/-1;text-align:center;">' +
+            'Selecione uma data.' +
+            '</p>';
+
+        return;
     }
 
+    const partes =
+        dataStr.split('-');
 
-    /*
-    ============================================================
-    SERVIÇOS
-    ============================================================
-    */
+    const data =
+        new Date(
+            Number(partes[0]),
+            Number(partes[1]) - 1,
+            Number(partes[2])
+        );
 
-    function renderizarServicos() {
+    const diaNome =
+        DIAS_SEMANA[
+            data.getDay()
+        ];
 
-        const container =
-            document.getElementById(
-                'servicos-container'
-            );
+    addLog(
+        '📅 Verificando data ' +
+        dataStr +
+        ', ' +
+        diaNome,
+        'info'
+    );
 
-        container.innerHTML = '';
+    if (!diaEstaAtivo(data)) {
 
-        if (
-            !CONFIG.servicos ||
-            CONFIG.servicos.length === 0
-        ) {
+        addLog(
+            '⛔ ' +
+            diaNome +
+            ' está INATIVO na aba Dias.',
+            'warning'
+        );
 
-            container.innerHTML =
-                '<p style="color:#b52b2b;">' +
-                'Nenhum serviço foi retornado pela planilha.' +
-                '</p>';
+        grid.innerHTML =
+            '<p style="grid-column:1/-1;text-align:center;padding:20px;color:#dc3545;font-weight:600;">' +
+            '⚠️ Não há atendimento neste dia.' +
+            '</p>';
 
-            addLog(
-                '⚠️ Nenhum serviço encontrado.',
-                'warning'
-            );
+        return;
+    }
 
-            return;
+    const ocupados =
+        obterAgendamentosDaData(
+            dataStr
+        );
 
-        }
+    addLog(
+        '📋 Horários ocupados nesta data: ' +
+        (
+            ocupados.length
+                ? ocupados.join(', ')
+                : 'nenhum'
+        ),
+        ocupados.length
+            ? 'warning'
+            : 'info'
+    );
 
-        CONFIG.servicos.forEach(
-            function(item, indice) {
+    const horarios =
+        CONFIG.horariosAtivos;
 
-                let nome = '';
-                let descricao = '';
+    if (
+        !horarios ||
+        horarios.length === 0
+    ) {
 
-                /*
-                Formato objeto:
-                {
-                    servico: "...",
-                    descricao: "..."
-                }
-                */
+        grid.innerHTML =
+            '<p style="grid-column:1/-1;text-align:center;color:#dc3545;">' +
+            'Nenhum horário ativo foi encontrado na aba Horarios.' +
+            '</p>';
 
-                if (
-                    typeof item === 'object'
-                ) {
+        return;
+    }
 
-                    nome =
-                        item.servico ||
-                        item.Serviço ||
-                        item.Servico ||
-                        item.nome ||
-                        item.Nome ||
-                        item.valor ||
-                        '';
+    const hoje =
+        hojeLocalISO();
 
-                    descricao =
-                        item.descricao ||
-                        item.Descrição ||
-                        '';
+    const agora =
+        new Date();
 
-                } else {
+    let totalDisponiveis = 0;
 
-                    nome =
-                        String(item);
+    horarios.forEach(
+        function(horario) {
 
-                }
+            const botao =
+                document.createElement(
+                    'button'
+                );
 
-                nome =
-                    normalizarTexto(
-                        nome
+            botao.type = 'button';
+
+            botao.className =
+                'horario-btn';
+
+            botao.textContent =
+                horario;
+
+            botao.dataset.horario =
+                horario;
+
+            const ocupado =
+                ocupados.includes(
+                    horario
+                );
+
+            let passado = false;
+
+            if (
+                dataStr === hoje
+            ) {
+
+                const partesHora =
+                    horario.split(':');
+
+                const hora =
+                    Number(
+                        partesHora[0]
                     );
 
-                descricao =
-                    normalizarTexto(
-                        descricao
+                const minuto =
+                    Number(
+                        partesHora[1]
                     );
 
-                if (!nome) {
-                    return;
-                }
-
-                const botao =
-                    document.createElement(
-                        'button'
+                passado =
+                    (
+                        hora <
+                        agora.getHours()
+                    ) ||
+                    (
+                        hora ===
+                        agora.getHours() &&
+                        minuto <=
+                        agora.getMinutes()
                     );
 
-                botao.type =
-                    'button';
+            }
 
-                botao.className =
-                    'servico-btn';
+            if (ocupado) {
 
-                botao.dataset.servico =
-                    nome;
+                botao.disabled =
+                    true;
 
-                botao.innerHTML =
-                    '<i class="fas fa-shoe-prints"></i>' +
-                    '<strong>' +
-                    escaparHTML(nome) +
-                    '</strong>' +
-                    '<span>' +
-                    escaparHTML(
-                        descricao
-                    ) +
-                    '</span>';
+                botao.classList.add(
+                    'ocupado'
+                );
+
+                botao.title =
+                    'Horário já ocupado';
+
+            } else if (passado) {
+
+                botao.disabled =
+                    true;
+
+                botao.classList.add(
+                    'passado'
+                );
+
+                botao.title =
+                    'Horário já passou';
+
+            } else {
+
+                totalDisponiveis++;
 
                 botao.addEventListener(
                     'click',
@@ -1692,13 +2620,15 @@
 
                         document
                             .querySelectorAll(
-                                '.servico-btn'
+                                '.horario-btn'
                             )
                             .forEach(
                                 function(btn) {
+
                                     btn.classList.remove(
                                         'selecionado'
                                     );
+
                                 }
                             );
 
@@ -1706,609 +2636,1060 @@
                             'selecionado'
                         );
 
-                        agendamento.servico =
-                            this.dataset.servico;
+                        agendamento.horario =
+                            this.dataset.horario;
 
                         addLog(
-                            '🩺 Serviço selecionado: ' +
-                            agendamento.servico,
+                            '✅ Horário selecionado: ' +
+                            agendamento.horario,
                             'sucesso'
                         );
 
                     }
                 );
 
-                container.appendChild(
-                    botao
-                );
-
-                addLog(
-                    '🩺 Serviço ' +
-                    (indice + 1) +
-                    ': ' +
-                    nome,
-                    'info'
-                );
-
             }
-        );
 
-    }
-
-
-    /*
-    ============================================================
-    DIAS ATIVOS
-    ============================================================
-    */
-
-    function obterDiasAtivos() {
-
-        const mapa = {
-
-            'domingo': 0,
-            'segunda-feira': 1,
-            'segunda': 1,
-            'terça-feira': 2,
-            'terca-feira': 2,
-            'terça': 2,
-            'terca': 2,
-            'quarta-feira': 3,
-            'quarta': 3,
-            'quinta-feira': 4,
-            'quinta': 4,
-            'sexta-feira': 5,
-            'sexta': 5,
-            'sábado': 6,
-            'sabado': 6,
-            'sábado': 6,
-            'sabado': 6
-
-        };
-
-        const diasAtivos = [];
-
-        CONFIG.dias.forEach(
-            function(item) {
-
-                let nome = '';
-                let ativo = '';
-
-                if (
-                    typeof item === 'object'
-                ) {
-
-                    nome =
-                        item.dia ||
-                        item.Dia ||
-                        item.nome ||
-                        item.valor ||
-                        '';
-
-                    ativo =
-                        item.ativo ||
-                        item.Ativo ||
-                        item.status ||
-                        '';
-
-                } else {
-
-                    nome =
-                        String(item);
-
-                    ativo =
-                        'Sim';
-
-                }
-
-                nome =
-                    normalizarTexto(
-                        nome
-                    );
-
-                if (
-                    estaAtivo(ativo)
-                ) {
-
-                    const chave =
-                        nome
-                            .toLowerCase();
-
-                    if (
-                        mapa[chave] !== undefined
-                    ) {
-
-                        diasAtivos.push(
-                            mapa[chave]
-                        );
-
-                    }
-
-                }
-
-            }
-        );
-
-        return diasAtivos;
-
-    }
-
-
-    /*
-    ============================================================
-    HORÁRIOS ATIVOS
-    ============================================================
-    */
-
-    function obterHorariosAtivos() {
-
-        const horarios = [];
-
-        CONFIG.horarios.forEach(
-            function(item) {
-
-                let hora = '';
-                let ativo = '';
-
-                if (
-                    typeof item === 'object'
-                ) {
-
-                    hora =
-                        item.hora ||
-                        item.Hora ||
-                        item.horario ||
-                        item.Horário ||
-                        item.valor ||
-                        '';
-
-                    ativo =
-                        item.ativo ||
-                        item.Ativo ||
-                        item.status ||
-                        '';
-
-                } else {
-
-                    hora =
-                        String(item);
-
-                    ativo =
-                        'Sim';
-
-                }
-
-                hora =
-                    normalizarHora(
-                        hora
-                    );
-
-                if (
-                    estaAtivo(ativo) &&
-                    hora
-                ) {
-
-                    horarios.push(
-                        hora
-                    );
-
-                }
-
-            }
-        );
-
-        horarios.sort();
-
-        return [
-            ...new Set(horarios)
-        ];
-
-    }
-
-
-    /*
-    ============================================================
-    AGENDAMENTOS OCUPADOS
-    ============================================================
-    */
-
-    function obterAgendamentosOcupados(
-        data
-    ) {
-
-        const ocupados = [];
-
-        CONFIG.agendamentos.forEach(
-            function(item) {
-
-                if (
-                    typeof item !== 'object'
-                ) {
-                    return;
-                }
-
-                const dataItem =
-                    normalizarData(
-                        item.data ||
-                        item.Data
-                    );
-
-                const horaItem =
-                    normalizarHora(
-                        item.hora ||
-                        item.Hora ||
-                        item.horario ||
-                        item.Horário
-                    );
-
-                const status =
-                    normalizarTexto(
-                        item.status ||
-                        item.Status
-                    ).toLowerCase();
-
-                if (
-                    dataItem === data &&
-                    horaItem &&
-                    status !== 'cancelado' &&
-                    status !== 'cancelada'
-                ) {
-
-                    ocupados.push(
-                        horaItem
-                    );
-
-                }
-
-            }
-        );
-
-        return [
-            ...new Set(ocupados)
-        ];
-
-    }
-
-
-    /*
-    ============================================================
-    NORMALIZAR DATA
-    ============================================================
-    */
-
-    function normalizarData(
-        valor
-    ) {
-
-        if (
-            !valor
-        ) {
-            return '';
-        }
-
-        if (
-            valor instanceof Date
-        ) {
-
-            return formatarISO(
-                valor
+            grid.appendChild(
+                botao
             );
 
         }
+    );
 
-        let texto =
-            String(valor)
-                .trim();
+    addLog(
+        '📊 Horários disponíveis: ' +
+        totalDisponiveis +
+        ' de ' +
+        horarios.length,
+        totalDisponiveis
+            ? 'sucesso'
+            : 'warning'
+    );
 
-        /*
-        YYYY-MM-DD
-        */
+    if (
+        totalDisponiveis === 0
+    ) {
 
-        if (
-            /^\d{4}-\d{2}-\d{2}$/.test(
-                texto
-            )
-        ) {
-
-            return texto;
-
-        }
-
-        /*
-        DD/MM/YYYY
-        */
-
-        const partes =
-            texto.split('/');
-
-        if (
-            partes.length === 3
-        ) {
-
-            return (
-                partes[2] +
-                '-' +
-                partes[1].padStart(2, '0') +
-                '-' +
-                partes[0].padStart(2, '0')
+        const mensagem =
+            document.createElement(
+                'p'
             );
 
-        }
+        mensagem.style.cssText =
+            'grid-column:1/-1;text-align:center;padding:20px;color:#dc3545;font-weight:600;';
 
-        return texto;
+        mensagem.textContent =
+            '⚠️ Não há horários disponíveis nesta data.';
 
-    }
-
-
-    function formatarISO(
-        data
-    ) {
-
-        const ano =
-            data.getFullYear();
-
-        const mes =
-            String(
-                data.getMonth() + 1
-            ).padStart(2, '0');
-
-        const dia =
-            String(
-                data.getDate()
-            ).padStart(2, '0');
-
-        return (
-            ano +
-            '-' +
-            mes +
-            '-' +
-            dia
+        grid.appendChild(
+            mensagem
         );
 
     }
 
+}
 
-    /*
-    ============================================================
-    VERIFICAR SE DIA ESTÁ ATIVO
-    ============================================================
-    */
+/* ============================================================
+   NAVEGAÇÃO
+   ============================================================ */
 
-    function diaEstaAtivo(
-        data
-    ) {
+function irParaPasso(numero) {
 
-        const diaSemana =
-            data.getDay();
+    document
+        .querySelectorAll(
+            '.passo-conteudo'
+        )
+        .forEach(
+            function(el) {
 
-        const diasAtivos =
-            obterDiasAtivos();
+                el.classList.remove(
+                    'ativo'
+                );
 
-        return diasAtivos.includes(
-            diaSemana
+            }
+        );
+
+    const passo =
+        document.getElementById(
+            'passo-' + numero
+        );
+
+    if (passo) {
+
+        passo.classList.add(
+            'ativo'
         );
 
     }
 
+    document
+        .querySelectorAll(
+            '.passo'
+        )
+        .forEach(
+            function(el) {
 
-    /*
-    ============================================================
-    GERAR HORÁRIOS
-    ============================================================
-    */
+                el.classList.remove(
+                    'ativo'
+                );
 
-    async function gerarHorarios(
-        dataStr
+                if (
+                    Number(
+                        el.dataset.passo
+                    ) === numero
+                ) {
+
+                    el.classList.add(
+                        'ativo'
+                    );
+
+                }
+
+            }
+        );
+
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+
+}
+
+function proximoPasso(numero) {
+
+    const atual =
+        numero - 1;
+
+    let valido = true;
+
+    if (atual === 1) {
+        valido = validarPasso1();
+    }
+
+    if (atual === 2) {
+        valido = validarPasso2();
+    }
+
+    if (atual === 3) {
+        valido = validarPasso3();
+    }
+
+    if (atual === 4) {
+        valido = validarPasso4();
+    }
+
+    if (!valido) {
+        return;
+    }
+
+    if (numero === 5) {
+
+        preencherResumo();
+
+    }
+
+    irParaPasso(numero);
+
+}
+
+function passoAnterior(numero) {
+
+    irParaPasso(
+        numero
+    );
+
+}
+
+/* ============================================================
+   VALIDAÇÕES
+   ============================================================ */
+
+function validarPasso1() {
+
+    const nome =
+        document.getElementById(
+            'nome'
+        ).value.trim();
+
+    const telefone =
+        document.getElementById(
+            'telefone'
+        ).value.trim();
+
+    const email =
+        document.getElementById(
+            'email'
+        ).value.trim();
+
+    if (!nome) {
+
+        mostrarToast(
+            'Digite seu nome completo.',
+            'erro'
+        );
+
+        return false;
+
+    }
+
+    if (
+        telefone.replace(
+            /\D/g,
+            ''
+        ).length < 10
     ) {
 
-        const grid =
+        mostrarToast(
+            'Digite um telefone válido.',
+            'erro'
+        );
+
+        return false;
+
+    }
+
+    if (
+        !email ||
+        !email.includes('@')
+    ) {
+
+        mostrarToast(
+            'Digite um e-mail válido.',
+            'erro'
+        );
+
+        return false;
+
+    }
+
+    agendamento.nome =
+        nome;
+
+    agendamento.telefone =
+        telefone;
+
+    agendamento.email =
+        email;
+
+    addLog(
+        '✅ Dados do cliente validados.',
+        'sucesso'
+    );
+
+    return true;
+}
+
+function validarPasso2() {
+
+    const selecionado =
+        document.querySelector(
+            '.tipo-btn.selecionado'
+        );
+
+    if (!selecionado) {
+
+        mostrarToast(
+            'Selecione o tipo de atendimento.',
+            'erro'
+        );
+
+        return false;
+
+    }
+
+    agendamento.tipo =
+        selecionado.dataset.tipo;
+
+    if (
+        agendamento.tipo ===
+        'domicilio'
+    ) {
+
+        const cep =
             document.getElementById(
-                'horarios-grid'
+                'cep'
+            ).value.replace(
+                /\D/g,
+                ''
             );
 
-        grid.innerHTML =
-            '<p>Consultando horários...</p>';
+        const numero =
+            document.getElementById(
+                'numero-endereco'
+            ).value.trim();
 
-        agendamento.horario =
-            '';
+        if (
+            cep.length !== 8
+        ) {
 
-        if (!dataStr) {
+            mostrarToast(
+                'Informe um CEP válido.',
+                'erro'
+            );
 
-            grid.innerHTML =
-                '<p>Selecione uma data.</p>';
-
-            return;
+            return false;
 
         }
 
-        const data =
-            new Date(
-                dataStr + 'T00:00:00'
+        if (!numero) {
+
+            mostrarToast(
+                'Informe o número do endereço.',
+                'erro'
             );
 
+            return false;
+
+        }
+
+        agendamento.cep =
+            cep;
+
+        agendamento.numero =
+            numero;
+
+        agendamento.complemento =
+            document.getElementById(
+                'complemento-endereco'
+            ).value.trim();
+
+        const logradouro =
+            document.getElementById(
+                'end-logradouro'
+            ).textContent;
+
+        const bairro =
+            document.getElementById(
+                'end-bairro'
+            ).textContent;
+
+        const cidade =
+            document.getElementById(
+                'end-cidade'
+            ).textContent;
+
+        const uf =
+            document.getElementById(
+                'end-uf'
+            ).textContent;
+
+        agendamento.endereco =
+            [
+                logradouro,
+                numero,
+                agendamento.complemento,
+                bairro,
+                cidade,
+                uf,
+                'CEP ' + cep
+            ]
+            .filter(Boolean)
+            .join(', ');
+
+    } else {
+
+        agendamento.endereco =
+            'Atendimento presencial na clínica';
+
+    }
+
+    addLog(
+        '✅ Tipo de atendimento validado: ' +
+        agendamento.tipo,
+        'sucesso'
+    );
+
+    return true;
+}
+
+function validarPasso3() {
+
+    if (
+        !agendamento.servico
+    ) {
+
+        const selecionado =
+            document.querySelector(
+                '.servico-btn.selecionado'
+            );
+
+        if (selecionado) {
+
+            agendamento.servico =
+                selecionado.dataset.servico;
+
+        }
+
+    }
+
+    if (
+        !agendamento.servico
+    ) {
+
+        mostrarToast(
+            'Selecione um serviço.',
+            'erro'
+        );
+
+        return false;
+
+    }
+
+    addLog(
+        '✅ Serviço validado: ' +
+        agendamento.servico,
+        'sucesso'
+    );
+
+    return true;
+}
+
+function validarPasso4() {
+
+    const data =
+        document.getElementById(
+            'data-agendamento'
+        ).value;
+
+    if (!data) {
+
+        mostrarToast(
+            'Selecione uma data.',
+            'erro'
+        );
+
+        return false;
+
+    }
+
+    if (
+        !agendamento.horario
+    ) {
+
+        mostrarToast(
+            'Selecione um horário.',
+            'erro'
+        );
+
+        return false;
+
+    }
+
+    const disponiveis =
+        obterHorariosDisponiveis(
+            data
+        );
+
+    if (
+        !disponiveis.includes(
+            agendamento.horario
+        )
+    ) {
+
         addLog(
-            '📅 Data selecionada: ' +
-            dataStr,
+            '❌ O horário selecionado não está mais disponível.',
+            'erro'
+        );
+
+        mostrarToast(
+            'Este horário não está mais disponível. Atualizando horários.',
+            'erro'
+        );
+
+        gerarHorarios(data);
+
+        return false;
+
+    }
+
+    agendamento.data =
+        data;
+
+    addLog(
+        '✅ Data e horário validados.',
+        'sucesso'
+    );
+
+    return true;
+}
+
+/* ============================================================
+   RESUMO
+   ============================================================ */
+
+function preencherResumo() {
+
+    const resumo =
+        document.getElementById(
+            'resumo-agendamento'
+        );
+
+    const data =
+        new Date(
+            agendamento.data +
+            'T00:00:00'
+        );
+
+    const dataFormatada =
+        DIAS_SEMANA[
+            data.getDay()
+        ] +
+        ', ' +
+        data.getDate() +
+        ' de ' +
+        MESES[
+            data.getMonth()
+        ] +
+        ' de ' +
+        data.getFullYear();
+
+    const tipo =
+        agendamento.tipo ===
+        'domicilio'
+            ? 'Domiciliar'
+            : 'Presencial';
+
+    resumo.innerHTML =
+
+        linhaResumo(
+            'Nome',
+            agendamento.nome
+        ) +
+
+        linhaResumo(
+            'Telefone',
+            agendamento.telefone
+        ) +
+
+        linhaResumo(
+            'E-mail',
+            agendamento.email
+        ) +
+
+        linhaResumo(
+            'Tipo',
+            tipo
+        ) +
+
+        linhaResumo(
+            'Serviço',
+            agendamento.servico
+        ) +
+
+        linhaResumo(
+            'Data',
+            dataFormatada
+        ) +
+
+        linhaResumo(
+            'Horário',
+            agendamento.horario
+        ) +
+
+        linhaResumo(
+            'Endereço',
+            agendamento.endereco
+        ) +
+
+        linhaResumo(
+            'Status',
+            '<span class="badge-status">Aguardando confirmação</span>',
+            true
+        );
+
+}
+
+function linhaResumo(
+    rotulo,
+    valor,
+    html = false
+) {
+
+    return (
+        '<div class="linha">' +
+            '<span class="rotulo">' +
+                escapeHTML(rotulo) +
+            '</span>' +
+            '<span class="valor">' +
+                (
+                    html
+                        ? valor
+                        : escapeHTML(
+                            String(
+                                valor || ''
+                            )
+                        )
+                ) +
+            '</span>' +
+        '</div>'
+    );
+
+}
+
+/* ============================================================
+   SALVAR AGENDAMENTO NO GOOGLE PLANILHAS
+   ============================================================ */
+
+async function confirmarAgendamento() {
+
+    if (!validarPasso1()) return;
+    if (!validarPasso2()) return;
+    if (!validarPasso3()) return;
+    if (!validarPasso4()) return;
+
+    const botao =
+        document.getElementById(
+            'btn-confirmar'
+        );
+
+    botao.disabled = true;
+
+    const textoOriginal =
+        botao.innerHTML;
+
+    botao.innerHTML =
+        '<i class="fas fa-spinner fa-spin"></i> Verificando...';
+
+    logEtapa(
+        '1',
+        '🚀 INICIANDO RESERVA',
+        'info'
+    );
+
+    try {
+
+        addLog(
+            '🔒 Fazendo nova verificação da disponibilidade na planilha...',
             'info'
         );
 
-        const diasAtivos =
-            obterDiasAtivos();
+        const respostaAgendamentos =
+            await apiGet(
+                'agendamentos'
+            );
 
-        addLog(
-            '📅 Dias ativos retornados pela planilha: ' +
-            JSON.stringify(
-                diasAtivos
-            ),
-            'info'
-        );
+        const listaAtualizada =
+            respostaAgendamentos.agendamentos ||
+            respostaAgendamentos.dados ||
+            respostaAgendamentos.data ||
+            (
+                Array.isArray(
+                    respostaAgendamentos
+                )
+                    ? respostaAgendamentos
+                    : []
+            );
 
-        const diaSemana =
-            data.getDay();
+        CONFIG.agendamentos =
+            Array.isArray(
+                listaAtualizada
+            )
+                ? listaAtualizada
+                : [];
+
+        const disponiveis =
+            obterHorariosDisponiveis(
+                agendamento.data
+            );
 
         if (
-            !diasAtivos.includes(
-                diaSemana
+            !disponiveis.includes(
+                agendamento.horario
             )
         ) {
 
             addLog(
-                '⛔ Este dia está INATIVO na planilha.',
-                'warning'
+                '❌ Horário acabou de ser ocupado.',
+                'erro'
             );
 
-            grid.innerHTML =
-                '<p style="color:#b52b2b;">' +
-                'Não há atendimento neste dia.' +
-                '</p>';
+            mostrarToast(
+                'Este horário não está mais disponível.',
+                'erro'
+            );
+
+            gerarHorarios(
+                agendamento.data
+            );
 
             return;
 
         }
 
-        addLog(
-            '✅ Dia está ATIVO na planilha.',
+        logEtapa(
+            '2',
+            '✅ HORÁRIO DISPONÍVEL',
             'sucesso'
         );
 
-        const horarios =
-            obterHorariosAtivos();
+        botao.innerHTML =
+            '<i class="fas fa-spinner fa-spin"></i> Salvando...';
 
-        addLog(
-            '⏰ Horários ativos encontrados: ' +
-            JSON.stringify(
-                horarios
-            ),
-            'sucesso'
+        const dadosParaSalvar = {
+
+            data:
+                agendamento.data,
+
+            horario:
+                agendamento.horario,
+
+            nome:
+                agendamento.nome,
+
+            telefone:
+                agendamento.telefone,
+
+            email:
+                agendamento.email,
+
+            tipo:
+                agendamento.tipo ===
+                'domicilio'
+                    ? 'Domiciliar'
+                    : 'Presencial',
+
+            servico:
+                agendamento.servico,
+
+            endereco:
+                agendamento.endereco,
+
+            numero:
+                agendamento.numero,
+
+            complemento:
+                agendamento.complemento,
+
+            cep:
+                agendamento.cep,
+
+            status:
+                'Pendente'
+
+        };
+
+        logObjeto(
+            '📤 Enviando agendamento',
+            dadosParaSalvar
         );
 
-        const ocupados =
-            obterAgendamentosOcupados(
-                dataStr
-            );
-
-        addLog(
-            '🔒 Horários ocupados para ' +
-            dataStr +
-            ': ' +
-            JSON.stringify(
-                ocupados
-            ),
+        logEtapa(
+            '3',
+            '💾 SALVANDO NO GOOGLE PLANILHAS',
             'info'
         );
 
-        grid.innerHTML = '';
-
-        const hoje =
-            new Date();
-
-        const hojeISO =
-            formatarISO(
-                hoje
+        const resposta =
+            await apiPost(
+                'salvarAgendamento',
+                dadosParaSalvar
             );
 
-        let disponiveis = 0;
+        logObjeto(
+            '📥 Resultado do salvamento',
+            resposta
+        );
 
-        horarios.forEach(
-            function(horario) {
+        if (
+            resposta &&
+            resposta.sucesso === false
+        ) {
 
-                const botao =
-                    document.createElement(
-                        'button'
-                    );
+            throw new Error(
+                resposta.mensagem ||
+                'Apps Script recusou o agendamento.'
+            );
 
-                botao.type =
-                    'button';
+        }
 
-                botao.className =
-                    'horario-btn';
+        let salvo =
+            resposta.dados ||
+            resposta.agendamento ||
+            resposta;
 
-                botao.textContent =
-                    horario;
+        if (
+            !salvo ||
+            typeof salvo !== 'object'
+        ) {
 
-                const ocupado =
-                    ocupados.includes(
-                        horario
-                    );
+            salvo =
+                dadosParaSalvar;
 
-                let passado =
-                    false;
+        }
 
-                if (
-                    dataStr === hojeISO
-                ) {
+        agendamento.id =
+            salvo.id ||
+            salvo.ID ||
+            resposta.id ||
+            '';
 
-                    const partes =
-                        horario.split(':');
+        agendamento.status =
+            salvo.status ||
+            salvo.Status ||
+            'Pendente';
 
-                    const hora =
-                        parseInt(
-                            partes[0],
-                            10
-                        );
+        logEtapa(
+            '3',
+            '✅ AGENDAMENTO SALVO NO GOOGLE PLANILHAS',
+            'sucesso'
+        );
 
-                    const minuto =
-                        parseInt(
-                            partes[1],
-                            10
-                        );
+        addLog(
+            '🆔 ID retornado: ' +
+            (
+                agendamento.id ||
+                'não informado'
+            ),
+            'sucesso'
+        );
 
-                    if (
-                        hora < hoje.getHours() ||
-                        (
-                            hora === hoje.getHours() &&
-                            minuto <= hoje.getMinutes()
-                        )
-                    ) {
+        sessionStorage.setItem(
+            'agendamento_confirmado',
+            JSON.stringify(
+                Object.assign(
+                    {},
+                    dadosParaSalvar,
+                    salvo
+                )
+            )
+        );
 
-                        passado =
-                            true;
+        mostrarToast(
+            'Agendamento realizado com sucesso!',
+            'sucesso'
+        );
 
-                    }
+        logEtapa(
+            '4',
+            '🎉 RESERVA CONCLUÍDA',
+            'sucesso'
+        );
 
-                }
+        botao.innerHTML =
+            '<i class="fas fa-check"></i> Reserva realizada';
 
-                if (ocupado) {
+        setTimeout(
+            function() {
 
-                    botao.disabled =
-                        true;
+                window.location.href =
+                    'obrigado.html';
 
-                    botao.classList.add(
-                        'ocupado'
-                    );
+            },
+            1200
+        );
 
-                    botao.title =
-                        'Horário já agendado';
+    } catch (erro) {
 
-                    addLog(
-                        '🔴 ' +
-                        horario +
-                        ' ocupado.',
-                        'warning'
-                    );
+        addLog(
+            '❌ ERRO AO FINALIZAR AGENDAMENTO: ' +
+            erro.message,
+            'erro'
+        );
 
-                } else if (passado) {
+        logEtapa(
+            '3',
+            '❌ FALHA AO SALVAR',
+            'erro'
+        );
 
-                    botao.disabled =
-                        true;
+        mostrarToast(
+            'Não foi possível concluir o agendamento. Verifique o log.',
+            'erro'
+        );
 
-                    botao.classList.add(
-                        'passado'
-                    );
+        botao.disabled =
+            false;
 
-                    botao.title =
-                        'Horário já passou';
+        botao.innerHTML =
+            textoOriginal;
 
-                    addLog(
-                        '⚪ ' +
-                        horario +
-                        ' já passou.',
-                        'warning'
-                    );
+    }
 
-                } else {
+}
 
-                    disponiveis++;
+/* ============================================================
+   LOG ETAPAS
+   ============================================================ */
+
+function logEtapa(
+    etapa,
+    mensagem,
+    tipo
+) {
+
+    addLog(
+        'ETAPA ' +
+        etapa +
+        ': ' +
+        mensagem,
+        tipo
+    );
+
+}
+
+/* ============================================================
+   BUSCA CEP
+   ============================================================ */
+
+async function buscarCEP() {
+
+    const cep =
+        document.getElementById(
+            'cep'
+        ).value.replace(
+            /\D/g,
+            ''
+        );
+
+    if (
+        cep.length !== 8
+    ) {
+
+        mostrarToast(
+            'Digite um CEP válido com 8 dígitos.',
+            'erro'
+        );
+
+        return;
+
+    }
+
+    addLog(
+        '🔍 Consultando CEP ' +
+        cep,
+        'info'
+    );
+
+    mostrarLoading(
+        'Consultando endereço...'
+    );
+
+    try {
+
+        const response =
+            await fetch(
+                API_CEP_URL +
+                cep +
+                '/json/'
+            );
+
+        const dados =
+            await response.json();
+
+        esconderLoading();
+
+        if (
+            dados.erro
+        ) {
+
+            addLog(
+                '❌ CEP não encontrado.',
+                'erro'
+            );
+
+            mostrarToast(
+                'CEP não encontrado.',
+                'erro'
+            );
+
+            return;
+
+        }
+
+        document.getElementById(
+            'end-logradouro'
+        ).textContent =
+            dados.logradouro || '-';
+
+        document.getElementById(
+            'end-bairro'
+        ).textContent =
+            dados.bairro || '-';
+
+        document.getElementById(
+            'end-cidade'
+        ).textContent =
+            dados.localidade || '-';
+
+        document.getElementById(
+            'end-uf'
+        ).textContent =
+            dados.uf || '-';
+
+        document.getElementById(
+            'endereco-completo'
+        ).classList.add(
+            'visivel'
+        );
+
+        addLog(
+            '✅ Endereço encontrado: ' +
+            (
+                dados.logradouro ||
+                ''
+            ) +
+            ', ' +
+            (
+                dados.localidade ||
+                ''
+            ) +
+            '/' +
+            (
+                dados.uf ||
+                ''
+            ),
+            'sucesso'
+        );
+
+    } catch (erro) {
+
+        esconderLoading();
+
+        addLog(
+            '❌ Erro ao consultar CEP: ' +
+            erro.message,
+            'erro'
+        );
+
+        mostrarToast(
+            'Erro ao consultar CEP.',
+            'erro'
+        );
+
+    }
+
+}
+
+/* ============================================================
+   EVENTOS
+   ============================================================ */
+
+document.addEventListener(
+    'DOMContentLoaded',
+    function() {
+
+        addLog(
+            '🚀 HTML carregado.',
+            'sucesso'
+        );
+
+        addLog(
+            '🔗 API: Google Apps Script',
+            'info'
+        );
+
+        addLog(
+            '📊 Banco: Google Planilhas',
+            'info'
+        );
+
+        document
+            .querySelectorAll(
+                '.tipo-btn'
+            )
+            .forEach(
+                function(botao) {
 
                     botao.addEventListener(
                         'click',
@@ -2316,7 +3697,7 @@
 
                             document
                                 .querySelectorAll(
-                                    '.horario-btn'
+                                    '.tipo-btn'
                                 )
                                 .forEach(
                                     function(btn) {
@@ -2332,1043 +3713,179 @@
                                 'selecionado'
                             );
 
-                            agendamento.horario =
-                                this.textContent;
+                            const tipo =
+                                this.dataset.tipo;
+
+                            document.getElementById(
+                                'endereco-domicilio'
+                            ).style.display =
+                                tipo === 'domicilio'
+                                    ? 'block'
+                                    : 'none';
+
+                            document.getElementById(
+                                'endereco-presencial'
+                            ).style.display =
+                                tipo === 'presencial'
+                                    ? 'block'
+                                    : 'none';
 
                             addLog(
-                                '✅ Horário selecionado: ' +
-                                agendamento.horario,
-                                'sucesso'
+                                '📌 Tipo selecionado: ' +
+                                tipo,
+                                'info'
                             );
 
                         }
                     );
 
-                    addLog(
-                        '🟢 ' +
-                        horario +
-                        ' disponível.',
-                        'sucesso'
-                    );
-
                 }
-
-                grid.appendChild(
-                    botao
-                );
-
-            }
-        );
-
-        addLog(
-            '📊 Total de horários disponíveis: ' +
-            disponiveis,
-            'info'
-        );
-
-        if (
-            horarios.length === 0
-        ) {
-
-            grid.innerHTML =
-                '<p style="color:#b52b2b;">' +
-                'Nenhum horário ativo foi encontrado na planilha.' +
-                '</p>';
-
-            addLog(
-                '❌ Nenhum horário ativo encontrado.',
-                'erro'
             );
 
-        }
-
-    }
-
-
-    /*
-    ============================================================
-    DATA MÍNIMA
-    ============================================================
-    */
-
-    function configurarDataMinima() {
-
-        const input =
+        const cepInput =
             document.getElementById(
-                'data-agendamento'
+                'cep'
             );
 
-        const hoje =
-            new Date();
+        if (cepInput) {
 
-        const hojeISO =
-            formatarISO(
-                hoje
-            );
-
-        input.min =
-            hojeISO;
-
-        addLog(
-            '📅 Data mínima configurada: ' +
-            hojeISO,
-            'info'
-        );
-
-    }
-
-
-    /*
-    ============================================================
-    PRÓXIMA DATA
-    ============================================================
-    */
-
-    function buscarProximaData() {
-
-        const hoje =
-            new Date();
-
-        for (
-            let i = 0;
-            i < 90;
-            i++
-        ) {
-
-            const data =
-                new Date(
-                    hoje
-                );
-
-            data.setDate(
-                hoje.getDate() + i
-            );
-
-            const iso =
-                formatarISO(
-                    data
-                );
-
-            if (
-                !diaEstaAtivo(
-                    data
-                )
-            ) {
-
-                continue;
-
-            }
-
-            const horarios =
-                obterHorariosAtivos();
-
-            const ocupados =
-                obterAgendamentosOcupados(
-                    iso
-                );
-
-            const disponivel =
-                horarios.some(
-                    function(hora) {
-
-                        return !ocupados.includes(
-                            hora
-                        );
-
-                    }
-                );
-
-            if (
-                disponivel
-            ) {
-
-                addLog(
-                    '📅 Próxima data disponível: ' +
-                    iso,
-                    'sucesso'
-                );
-
-                return iso;
-
-            }
-
-        }
-
-        addLog(
-            '⚠️ Nenhuma data disponível encontrada nos próximos 90 dias.',
-            'warning'
-        );
-
-        return '';
-
-    }
-
-
-    /*
-    ============================================================
-    EVENTOS
-    ============================================================
-    */
-
-    document.addEventListener(
-        'DOMContentLoaded',
-        async function() {
-
-            addLog(
-                '🚀 HTML iniciado.',
-                'sucesso'
-            );
-
-            addLog(
-                '🔗 API configurada: Google Apps Script',
-                'info'
-            );
-
-            await carregarConfiguracao();
-
-            const dataInput =
-                document.getElementById(
-                    'data-agendamento'
-                );
-
-            dataInput.addEventListener(
-                'change',
+            cepInput.addEventListener(
+                'input',
                 function() {
 
-                    agendamento.data =
-                        this.value;
-
-                    gerarHorarios(
-                        this.value
-                    );
-
-                }
-            );
-
-            const proximaData =
-                buscarProximaData();
-
-            if (
-                proximaData
-            ) {
-
-                dataInput.value =
-                    proximaData;
-
-                agendamento.data =
-                    proximaData;
-
-                gerarHorarios(
-                    proximaData
-                );
-
-            }
-
-        }
-    );
-
-
-    /*
-    ============================================================
-    TIPO DE ATENDIMENTO
-    ============================================================
-    */
-
-    document
-        .querySelectorAll(
-            '.tipo-btn'
-        )
-        .forEach(
-            function(botao) {
-
-                botao.addEventListener(
-                    'click',
-                    function() {
-
-                        document
-                            .querySelectorAll(
-                                '.tipo-btn'
-                            )
-                            .forEach(
-                                function(btn) {
-
-                                    btn.classList.remove(
-                                        'selecionado'
-                                    );
-
-                                }
-                            );
-
-                        this.classList.add(
-                            'selecionado'
+                    let valor =
+                        this.value.replace(
+                            /\D/g,
+                            ''
                         );
-
-                        agendamento.tipo =
-                            this.dataset.tipo;
-
-                        addLog(
-                            '🏠 Tipo de atendimento: ' +
-                            agendamento.tipo,
-                            'sucesso'
-                        );
-
-                    }
-                );
-
-            }
-        );
-
-
-    /*
-    ============================================================
-    NAVEGAÇÃO
-    ============================================================
-    */
-
-    function irParaPasso(
-        numero
-    ) {
-
-        document
-            .querySelectorAll(
-                '.passo-conteudo'
-            )
-            .forEach(
-                function(el) {
-
-                    el.classList.remove(
-                        'ativo'
-                    );
-
-                }
-            );
-
-        document
-            .getElementById(
-                'passo-' + numero
-            )
-            .classList.add(
-                'ativo'
-            );
-
-        document
-            .querySelectorAll(
-                '.passo'
-            )
-            .forEach(
-                function(el) {
-
-                    const passo =
-                        parseInt(
-                            el.dataset.passo
-                        );
-
-                    el.classList.remove(
-                        'ativo',
-                        'concluido'
-                    );
 
                     if (
-                        passo === numero
+                        valor.length > 8
                     ) {
 
-                        el.classList.add(
-                            'ativo'
-                        );
-
-                    } else if (
-                        passo < numero
-                    ) {
-
-                        el.classList.add(
-                            'concluido'
-                        );
+                        valor =
+                            valor.substring(
+                                0,
+                                8
+                            );
 
                     }
 
+                    if (
+                        valor.length > 5
+                    ) {
+
+                        valor =
+                            valor.substring(
+                                0,
+                                5
+                            ) +
+                            '-' +
+                            valor.substring(
+                                5
+                            );
+
+                    }
+
+                    this.value =
+                        valor;
+
                 }
             );
 
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
-
-    }
-
-
-    function proximoPasso(
-        numero
-    ) {
-
-        const atual =
-            numero - 1;
-
-        if (
-            atual === 1 &&
-            !validarPasso1()
-        ) {
-            return;
         }
 
-        if (
-            atual === 2 &&
-            !validarPasso2()
-        ) {
-            return;
-        }
-
-        if (
-            atual === 3 &&
-            !validarPasso3()
-        ) {
-            return;
-        }
-
-        if (
-            atual === 4 &&
-            !validarPasso4()
-        ) {
-            return;
-        }
-
-        if (
-            numero === 5
-        ) {
-
-            gerarResumo();
-
-        }
-
-        irParaPasso(
-            numero
-        );
-
-    }
-
-
-    function passoAnterior(
-        numero
-    ) {
-
-        irParaPasso(
-            numero
-        );
-
-    }
-
-
-    /*
-    ============================================================
-    VALIDAÇÕES
-    ============================================================
-    */
-
-    function validarPasso1() {
-
-        agendamento.nome =
-            document
-                .getElementById(
-                    'nome'
-                )
-                .value
-                .trim();
-
-        agendamento.telefone =
-            document
-                .getElementById(
-                    'telefone'
-                )
-                .value
-                .trim();
-
-        agendamento.email =
-            document
-                .getElementById(
-                    'email'
-                )
-                .value
-                .trim();
-
-        if (
-            !agendamento.nome
-        ) {
-
-            mostrarToast(
-                'Informe seu nome completo.',
-                'erro'
-            );
-
-            return false;
-
-        }
-
-        if (
-            !agendamento.telefone
-        ) {
-
-            mostrarToast(
-                'Informe seu telefone.',
-                'erro'
-            );
-
-            return false;
-
-        }
-
-        if (
-            !agendamento.email
-        ) {
-
-            mostrarToast(
-                'Informe seu e-mail.',
-                'erro'
-            );
-
-            return false;
-
-        }
-
-        return true;
-
-    }
-
-
-    function validarPasso2() {
-
-        if (
-            !agendamento.tipo
-        ) {
-
-            mostrarToast(
-                'Escolha o tipo de atendimento.',
-                'erro'
-            );
-
-            return false;
-
-        }
-
-        return true;
-
-    }
-
-
-    function validarPasso3() {
-
-        if (
-            !agendamento.servico
-        ) {
-
-            mostrarToast(
-                'Escolha um serviço.',
-                'erro'
-            );
-
-            return false;
-
-        }
-
-        return true;
-
-    }
-
-
-    function validarPasso4() {
-
-        if (
-            !agendamento.data
-        ) {
-
-            mostrarToast(
-                'Escolha uma data.',
-                'erro'
-            );
-
-            return false;
-
-        }
-
-        if (
-            !agendamento.horario
-        ) {
-
-            mostrarToast(
-                'Escolha um horário.',
-                'erro'
-            );
-
-            return false;
-
-        }
-
-        return true;
-
-    }
-
-
-    /*
-    ============================================================
-    RESUMO
-    ============================================================
-    */
-
-    function gerarResumo() {
-
-        const data =
-            new Date(
-                agendamento.data +
-                'T00:00:00'
-            );
-
-        const dataFormatada =
-            data.toLocaleDateString(
-                'pt-BR',
-                {
-                    weekday: 'long',
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric'
-                }
-            );
-
-        const tipo =
-            agendamento.tipo ===
-            'domiciliar'
-                ? 'Domiciliar'
-                : 'Presencial';
-
-        document
-            .getElementById(
-                'resumo-agendamento'
-            )
-            .innerHTML =
-
-            linhaResumo(
-                'Nome',
-                agendamento.nome
-            ) +
-
-            linhaResumo(
-                'Telefone',
-                agendamento.telefone
-            ) +
-
-            linhaResumo(
-                'E-mail',
-                agendamento.email
-            ) +
-
-            linhaResumo(
-                'Atendimento',
-                tipo
-            ) +
-
-            linhaResumo(
-                'Serviço',
-                agendamento.servico
-            ) +
-
-            linhaResumo(
-                'Data',
-                dataFormatada
-            ) +
-
-            linhaResumo(
-                'Horário',
-                agendamento.horario
-            );
-
-    }
-
-
-    function linhaResumo(
-        rotulo,
-        valor
-    ) {
-
-        return (
-            '<div class="linha-resumo">' +
-                '<span class="rotulo">' +
-                    escaparHTML(rotulo) +
-                '</span>' +
-                '<span class="valor">' +
-                    escaparHTML(valor) +
-                '</span>' +
-            '</div>'
-        );
-
-    }
-
-
-    /*
-    ============================================================
-    CONFIRMAR AGENDAMENTO
-    ============================================================
-    */
-
-    async function confirmarAgendamento() {
-
-        if (
-            !validarPasso1() ||
-            !validarPasso2() ||
-            !validarPasso3() ||
-            !validarPasso4()
-        ) {
-
-            return;
-
-        }
-
-        const botao =
+        const telefoneInput =
             document.getElementById(
-                'btn-confirmar'
+                'telefone'
             );
 
-        botao.disabled =
-            true;
+        if (telefoneInput) {
 
-        botao.innerHTML =
-            '<i class="fas fa-spinner fa-spin"></i> Salvando...';
-
-        try {
-
-            addLog(
-                '🚀 Iniciando gravação do agendamento.',
-                'info'
-            );
-
-            /*
-            Antes de gravar, consulta novamente
-            os agendamentos para evitar conflito.
-            */
-
-            const resposta =
-                await chamarAPI({
-                    acao: 'agendamentos'
-                });
-
-            let lista =
-                resposta;
-
-            if (
-                resposta &&
-                resposta.dados
-            ) {
-
-                lista =
-                    resposta.dados;
-
-            }
-
-            if (
-                !Array.isArray(lista)
-            ) {
-
-                lista =
-                    lista.agendamentos ||
-                    lista.Agendamentos ||
-                    [];
-
-            }
-
-            CONFIG.agendamentos =
-                lista;
-
-            const ocupados =
-                obterAgendamentosOcupados(
-                    agendamento.data
-                );
-
-            if (
-                ocupados.includes(
-                    agendamento.horario
-                )
-            ) {
-
-                addLog(
-                    '❌ Horário ocupado durante a confirmação.',
-                    'erro'
-                );
-
-                mostrarToast(
-                    'Este horário acabou de ser ocupado. Escolha outro.',
-                    'erro'
-                );
-
-                gerarHorarios(
-                    agendamento.data
-                );
-
-                botao.disabled =
-                    false;
-
-                botao.innerHTML =
-                    '<i class="fas fa-save"></i> Efetuar Reserva';
-
-                return;
-
-            }
-
-            addLog(
-                '✅ Horário ainda está disponível.',
-                'sucesso'
-            );
-
-            /*
-            Envia para a API.
-            */
-
-            const payload =
-                new URLSearchParams();
-
-            payload.append(
-                'acao',
-                'criarAgendamento'
-            );
-
-            payload.append(
-                'nome',
-                agendamento.nome
-            );
-
-            payload.append(
-                'telefone',
-                agendamento.telefone
-            );
-
-            payload.append(
-                'email',
-                agendamento.email
-            );
-
-            payload.append(
-                'tipo',
-                agendamento.tipo ===
-                'domiciliar'
-                    ? 'Domiciliar'
-                    : 'Presencial'
-            );
-
-            payload.append(
-                'servico',
-                agendamento.servico
-            );
-
-            payload.append(
-                'data',
-                agendamento.data
-            );
-
-            payload.append(
-                'hora',
-                agendamento.horario
-            );
-
-            payload.append(
-                'status',
-                'Pendente'
-            );
-
-            const respostaGravacao =
-                await fetch(
-                    API_URL,
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type':
-                                'application/x-www-form-urlencoded;charset=UTF-8'
-                        },
-                        body:
-                            payload.toString()
-                    }
-                );
-
-            addLog(
-                '📡 Resposta da gravação: HTTP ' +
-                respostaGravacao.status,
-                respostaGravacao.ok
-                    ? 'sucesso'
-                    : 'erro'
-            );
-
-            const texto =
-                await respostaGravacao.text();
-
-            addLog(
-                '📥 Retorno da gravação: ' +
-                texto.substring(0, 500),
-                'info'
-            );
-
-            let resultado;
-
-            try {
-
-                resultado =
-                    JSON.parse(
-                        texto
-                    );
-
-            } catch (erro) {
-
-                resultado = {
-                    sucesso:
-                        respostaGravacao.ok
-                };
-
-            }
-
-            if (
-                resultado.sucesso === false
-            ) {
-
-                throw new Error(
-                    resultado.mensagem ||
-                    resultado.message ||
-                    'A API recusou o agendamento.'
-                );
-
-            }
-
-            addLog(
-                '✅ AGENDAMENTO GRAVADO COM SUCESSO.',
-                'sucesso'
-            );
-
-            mostrarToast(
-                'Agendamento realizado com sucesso!',
-                'sucesso'
-            );
-
-            botao.innerHTML =
-                '<i class="fas fa-check"></i> Reserva realizada';
-
-            /*
-            Aguarda um pouco para o usuário
-            visualizar o log antes de avançar.
-            */
-
-            setTimeout(
+            telefoneInput.addEventListener(
+                'input',
                 function() {
 
-                    mostrarResumoFinal();
+                    let valor =
+                        this.value.replace(
+                            /\D/g,
+                            ''
+                        );
 
-                },
-                700
-            );
+                    if (
+                        valor.length > 11
+                    ) {
 
-        } catch (erro) {
+                        valor =
+                            valor.substring(
+                                0,
+                                11
+                            );
 
-            console.error(
-                erro
-            );
+                    }
 
-            addLog(
-                '❌ ERRO AO GRAVAR: ' +
-                erro.message,
-                'erro'
-            );
+                    if (
+                        valor.length <= 2
+                    ) {
 
-            mostrarToast(
-                'Não foi possível realizar a reserva.',
-                'erro'
-            );
+                        this.value =
+                            valor
+                                ? '(' +
+                                  valor
+                                : '';
 
-            botao.disabled =
-                false;
+                    } else if (
+                        valor.length <= 7
+                    ) {
 
-            botao.innerHTML =
-                '<i class="fas fa-save"></i> Efetuar Reserva';
+                        this.value =
+                            '(' +
+                            valor.substring(
+                                0,
+                                2
+                            ) +
+                            ') ' +
+                            valor.substring(
+                                2
+                            );
 
-        }
+                    } else {
 
-    }
+                        this.value =
+                            '(' +
+                            valor.substring(
+                                0,
+                                2
+                            ) +
+                            ') ' +
+                            valor.substring(
+                                2,
+                                7
+                            ) +
+                            '-' +
+                            valor.substring(
+                                7
+                            );
 
+                    }
 
-    /*
-    ============================================================
-    RESUMO FINAL
-    ============================================================
-    */
-
-    function mostrarResumoFinal() {
-
-        const resumo =
-            document.getElementById(
-                'resumo-agendamento'
-            );
-
-        resumo.innerHTML +=
-            '<div class="linha-resumo" style="background:#eef8f1;">' +
-                '<span class="rotulo">Status</span>' +
-                '<span class="valor" style="color:#287746;">' +
-                    'Reserva enviada' +
-                '</span>' +
-            '</div>';
-
-    }
-
-
-    /*
-    ============================================================
-    TESTAR API
-    ============================================================
-    */
-
-    async function testarAPI() {
-
-        addLog(
-            '🧪 TESTANDO CONEXÃO COM A API...',
-            'info'
-        );
-
-        try {
-
-            const resultado =
-                await chamarAPI({
-                    acao: 'teste'
-                });
-
-            addLog(
-                '✅ API respondeu corretamente.',
-                'sucesso'
-            );
-
-            addLog(
-                '📦 Resultado do teste: ' +
-                JSON.stringify(
-                    resultado
-                ),
-                'info'
-            );
-
-        } catch (erro) {
-
-            addLog(
-                '❌ TESTE DA API FALHOU: ' +
-                erro.message,
-                'erro'
+                }
             );
 
         }
 
+        carregarConfiguracoes();
+
     }
+);
 
+/* ============================================================
+   ESCAPE HTML
+   ============================================================ */
 
-    /*
-    ============================================================
-    ESCAPAR HTML
-    ============================================================
-    */
+function escapeHTML(valor) {
 
-    function escaparHTML(
-        texto
-    ) {
-
-        return String(
-            texto || ''
-        )
+    return String(valor || '')
         .replace(
             /&/g,
             '&amp;'
@@ -3390,8 +3907,7 @@
             '&#039;'
         );
 
-    }
-
+}
 </script>
 
 </body>
