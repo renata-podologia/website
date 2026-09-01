@@ -1666,15 +1666,19 @@ async function carregarConfiguracoes() {
 
     try {
 
+        // Carrega toda a base necessária para montar a agenda de uma vez.
+        // A tela não precisa consultar a API novamente ao entrar na etapa 4.
         const resultados = await Promise.all([
             apiGet('dias'),
             apiGet('horarios'),
-            apiGet('servicos')
+            apiGet('servicos'),
+            apiGet('agendamentos')
         ]);
 
         const respostaDias = resultados[0];
         const respostaHorarios = resultados[1];
         const respostaServicos = resultados[2];
+        const respostaAgendamentos = resultados[3];
 
         [respostaDias, respostaHorarios, respostaServicos].forEach(
             function(resposta) {
@@ -1703,7 +1707,20 @@ async function carregarConfiguracoes() {
             respostaServicos.dados ||
             [];
 
-        CONFIG.agendamentos = [];
+        CONFIG.agendamentos =
+            respostaAgendamentos.agendamentos ||
+            respostaAgendamentos.dados ||
+            respostaAgendamentos.data ||
+            [];
+
+        if (!Array.isArray(CONFIG.agendamentos)) {
+            CONFIG.agendamentos = [];
+        }
+
+        addLog(
+            '📌 Agendamentos recebidos: ' + CONFIG.agendamentos.length,
+            'sucesso'
+        );
 
         addLog(
             '📅 Dias recebidos: ' + CONFIG.dias.length,
@@ -1724,7 +1741,7 @@ async function carregarConfiguracoes() {
         prepararHorarios();
         renderizarServicos();
 
-        await configurarData();
+        configurarData();
 
         atualizarStatusAPI(
             true,
@@ -2097,7 +2114,7 @@ function renderizarServicos() {
    DATA
    ============================================================ */
 
-async function configurarData() {
+function configurarData() {
 
     const input =
         document.getElementById(
@@ -2112,102 +2129,69 @@ async function configurarData() {
     input.min = hoje;
 
     const proxima =
-        await buscarProximaDataDisponivelLocal();
+        buscarProximaDataDisponivelLocal();
 
     if (proxima) {
 
-        input.value =
-            proxima;
+        input.value = proxima;
+        agendamento.data = proxima;
 
-        agendamento.data =
-            proxima;
-
-        await gerarHorarios(
-            proxima
-        );
+        gerarHorarios(proxima);
 
         addLog(
-            '📅 Próxima data disponível: ' +
-            proxima,
+            '📅 Próxima data disponível: ' + proxima,
             'sucesso'
         );
 
     } else {
 
-        input.value =
-            hoje;
+        input.value = hoje;
+        agendamento.data = hoje;
 
-        agendamento.data =
-            hoje;
-
-        await gerarHorarios(
-            hoje
-        );
-
+        gerarHorarios(hoje);
     }
 
     input.addEventListener(
         'change',
-        async function() {
+        function() {
 
-            agendamento.data =
-                this.value;
-
-            agendamento.horario =
-                '';
+            agendamento.data = this.value;
+            agendamento.horario = '';
 
             addLog(
-                '📅 Data escolhida: ' +
-                this.value,
+                '📅 Data escolhida: ' + this.value,
                 'info'
             );
 
-            await gerarHorarios(
-                this.value
-            );
+            // A disponibilidade já está em CONFIG.agendamentos.
+            // Portanto, a troca de data é instantânea e não faz novo GET.
+            gerarHorarios(this.value);
         }
     );
 }
 
 function hojeLocalISO() {
 
-    const hoje =
-        new Date();
+    const hoje = new Date();
 
     return (
         hoje.getFullYear() +
         '-' +
-        String(
-            hoje.getMonth() + 1
-        ).padStart(2, '0') +
+        String(hoje.getMonth() + 1).padStart(2, '0') +
         '-' +
-        String(
-            hoje.getDate()
-        ).padStart(2, '0')
+        String(hoje.getDate()).padStart(2, '0')
     );
 }
 
-async function buscarProximaDataDisponivelLocal() {
+function buscarProximaDataDisponivelLocal() {
 
-    const hoje =
-        new Date();
+    const hoje = new Date();
 
-    for (
-        let i = 0;
-        i < 90;
-        i++
-    ) {
+    for (let i = 0; i < 90; i++) {
 
-        const data =
-            new Date(hoje);
-
-        data.setDate(
-            data.getDate() + i
-        );
-
-        data.setHours(
-            0, 0, 0, 0
-        );
+        const data = new Date(hoje);
+        data.setDate(data.getDate() + i);
+        data.setHours(0, 0, 0, 0);
 
         if (!diaEstaAtivo(data)) {
             continue;
@@ -2216,44 +2200,15 @@ async function buscarProximaDataDisponivelLocal() {
         const iso =
             data.getFullYear() +
             '-' +
-            String(
-                data.getMonth() + 1
-            ).padStart(2, '0') +
+            String(data.getMonth() + 1).padStart(2, '0') +
             '-' +
-            String(
-                data.getDate()
-            ).padStart(2, '0');
+            String(data.getDate()).padStart(2, '0');
 
-        try {
+        const disponiveis =
+            obterHorariosDisponiveisLocal(iso);
 
-            const resposta =
-                await apiGet(
-                    'disponibilidade',
-                    {
-                        data: iso
-                    }
-                );
-
-            const disponiveis =
-                Array.isArray(resposta.horarios)
-                    ? resposta.horarios
-                    : [];
-
-            if (
-                disponiveis.length > 0
-            ) {
-                return iso;
-            }
-
-        } catch (erro) {
-
-            addLog(
-                '⚠️ Falha ao consultar disponibilidade de ' +
-                iso +
-                ': ' +
-                erro.message,
-                'warning'
-            );
+        if (disponiveis.length > 0) {
+            return iso;
         }
     }
 
@@ -2264,61 +2219,126 @@ async function buscarProximaDataDisponivelLocal() {
    HORÁRIOS DISPONÍVEIS
    ============================================================ */
 
-async function obterHorariosDisponiveis(dataStr) {
+function obterHorariosDisponiveisLocal(dataStr) {
 
-    if (!dataStr) {
+    if (!dataStr || !diaEstaAtivo(new Date(dataStr + 'T00:00:00'))) {
         return [];
     }
 
-    try {
+    const horarios = CONFIG.horariosAtivos || [];
+    const bloqueios = [];
 
-        const resposta =
-            await apiGet(
-                'disponibilidade',
-                {
-                    data: dataStr
-                }
-            );
+    for (let i = 0; i < CONFIG.agendamentos.length; i++) {
 
-        if (
-            resposta &&
-            resposta.sucesso === false
-        ) {
+        const item = CONFIG.agendamentos[i];
 
-            throw new Error(
-                resposta.mensagem ||
-                'A API recusou a consulta de disponibilidade.'
-            );
+        if (!item || typeof item !== 'object') {
+            continue;
         }
 
-        const horarios =
-            Array.isArray(
-                resposta.horarios
-            )
-                ? resposta.horarios
-                : [];
-
-        return horarios.map(
-            normalizarHora
+        const itemData = normalizarData(
+            item.data || item.Data || item.date || ''
         );
 
-    } catch (erro) {
+        if (itemData !== dataStr) {
+            continue;
+        }
 
-        addLog(
-            '❌ Erro ao consultar disponibilidade: ' +
-            erro.message,
-            'erro'
+        const status = normalizarTexto(
+            item.status || item.Status || ''
+        ).toLowerCase();
+
+        if (
+            status === 'cancelado' ||
+            status === 'cancelada' ||
+            status === 'cancelled'
+        ) {
+            continue;
+        }
+
+        const hora = normalizarHora(
+            item.hora || item.Hora || item.horario || item.Horario || ''
         );
 
-        return [];
+        if (!hora) {
+            continue;
+        }
+
+        const partes = hora.split(':');
+        const inicio =
+            Number(partes[0]) * 60 + Number(partes[1]);
+
+        // Serviço de 60 min + intervalo de 30 min = bloco de 90 min.
+        bloqueios.push({
+            inicio: inicio,
+            fim: inicio + 90
+        });
     }
+
+    const disponiveis = [];
+
+    for (let i = 0; i < horarios.length; i++) {
+
+        const horario = normalizarHora(horarios[i]);
+        const partes = horario.split(':');
+        const inicio =
+            Number(partes[0]) * 60 + Number(partes[1]);
+        const fim = inicio + 90;
+
+        let conflita = false;
+
+        for (let j = 0; j < bloqueios.length; j++) {
+
+            const bloqueio = bloqueios[j];
+
+            if (
+                inicio < bloqueio.fim &&
+                fim > bloqueio.inicio
+            ) {
+                conflita = true;
+                break;
+            }
+        }
+
+        if (!conflita) {
+            disponiveis.push(horario);
+        }
+    }
+
+    return disponiveis;
+}
+
+async function consultarDisponibilidadeOnline(dataStr) {
+
+    if (!dataStr) return [];
+
+    const resposta =
+        await apiGet(
+            'disponibilidade',
+            { data: dataStr }
+        );
+
+    if (
+        resposta &&
+        resposta.sucesso === false
+    ) {
+        throw new Error(
+            resposta.mensagem ||
+            resposta.erro ||
+            'A API recusou a consulta de disponibilidade.'
+        );
+    }
+
+    return Array.isArray(resposta.horarios)
+        ? resposta.horarios.map(normalizarHora)
+        : [];
 }
 
 /* ============================================================
    RENDERIZAR HORÁRIOS
    ============================================================ */
 
-async function gerarHorarios(dataStr) {
+function gerarHorarios(dataStr) {
 
     const grid =
         document.getElementById(
@@ -2327,13 +2347,8 @@ async function gerarHorarios(dataStr) {
 
     if (!grid) return;
 
-    grid.innerHTML =
-        '<p style="grid-column:1/-1;text-align:center;padding:20px;">' +
-        '<i class="fas fa-spinner fa-spin"></i> Consultando disponibilidade...' +
-        '</p>';
-
-    agendamento.horario =
-        '';
+    grid.innerHTML = '';
+    agendamento.horario = '';
 
     if (!dataStr) {
 
@@ -2345,23 +2360,18 @@ async function gerarHorarios(dataStr) {
         return;
     }
 
-    const partes =
-        dataStr.split('-');
+    const partes = dataStr.split('-');
 
-    const data =
-        new Date(
-            Number(partes[0]),
-            Number(partes[1]) - 1,
-            Number(partes[2])
-        );
+    const data = new Date(
+        Number(partes[0]),
+        Number(partes[1]) - 1,
+        Number(partes[2])
+    );
 
-    const diaNome =
-        DIAS_SEMANA[
-            data.getDay()
-        ];
+    const diaNome = DIAS_SEMANA[data.getDay()];
 
     addLog(
-        '📅 Consultando disponibilidade para ' +
+        '📅 Montando agenda local para ' +
         dataStr +
         ', ' +
         diaNome,
@@ -2371,9 +2381,7 @@ async function gerarHorarios(dataStr) {
     if (!diaEstaAtivo(data)) {
 
         addLog(
-            '⛔ ' +
-            diaNome +
-            ' está INATIVO na aba Dias.',
+            '⛔ ' + diaNome + ' está INATIVO na aba Dias.',
             'warning'
         );
 
@@ -2386,16 +2394,11 @@ async function gerarHorarios(dataStr) {
     }
 
     const horariosDisponiveis =
-        await obterHorariosDisponiveis(
-            dataStr
-        );
+        obterHorariosDisponiveisLocal(dataStr);
 
-    const horarios =
-        CONFIG.horariosAtivos || [];
+    const horarios = CONFIG.horariosAtivos || [];
 
-    if (
-        !horarios.length
-    ) {
+    if (!horarios.length) {
 
         grid.innerHTML =
             '<p style="grid-column:1/-1;text-align:center;color:#dc3545;">' +
@@ -2405,157 +2408,89 @@ async function gerarHorarios(dataStr) {
         return;
     }
 
-    const hoje =
-        hojeLocalISO();
-
-    const agora =
-        new Date();
-
+    const hoje = hojeLocalISO();
+    const agora = new Date();
     let totalDisponiveis = 0;
 
-    horarios.forEach(
-        function(horario) {
+    horarios.forEach(function(horario) {
 
-            const botao =
-                document.createElement(
-                    'button'
+        horario = normalizarHora(horario);
+
+        const botao = document.createElement('button');
+        botao.type = 'button';
+        botao.className = 'horario-btn';
+        botao.textContent = horario;
+        botao.dataset.horario = horario;
+
+        const disponivel =
+            horariosDisponiveis.includes(horario);
+
+        let passado = false;
+
+        if (dataStr === hoje) {
+
+            const partesHora = horario.split(':');
+            const hora = Number(partesHora[0]);
+            const minuto = Number(partesHora[1]);
+
+            passado =
+                hora < agora.getHours() ||
+                (
+                    hora === agora.getHours() &&
+                    minuto <= agora.getMinutes()
                 );
-
-            botao.type = 'button';
-
-            botao.className =
-                'horario-btn';
-
-            botao.textContent =
-                horario;
-
-            botao.dataset.horario =
-                horario;
-
-            const disponivel =
-                horariosDisponiveis.includes(
-                    horario
-                );
-
-            let passado = false;
-
-            if (
-                dataStr === hoje
-            ) {
-
-                const partesHora =
-                    horario.split(':');
-
-                const hora =
-                    Number(
-                        partesHora[0]
-                    );
-
-                const minuto =
-                    Number(
-                        partesHora[1]
-                    );
-
-                passado =
-                    (
-                        hora <
-                        agora.getHours()
-                    ) ||
-                    (
-                        hora ===
-                        agora.getHours() &&
-                        minuto <=
-                        agora.getMinutes()
-                    );
-            }
-
-            if (!disponivel) {
-
-                botao.disabled =
-                    true;
-
-                botao.classList.add(
-                    'ocupado'
-                );
-
-                botao.title =
-                    'Horário indisponível';
-
-            } else if (passado) {
-
-                botao.disabled =
-                    true;
-
-                botao.classList.add(
-                    'passado'
-                );
-
-                botao.title =
-                    'Horário já passou';
-
-            } else {
-
-                totalDisponiveis++;
-
-                botao.addEventListener(
-                    'click',
-                    function() {
-
-                        document
-                            .querySelectorAll(
-                                '.horario-btn'
-                            )
-                            .forEach(
-                                function(btn) {
-
-                                    btn.classList.remove(
-                                        'selecionado'
-                                    );
-
-                                }
-                            );
-
-                        this.classList.add(
-                            'selecionado'
-                        );
-
-                        agendamento.horario =
-                            this.dataset.horario;
-
-                        addLog(
-                            '✅ Horário selecionado: ' +
-                            agendamento.horario,
-                            'sucesso'
-                        );
-
-                    }
-                );
-            }
-
-            grid.appendChild(
-                botao
-            );
         }
-    );
+
+        if (passado) {
+
+            botao.disabled = true;
+            botao.classList.add('passado');
+            botao.title = 'Horário já passou';
+
+        } else if (!disponivel) {
+
+            botao.disabled = true;
+            botao.classList.add('ocupado');
+            botao.title = 'Horário indisponível';
+
+        } else {
+
+            totalDisponiveis++;
+
+            botao.addEventListener('click', function() {
+
+                document
+                    .querySelectorAll('.horario-btn')
+                    .forEach(function(btn) {
+                        btn.classList.remove('selecionado');
+                    });
+
+                this.classList.add('selecionado');
+                agendamento.horario = this.dataset.horario;
+
+                addLog(
+                    '✅ Horário selecionado: ' +
+                    agendamento.horario,
+                    'sucesso'
+                );
+            });
+        }
+
+        grid.appendChild(botao);
+    });
 
     addLog(
         '📊 Horários disponíveis: ' +
         totalDisponiveis +
         ' de ' +
-        horarios.length,
-        totalDisponiveis
-            ? 'sucesso'
-            : 'warning'
+        horarios.length +
+        ' (dados carregados na inicialização)',
+        totalDisponiveis ? 'sucesso' : 'warning'
     );
 
-    if (
-        totalDisponiveis === 0
-    ) {
+    if (totalDisponiveis === 0) {
 
-        const mensagem =
-            document.createElement(
-                'p'
-            );
+        const mensagem = document.createElement('p');
 
         mensagem.style.cssText =
             'grid-column:1/-1;text-align:center;padding:20px;color:#dc3545;font-weight:600;';
@@ -2563,9 +2498,7 @@ async function gerarHorarios(dataStr) {
         mensagem.textContent =
             '⚠️ Não há horários disponíveis nesta data.';
 
-        grid.appendChild(
-            mensagem
-        );
+        grid.appendChild(mensagem);
     }
 }
 
@@ -2952,7 +2885,7 @@ async function validarPasso4() {
     }
 
     const disponiveis =
-        await obterHorariosDisponiveis(
+        await consultarDisponibilidadeOnline(
             data
         );
 
@@ -3139,7 +3072,7 @@ async function confirmarAgendamento() {
         );
 
         const disponiveis =
-            await obterHorariosDisponiveis(
+            await consultarDisponibilidadeOnline(
                 agendamento.data
             );
 
