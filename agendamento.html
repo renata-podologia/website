@@ -272,6 +272,24 @@
             font-weight: 400;
         }
 
+        .input-icon select {
+            width: 100%;
+            padding: 14px 45px 14px 15px;
+            border: 1px solid #d7e0e2;
+            border-radius: 10px;
+            background: white;
+            color: #2F5D62;
+            font: inherit;
+            font-weight: 600;
+            appearance: auto;
+        }
+
+        .input-icon select:focus {
+            outline: none;
+            border-color: #2F5D62;
+            box-shadow: 0 0 0 3px rgba(47, 93, 98, .10);
+        }
+
         .horarios-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
@@ -988,18 +1006,23 @@
 
                 <label>
                     <i class="fas fa-calendar-day"></i>
-                    Data <span class="obrigatorio">*</span>
+                    Dia do atendimento <span class="obrigatorio">*</span>
                 </label>
 
                 <div class="input-icon">
 
-                    <input
-                        type="date"
-                        id="data-agendamento">
+                    <select id="dia-agendamento">
+                        <option value="">Carregando dias disponíveis...</option>
+                    </select>
 
                     <i class="fas fa-calendar-alt"></i>
 
                 </div>
+
+                <small
+                    id="data-selecionada"
+                    style="display:block;margin-top:8px;color:#666;">
+                </small>
 
             </div>
 
@@ -2116,58 +2139,93 @@ function renderizarServicos() {
 
 function configurarData() {
 
-    const input =
-        document.getElementById(
-            'data-agendamento'
-        );
+    const select =
+        document.getElementById('dia-agendamento');
 
-    if (!input) return;
+    const dataTexto =
+        document.getElementById('data-selecionada');
 
-    const hoje =
-        hojeLocalISO();
+    if (!select) return;
 
-    input.min = hoje;
+    select.innerHTML =
+        '<option value="">Selecione um dia...</option>';
 
-    const proxima =
-        buscarProximaDataDisponivelLocal();
+    const opcoes = obterProximosDiasDisponiveis();
 
-    if (proxima) {
+    if (!opcoes.length) {
 
-        input.value = proxima;
-        agendamento.data = proxima;
+        select.innerHTML =
+            '<option value="">Nenhum dia disponível encontrado</option>';
 
-        gerarHorarios(proxima);
+        select.disabled = true;
+        agendamento.data = '';
+        agendamento.horario = '';
+
+        const grid = document.getElementById('horarios-grid');
+        if (grid) {
+            grid.innerHTML =
+                '<p style="grid-column:1/-1;text-align:center;padding:20px;color:#dc3545;font-weight:600;">' +
+                '⚠️ Não há datas e horários disponíveis nos próximos 90 dias.' +
+                '</p>';
+        }
+
+        return;
+    }
+
+    opcoes.forEach(function(opcao, indice) {
+
+        const option = document.createElement('option');
+        option.value = opcao.data;
+        option.textContent =
+            opcao.dia + ' • ' + opcao.dataFormatada;
+
+        select.appendChild(option);
+
+        // A primeira opção encontrada é a próxima data realmente disponível.
+        if (indice === 0) {
+            select.value = opcao.data;
+        }
+    });
+
+    select.disabled = false;
+
+    function aplicarDiaSelecionado() {
+
+        const data = select.value;
+
+        agendamento.data = data;
+        agendamento.horario = '';
+
+        if (!data) {
+            if (dataTexto) dataTexto.textContent = '';
+            gerarHorarios('');
+            return;
+        }
+
+        const opcao = opcoes.find(item => item.data === data);
+
+        if (dataTexto && opcao) {
+            dataTexto.textContent =
+                'Próxima data: ' + opcao.dataFormatada;
+        }
 
         addLog(
-            '📅 Próxima data disponível: ' + proxima,
+            '📅 Dia escolhido: ' +
+            (opcao ? opcao.dia : data) +
+            ' (' + data + ')',
             'sucesso'
         );
 
-    } else {
-
-        input.value = hoje;
-        agendamento.data = hoje;
-
-        gerarHorarios(hoje);
+        gerarHorarios(data);
     }
 
-    input.addEventListener(
+    select.addEventListener(
         'change',
-        function() {
-
-            agendamento.data = this.value;
-            agendamento.horario = '';
-
-            addLog(
-                '📅 Data escolhida: ' + this.value,
-                'info'
-            );
-
-            // A disponibilidade já está em CONFIG.agendamentos.
-            // Portanto, a troca de data é instantânea e não faz novo GET.
-            gerarHorarios(this.value);
-        }
+        aplicarDiaSelecionado
     );
+
+    // Mostra imediatamente a próxima data disponível.
+    aplicarDiaSelecionado();
 }
 
 function hojeLocalISO() {
@@ -2183,10 +2241,40 @@ function hojeLocalISO() {
     );
 }
 
-function buscarProximaDataDisponivelLocal() {
+function criarISOData(data) {
 
+    return (
+        data.getFullYear() +
+        '-' +
+        String(data.getMonth() + 1).padStart(2, '0') +
+        '-' +
+        String(data.getDate()).padStart(2, '0')
+    );
+}
+
+function formatarDataExibicao(dataStr) {
+
+    const partes = String(dataStr).split('-');
+
+    if (partes.length !== 3) return dataStr;
+
+    return (
+        partes[2] + '/' +
+        partes[1] + '/' +
+        partes[0]
+    );
+}
+
+function obterProximosDiasDisponiveis() {
+
+    const encontrados = [];
+    const vistos = {};
     const hoje = new Date();
 
+    hoje.setHours(0, 0, 0, 0);
+
+    // Para cada dia ativo da planilha, procura a próxima ocorrência
+    // que ainda tenha pelo menos um horário disponível.
     for (let i = 0; i < 90; i++) {
 
         const data = new Date(hoje);
@@ -2197,22 +2285,49 @@ function buscarProximaDataDisponivelLocal() {
             continue;
         }
 
-        const iso =
-            data.getFullYear() +
-            '-' +
-            String(data.getMonth() + 1).padStart(2, '0') +
-            '-' +
-            String(data.getDate()).padStart(2, '0');
+        const iso = criarISOData(data);
+        const horarios = obterHorariosDisponiveisLocal(iso);
 
-        const disponiveis =
-            obterHorariosDisponiveisLocal(iso);
-
-        if (disponiveis.length > 0) {
-            return iso;
+        if (!horarios.length) {
+            continue;
         }
+
+        const dia = DIAS_SEMANA[data.getDay()];
+
+        // Um único item por dia da semana. Assim o usuário escolhe
+        // Segunda-feira, Terça-feira, etc., e recebe a próxima data.
+        const chave = normalizarTexto(dia);
+
+        if (vistos[chave]) {
+            continue;
+        }
+
+        vistos[chave] = true;
+
+        encontrados.push({
+            dia: dia,
+            data: iso,
+            dataFormatada: formatarDataExibicao(iso),
+            horarios: horarios
+        });
     }
 
-    return null;
+    // Mantém a ordem definida na aba Dias, e não a ordem aleatória
+    // de descoberta no calendário.
+    const ordemDias = {};
+
+    (CONFIG.diasAtivos || []).forEach(function(dia, indice) {
+        ordemDias[normalizarTexto(dia)] = indice;
+    });
+
+    encontrados.sort(function(a, b) {
+        return (
+            (ordemDias[normalizarTexto(a.dia)] ?? 999) -
+            (ordemDias[normalizarTexto(b.dia)] ?? 999)
+        );
+    });
+
+    return encontrados;
 }
 
 /* ============================================================
@@ -2221,7 +2336,31 @@ function buscarProximaDataDisponivelLocal() {
 
 function obterHorariosDisponiveisLocal(dataStr) {
 
-    if (!dataStr || !diaEstaAtivo(new Date(dataStr + 'T00:00:00'))) {
+    if (!dataStr) {
+        return [];
+    }
+
+    const partesData = dataStr.split('-');
+    if (partesData.length !== 3) {
+        return [];
+    }
+
+    const data = new Date(
+        Number(partesData[0]),
+        Number(partesData[1]) - 1,
+        Number(partesData[2])
+    );
+
+    data.setHours(0, 0, 0, 0);
+
+    if (!diaEstaAtivo(data)) {
+        return [];
+    }
+
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+
+    if (data < hoje) {
         return [];
     }
 
@@ -2285,6 +2424,17 @@ function obterHorariosDisponiveisLocal(dataStr) {
             Number(partes[0]) * 60 + Number(partes[1]);
         const fim = inicio + 90;
 
+        // Hoje, horários cujo início já passou não podem ser escolhidos.
+        if (dataStr === hojeLocalISO()) {
+            const agora = new Date();
+            const minutosAgora =
+                agora.getHours() * 60 + agora.getMinutes();
+
+            if (inicio <= minutosAgora) {
+                continue;
+            }
+        }
+
         let conflita = false;
 
         for (let j = 0; j < bloqueios.length; j++) {
@@ -2340,10 +2490,7 @@ async function consultarDisponibilidadeOnline(dataStr) {
 
 function gerarHorarios(dataStr) {
 
-    const grid =
-        document.getElementById(
-            'horarios-grid'
-        );
+    const grid = document.getElementById('horarios-grid');
 
     if (!grid) return;
 
@@ -2351,17 +2498,14 @@ function gerarHorarios(dataStr) {
     agendamento.horario = '';
 
     if (!dataStr) {
-
         grid.innerHTML =
-            '<p style="grid-column:1/-1;text-align:center;">' +
-            'Selecione uma data.' +
+            '<p style="grid-column:1/-1;text-align:center;padding:20px;">' +
+            'Selecione um dia.' +
             '</p>';
-
         return;
     }
 
     const partes = dataStr.split('-');
-
     const data = new Date(
         Number(partes[0]),
         Number(partes[1]) - 1,
@@ -2371,40 +2515,28 @@ function gerarHorarios(dataStr) {
     const diaNome = DIAS_SEMANA[data.getDay()];
 
     addLog(
-        '📅 Montando agenda local para ' +
-        dataStr +
-        ', ' +
-        diaNome,
+        '📅 Montando agenda local para ' + dataStr + ', ' + diaNome,
         'info'
     );
 
     if (!diaEstaAtivo(data)) {
-
-        addLog(
-            '⛔ ' + diaNome + ' está INATIVO na aba Dias.',
-            'warning'
-        );
-
         grid.innerHTML =
             '<p style="grid-column:1/-1;text-align:center;padding:20px;color:#dc3545;font-weight:600;">' +
             '⚠️ Não há atendimento neste dia.' +
             '</p>';
-
         return;
     }
 
-    const horariosDisponiveis =
-        obterHorariosDisponiveisLocal(dataStr);
-
+    // A agenda já foi carregada na inicialização.
+    // Nenhuma consulta à API é feita ao abrir ou trocar a data.
+    const horariosDisponiveis = obterHorariosDisponiveisLocal(dataStr);
     const horarios = CONFIG.horariosAtivos || [];
 
     if (!horarios.length) {
-
         grid.innerHTML =
             '<p style="grid-column:1/-1;text-align:center;color:#dc3545;">' +
             'Nenhum horário ativo foi encontrado na aba Horarios.' +
             '</p>';
-
         return;
     }
 
@@ -2422,55 +2554,41 @@ function gerarHorarios(dataStr) {
         botao.textContent = horario;
         botao.dataset.horario = horario;
 
-        const disponivel =
-            horariosDisponiveis.includes(horario);
-
         let passado = false;
 
         if (dataStr === hoje) {
-
             const partesHora = horario.split(':');
             const hora = Number(partesHora[0]);
             const minuto = Number(partesHora[1]);
 
             passado =
                 hora < agora.getHours() ||
-                (
-                    hora === agora.getHours() &&
-                    minuto <= agora.getMinutes()
-                );
+                (hora === agora.getHours() && minuto <= agora.getMinutes());
         }
 
-        if (passado) {
+        const disponivel = horariosDisponiveis.includes(horario);
 
+        if (passado) {
             botao.disabled = true;
             botao.classList.add('passado');
             botao.title = 'Horário já passou';
-
         } else if (!disponivel) {
-
             botao.disabled = true;
             botao.classList.add('ocupado');
             botao.title = 'Horário indisponível';
-
         } else {
-
             totalDisponiveis++;
 
             botao.addEventListener('click', function() {
-
-                document
-                    .querySelectorAll('.horario-btn')
-                    .forEach(function(btn) {
-                        btn.classList.remove('selecionado');
-                    });
+                document.querySelectorAll('.horario-btn').forEach(function(btn) {
+                    btn.classList.remove('selecionado');
+                });
 
                 this.classList.add('selecionado');
                 agendamento.horario = this.dataset.horario;
 
                 addLog(
-                    '✅ Horário selecionado: ' +
-                    agendamento.horario,
+                    '✅ Horário selecionado: ' + agendamento.horario,
                     'sucesso'
                 );
             });
@@ -2480,24 +2598,17 @@ function gerarHorarios(dataStr) {
     });
 
     addLog(
-        '📊 Horários disponíveis: ' +
-        totalDisponiveis +
-        ' de ' +
-        horarios.length +
-        ' (dados carregados na inicialização)',
+        '📊 Horários disponíveis: ' + totalDisponiveis + ' de ' + horarios.length +
+        ' (base local carregada na inicialização)',
         totalDisponiveis ? 'sucesso' : 'warning'
     );
 
     if (totalDisponiveis === 0) {
-
         const mensagem = document.createElement('p');
-
         mensagem.style.cssText =
             'grid-column:1/-1;text-align:center;padding:20px;color:#dc3545;font-weight:600;';
-
         mensagem.textContent =
             '⚠️ Não há horários disponíveis nesta data.';
-
         grid.appendChild(mensagem);
     }
 }
@@ -2859,15 +2970,18 @@ function validarPasso3() {
 
 async function validarPasso4() {
 
+    const seletorDia =
+        document.getElementById('dia-agendamento');
+
     const data =
-        document.getElementById(
-            'data-agendamento'
-        ).value;
+        seletorDia
+            ? seletorDia.value
+            : agendamento.data;
 
     if (!data) {
 
         mostrarToast(
-            'Selecione uma data.',
+            'Selecione um dia.',
             'erro'
         );
 
@@ -2905,7 +3019,7 @@ async function validarPasso4() {
             'erro'
         );
 
-        await gerarHorarios(data);
+        gerarHorarios(data);
 
         return false;
     }
@@ -3092,7 +3206,7 @@ async function confirmarAgendamento() {
                 'erro'
             );
 
-            await gerarHorarios(
+            gerarHorarios(
                 agendamento.data
             );
 
