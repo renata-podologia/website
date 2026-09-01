@@ -1274,6 +1274,10 @@ let agendamento = {
     numero: '',
     complemento: '',
     cep: '',
+    logradouro: '',
+    bairro: '',
+    cidade: '',
+    uf: '',
     status: 'Pendente'
 };
 
@@ -3114,6 +3118,11 @@ function validarPasso2() {
                 'end-uf'
             ).textContent;
 
+        agendamento.logradouro = logradouro;
+        agendamento.bairro = bairro;
+        agendamento.cidade = cidade;
+        agendamento.uf = uf;
+
         agendamento.endereco =
             [
                 logradouro,
@@ -3128,6 +3137,14 @@ function validarPasso2() {
             .join(', ');
 
     } else {
+
+        agendamento.cep = '';
+        agendamento.numero = '';
+        agendamento.complemento = '';
+        agendamento.logradouro = '';
+        agendamento.bairro = '';
+        agendamento.cidade = '';
+        agendamento.uf = '';
 
         agendamento.endereco =
             'Atendimento presencial na clínica';
@@ -3467,6 +3484,18 @@ async function confirmarAgendamento() {
 
             endereco:
                 agendamento.endereco,
+
+            logradouro:
+                agendamento.logradouro,
+
+            bairro:
+                agendamento.bairro,
+
+            cidade:
+                agendamento.cidade,
+
+            uf:
+                agendamento.uf,
 
             numero:
                 agendamento.numero,
