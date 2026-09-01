@@ -1660,93 +1660,59 @@ async function carregarConfiguracoes() {
         'info'
     );
 
-    addLog(
-        '📑 Abas esperadas: Dias, Horarios, Servicos, Agendamentos',
-        'info'
-    );
-
     mostrarLoading(
-        'Carregando configurações da agenda...'
+        'Carregando agenda...'
     );
 
     try {
 
-        const resposta =
-            await apiGet('config');
+        const resultados = await Promise.all([
+            apiGet('dias'),
+            apiGet('horarios'),
+            apiGet('servicos')
+        ]);
 
-        logObjeto(
-            '📦 Configuração recebida',
-            resposta
-        );
-
-        if (
-            resposta &&
-            resposta.sucesso === false
-        ) {
-
-            throw new Error(
-                resposta.mensagem ||
-                'Apps Script informou um erro.'
-            );
-
-        }
-
-        const dados =
-            resposta.dados ||
-            resposta.config ||
-            resposta;
+        const respostaDias = resultados[0];
+        const respostaHorarios = resultados[1];
+        const respostaServicos = resultados[2];
 
         CONFIG.dias =
-            dados.dias ||
-            dados.Dias ||
+            respostaDias.dias ||
+            respostaDias.dados ||
             [];
 
         CONFIG.horarios =
-            dados.horarios ||
-            dados.Horarios ||
+            respostaHorarios.horarios ||
+            respostaHorarios.dados ||
             [];
 
         CONFIG.servicos =
-            dados.servicos ||
-            dados.Servicos ||
+            respostaServicos.servicos ||
+            respostaServicos.dados ||
             [];
 
-        CONFIG.agendamentos =
-            dados.agendamentos ||
-            dados.Agendamentos ||
-            [];
+        CONFIG.agendamentos = [];
 
         addLog(
-            '📅 Dias recebidos: ' +
-            CONFIG.dias.length,
+            '📅 Dias recebidos: ' + CONFIG.dias.length,
             'sucesso'
         );
 
         addLog(
-            '🕐 Horários recebidos: ' +
-            CONFIG.horarios.length,
+            '🕐 Horários recebidos: ' + CONFIG.horarios.length,
             'sucesso'
         );
 
         addLog(
-            '💆 Serviços recebidos: ' +
-            CONFIG.servicos.length,
-            'sucesso'
-        );
-
-        addLog(
-            '📋 Agendamentos recebidos: ' +
-            CONFIG.agendamentos.length,
+            '💆 Serviços recebidos: ' + CONFIG.servicos.length,
             'sucesso'
         );
 
         prepararDias();
-
         prepararHorarios();
-
         renderizarServicos();
 
-        configurarData();
+        await configurarData();
 
         atualizarStatusAPI(
             true,
@@ -1776,17 +1742,10 @@ async function carregarConfiguracoes() {
             'erro'
         );
 
-        logEtapa(
-            '0',
-            '❌ FALHA AO CARREGAR CONFIGURAÇÕES',
-            'erro'
-        );
-
         mostrarToast(
-            'Não foi possível carregar as configurações da agenda. Verifique o log abaixo.',
+            'Não foi possível carregar a agenda. Verifique sua conexão.',
             'erro'
         );
-
     }
 }
 
@@ -2126,7 +2085,7 @@ function renderizarServicos() {
    DATA
    ============================================================ */
 
-function configurarData() {
+async function configurarData() {
 
     const input =
         document.getElementById(
@@ -2141,7 +2100,7 @@ function configurarData() {
     input.min = hoje;
 
     const proxima =
-        buscarProximaDataDisponivelLocal();
+        await buscarProximaDataDisponivelLocal();
 
     if (proxima) {
 
@@ -2151,7 +2110,7 @@ function configurarData() {
         agendamento.data =
             proxima;
 
-        gerarHorarios(
+        await gerarHorarios(
             proxima
         );
 
@@ -2169,7 +2128,7 @@ function configurarData() {
         agendamento.data =
             hoje;
 
-        gerarHorarios(
+        await gerarHorarios(
             hoje
         );
 
@@ -2177,7 +2136,7 @@ function configurarData() {
 
     input.addEventListener(
         'change',
-        function() {
+        async function() {
 
             agendamento.data =
                 this.value;
@@ -2191,10 +2150,9 @@ function configurarData() {
                 'info'
             );
 
-            gerarHorarios(
+            await gerarHorarios(
                 this.value
             );
-
         }
     );
 }
@@ -2217,7 +2175,7 @@ function hojeLocalISO() {
     );
 }
 
-function buscarProximaDataDisponivelLocal() {
+async function buscarProximaDataDisponivelLocal() {
 
     const hoje =
         new Date();
@@ -2254,19 +2212,37 @@ function buscarProximaDataDisponivelLocal() {
                 data.getDate()
             ).padStart(2, '0');
 
-        const disponiveis =
-            obterHorariosDisponiveis(
-                iso
+        try {
+
+            const resposta =
+                await apiGet(
+                    'disponibilidade',
+                    {
+                        data: iso
+                    }
+                );
+
+            const disponiveis =
+                Array.isArray(resposta.horarios)
+                    ? resposta.horarios
+                    : [];
+
+            if (
+                disponiveis.length > 0
+            ) {
+                return iso;
+            }
+
+        } catch (erro) {
+
+            addLog(
+                '⚠️ Falha ao consultar disponibilidade de ' +
+                iso +
+                ': ' +
+                erro.message,
+                'warning'
             );
-
-        if (
-            disponiveis.length > 0
-        ) {
-
-            return iso;
-
         }
-
     }
 
     return null;
@@ -2276,155 +2252,61 @@ function buscarProximaDataDisponivelLocal() {
    HORÁRIOS DISPONÍVEIS
    ============================================================ */
 
-function obterAgendamentosDaData(data) {
-
-    const encontrados = [];
-
-    for (
-        let i = 0;
-        i < CONFIG.agendamentos.length;
-        i++
-    ) {
-
-        const item =
-            CONFIG.agendamentos[i];
-
-        if (
-            typeof item !== 'object' ||
-            item === null
-        ) {
-            continue;
-        }
-
-        const itemData =
-            normalizarData(
-                item.data ||
-                item.Data ||
-                item.date
-            );
-
-        if (
-            itemData !== data
-        ) {
-            continue;
-        }
-
-        const status =
-            normalizarTexto(
-                item.status ||
-                item.Status ||
-                ''
-            ).toLowerCase();
-
-        if (
-            status === 'cancelado' ||
-            status === 'cancelada' ||
-            status === 'cancelled'
-        ) {
-            continue;
-        }
-
-        const horario =
-            normalizarHora(
-                item.horario ||
-                item.Hora ||
-                item.hora ||
-                ''
-            );
-
-        if (horario) {
-
-            encontrados.push(
-                horario
-            );
-
-        }
-
-    }
-
-    return encontrados;
-}
-
-function obterHorariosDisponiveis(dataStr) {
+async function obterHorariosDisponiveis(dataStr) {
 
     if (!dataStr) {
         return [];
     }
 
-    const partes =
-        dataStr.split('-');
+    try {
 
-    const data =
-        new Date(
-            Number(partes[0]),
-            Number(partes[1]) - 1,
-            Number(partes[2])
+        const resposta =
+            await apiGet(
+                'disponibilidade',
+                {
+                    data: dataStr
+                }
+            );
+
+        if (
+            resposta &&
+            resposta.sucesso === false
+        ) {
+
+            throw new Error(
+                resposta.mensagem ||
+                'A API recusou a consulta de disponibilidade.'
+            );
+        }
+
+        const horarios =
+            Array.isArray(
+                resposta.horarios
+            )
+                ? resposta.horarios
+                : [];
+
+        return horarios.map(
+            normalizarHora
         );
 
-    if (!diaEstaAtivo(data)) {
+    } catch (erro) {
+
+        addLog(
+            '❌ Erro ao consultar disponibilidade: ' +
+            erro.message,
+            'erro'
+        );
+
         return [];
     }
-
-    const ocupados =
-        obterAgendamentosDaData(
-            dataStr
-        );
-
-    const hoje =
-        hojeLocalISO();
-
-    const agora =
-        new Date();
-
-    return CONFIG.horariosAtivos.filter(
-        function(horario) {
-
-            if (
-                ocupados.includes(
-                    horario
-                )
-            ) {
-                return false;
-            }
-
-            if (
-                dataStr === hoje
-            ) {
-
-                const partesHora =
-                    horario.split(':');
-
-                const hora =
-                    Number(partesHora[0]);
-
-                const minuto =
-                    Number(partesHora[1]);
-
-                if (
-                    hora < agora.getHours() ||
-                    (
-                        hora === agora.getHours() &&
-                        minuto <= agora.getMinutes()
-                    )
-                ) {
-
-                    return false;
-
-                }
-
-            }
-
-            return true;
-
-        }
-    );
 }
 
 /* ============================================================
    RENDERIZAR HORÁRIOS
    ============================================================ */
 
-function gerarHorarios(dataStr) {
+async function gerarHorarios(dataStr) {
 
     const grid =
         document.getElementById(
@@ -2433,7 +2315,10 @@ function gerarHorarios(dataStr) {
 
     if (!grid) return;
 
-    grid.innerHTML = '';
+    grid.innerHTML =
+        '<p style="grid-column:1/-1;text-align:center;padding:20px;">' +
+        '<i class="fas fa-spinner fa-spin"></i> Consultando disponibilidade...' +
+        '</p>';
 
     agendamento.horario =
         '';
@@ -2464,7 +2349,7 @@ function gerarHorarios(dataStr) {
         ];
 
     addLog(
-        '📅 Verificando data ' +
+        '📅 Consultando disponibilidade para ' +
         dataStr +
         ', ' +
         diaNome,
@@ -2488,29 +2373,16 @@ function gerarHorarios(dataStr) {
         return;
     }
 
-    const ocupados =
-        obterAgendamentosDaData(
+    const horariosDisponiveis =
+        await obterHorariosDisponiveis(
             dataStr
         );
 
-    addLog(
-        '📋 Horários ocupados nesta data: ' +
-        (
-            ocupados.length
-                ? ocupados.join(', ')
-                : 'nenhum'
-        ),
-        ocupados.length
-            ? 'warning'
-            : 'info'
-    );
-
     const horarios =
-        CONFIG.horariosAtivos;
+        CONFIG.horariosAtivos || [];
 
     if (
-        !horarios ||
-        horarios.length === 0
+        !horarios.length
     ) {
 
         grid.innerHTML =
@@ -2548,8 +2420,8 @@ function gerarHorarios(dataStr) {
             botao.dataset.horario =
                 horario;
 
-            const ocupado =
-                ocupados.includes(
+            const disponivel =
+                horariosDisponiveis.includes(
                     horario
                 );
 
@@ -2583,10 +2455,9 @@ function gerarHorarios(dataStr) {
                         minuto <=
                         agora.getMinutes()
                     );
-
             }
 
-            if (ocupado) {
+            if (!disponivel) {
 
                 botao.disabled =
                     true;
@@ -2596,7 +2467,7 @@ function gerarHorarios(dataStr) {
                 );
 
                 botao.title =
-                    'Horário já ocupado';
+                    'Horário indisponível';
 
             } else if (passado) {
 
@@ -2647,13 +2518,11 @@ function gerarHorarios(dataStr) {
 
                     }
                 );
-
             }
 
             grid.appendChild(
                 botao
             );
-
         }
     );
 
@@ -2685,9 +2554,7 @@ function gerarHorarios(dataStr) {
         grid.appendChild(
             mensagem
         );
-
     }
-
 }
 
 /* ============================================================
@@ -3045,7 +2912,7 @@ function validarPasso3() {
     return true;
 }
 
-function validarPasso4() {
+async function validarPasso4() {
 
     const data =
         document.getElementById(
@@ -3060,12 +2927,9 @@ function validarPasso4() {
         );
 
         return false;
-
     }
 
-    if (
-        !agendamento.horario
-    ) {
+    if (!agendamento.horario) {
 
         mostrarToast(
             'Selecione um horário.',
@@ -3073,11 +2937,10 @@ function validarPasso4() {
         );
 
         return false;
-
     }
 
     const disponiveis =
-        obterHorariosDisponiveis(
+        await obterHorariosDisponiveis(
             data
         );
 
@@ -3097,17 +2960,16 @@ function validarPasso4() {
             'erro'
         );
 
-        gerarHorarios(data);
+        await gerarHorarios(data);
 
         return false;
-
     }
 
     agendamento.data =
         data;
 
     addLog(
-        '✅ Data e horário validados.',
+        '✅ Data e horário validados pela API.',
         'sucesso'
     );
 
@@ -3264,32 +3126,8 @@ async function confirmarAgendamento() {
             'info'
         );
 
-        const respostaAgendamentos =
-            await apiGet(
-                'agendamentos'
-            );
-
-        const listaAtualizada =
-            respostaAgendamentos.agendamentos ||
-            respostaAgendamentos.dados ||
-            respostaAgendamentos.data ||
-            (
-                Array.isArray(
-                    respostaAgendamentos
-                )
-                    ? respostaAgendamentos
-                    : []
-            );
-
-        CONFIG.agendamentos =
-            Array.isArray(
-                listaAtualizada
-            )
-                ? listaAtualizada
-                : [];
-
         const disponiveis =
-            obterHorariosDisponiveis(
+            await obterHorariosDisponiveis(
                 agendamento.data
             );
 
@@ -3309,12 +3147,11 @@ async function confirmarAgendamento() {
                 'erro'
             );
 
-            gerarHorarios(
+            await gerarHorarios(
                 agendamento.data
             );
 
             return;
-
         }
 
         logEtapa(
