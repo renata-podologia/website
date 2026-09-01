@@ -1676,6 +1676,18 @@ async function carregarConfiguracoes() {
         const respostaHorarios = resultados[1];
         const respostaServicos = resultados[2];
 
+        [respostaDias, respostaHorarios, respostaServicos].forEach(
+            function(resposta) {
+                if (resposta && resposta.sucesso === false) {
+                    throw new Error(
+                        resposta.mensagem ||
+                        resposta.erro ||
+                        'Apps Script informou um erro.'
+                    );
+                }
+            }
+        );
+
         CONFIG.dias =
             respostaDias.dias ||
             respostaDias.dados ||
@@ -2623,7 +2635,7 @@ function irParaPasso(numero) {
 
 }
 
-function proximoPasso(numero) {
+async function proximoPasso(numero) {
 
     const atual =
         numero - 1;
@@ -2643,7 +2655,7 @@ function proximoPasso(numero) {
     }
 
     if (atual === 4) {
-        valido = validarPasso4();
+        valido = await validarPasso4();
     }
 
     if (!valido) {
@@ -3098,7 +3110,7 @@ async function confirmarAgendamento() {
     if (!validarPasso1()) return;
     if (!validarPasso2()) return;
     if (!validarPasso3()) return;
-    if (!validarPasso4()) return;
+    if (!(await validarPasso4())) return;
 
     const botao =
         document.getElementById(
@@ -3168,7 +3180,7 @@ async function confirmarAgendamento() {
             data:
                 agendamento.data,
 
-            horario:
+            hora:
                 agendamento.horario,
 
             nome:
