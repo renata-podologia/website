@@ -1,1019 +1,370 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
-    <title>Agendamento - Levità Podologia</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendamento - Podologia</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { scroll-behavior: smooth; font-size: 16px; }
+        :root {
+            --primary: #5c8374;
+            --primary-dark: #3b564b;
+            --background: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #2b3a42;
+            --border-color: #d1dcd6;
+            --error-color: #dc3545;
+            --success-color: #28a745;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background: #F7F8FA;
-            color: #1e2b2f;
-            line-height: 1.6;
-            padding: 20px;
+            background-color: var(--background);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            padding: 20px;
         }
-        
+
         .container {
-            max-width: 900px;
+            background-color: var(--card-bg);
             width: 100%;
-            margin: 0 auto;
-            background: #FFFFFF;
-            border-radius: 28px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.06);
-            border: 1px solid rgba(168, 195, 160, 0.12);
-            position: relative;
-            overflow: hidden;
-        }
-        .container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 5px;
-            background: linear-gradient(90deg, #2F5D62, #C9A227, #2F5D62);
-            background-size: 200% 100%;
-            animation: gradiente 4s ease infinite;
-        }
-        @keyframes gradiente {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 14px 34px;
-            border-radius: 50px;
-            font-weight: 600;
-            font-size: 1rem;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: none;
-            cursor: pointer;
-            font-family: 'Inter', sans-serif;
-            text-align: center;
-            text-decoration: none;
-            position: relative;
-            overflow: hidden;
-        }
-        .btn-primario { background: #2F5D62; color: #fff; box-shadow: 0 8px 25px rgba(47, 93, 98, 0.3); }
-        .btn-primario:hover { background: #1c3e42; transform: translateY(-3px); box-shadow: 0 12px 35px rgba(47, 93, 98, 0.4); }
-        .btn-success { background: #28a745; color: #fff; box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3); }
-        .btn-success:hover { background: #1e7e34; transform: translateY(-3px); box-shadow: 0 12px 35px rgba(40, 167, 69, 0.4); }
-        .btn-voltar { background: #F7F8FA; color: #1e2b2f; }
-        .btn-voltar:hover { background: #e8edee; transform: translateY(-2px); }
-        .btn-outline { background: transparent; color: #2F5D62; border: 2px solid #2F5D62; }
-        .btn-outline:hover { background: #2F5D62; color: #fff; transform: translateY(-3px); box-shadow: 0 8px 25px rgba(47, 93, 98, 0.2); }
-        .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
-        .btn i { font-size: 1.1rem; }
-        
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 16px;
-            margin-bottom: 20px;
-            padding-bottom: 16px;
-            border-bottom: 2px solid #F7F8FA;
-        }
-        .header .back-link {
-            color: #2F5D62;
-            font-weight: 600;
-            text-decoration: none;
-            font-size: 0.95rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 22px;
-            border-radius: 30px;
-            transition: all 0.3s ease;
-            border: 2px solid #2F5D62;
-        }
-        .header .back-link:hover {
-            background: #2F5D62;
-            color: #fff;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(47, 93, 98, 0.25);
-        }
-        .header-title {
-            font-family: 'Poppins', sans-serif;
-            font-weight: 700;
-            font-size: 2rem;
-            color: #2F5D62;
-        }
-        .header-title span { color: #C9A227; }
-        .header-subtitle {
-            text-align: center;
-            color: #4a5f64;
-            margin-bottom: 32px;
-            font-size: 1.05rem;
-        }
-        .header-subtitle strong { color: #2F5D62; }
-        
-        .passo-indicador {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 32px;
-            flex-wrap: wrap;
-        }
-        .passo-indicador .passo {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 18px;
-            border-radius: 30px;
-            background: #F7F8FA;
-            color: #8a9ea3;
-            font-size: 0.85rem;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            cursor: default;
-            border: 2px solid transparent;
-        }
-        .passo-indicador .passo.ativo {
-            background: #2F5D62;
-            color: #fff;
-            box-shadow: 0 4px 20px rgba(47, 93, 98, 0.25);
-            border-color: #2F5D62;
-        }
-        .passo-indicador .passo .numero {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 26px;
-            height: 26px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.2);
-            font-weight: 700;
-            font-size: 0.75rem;
-        }
-        .passo-indicador .passo.ativo .numero {
-            background: rgba(255,255,255,0.3);
-        }
-        .passo-indicador .passo i { font-size: 0.85rem; }
-        
-        .passo-conteudo { display: none; animation: fadeIn 0.5s ease; }
-        .passo-conteudo.ativo { display: block; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(25px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .passo-title {
-            font-family: 'Poppins', sans-serif;
-            color: #2F5D62;
-            margin-bottom: 20px;
-            font-size: 1.3rem;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .passo-title i { color: #C9A227; font-size: 1.4rem; }
-        
-        .form-group { margin-bottom: 20px; }
-        .form-group label {
-            display: block;
-            font-weight: 600;
-            color: #2F5D62;
-            margin-bottom: 6px;
-            font-size: 0.95rem;
-        }
-        .form-group label .obrigatorio { color: #dc3545; }
-        .form-group .input-wrapper {
-            position: relative;
-        }
-        .form-group .input-wrapper i {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #8a9ea3;
-            font-size: 1rem;
-            transition: color 0.3s ease;
-        }
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px 16px 12px 44px;
-            border: 2px solid #e8edee;
+            max-width: 600px;
+            padding: 30px;
             border-radius: 12px;
-            font-size: 1rem;
-            font-family: 'Inter', sans-serif;
-            transition: all 0.3s ease;
-            background: #fafbfb;
-            color: #1e2b2f;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
         }
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #2F5D62;
-            background: #fff;
-            box-shadow: 0 0 0 4px rgba(47, 93, 98, 0.08);
-        }
-        .form-group input:disabled {
-            background: #F4EFE8;
-            color: #4a5f64;
-            padding-left: 16px;
-        }
-        .form-group input:disabled + i { display: none; }
-        
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .form-actions {
-            display: flex;
-            gap: 16px;
-            justify-content: space-between;
-            margin-top: 24px;
-            flex-wrap: wrap;
-        }
-        .form-actions .btn { min-width: 120px; }
-        
-        .tipo-atendimento-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-top: 8px;
-        }
-        .tipo-btn {
-            padding: 28px 20px;
-            border: 2px solid #e8edee;
-            border-radius: 16px;
-            background: #fafbfb;
-            cursor: pointer;
-            font-family: 'Inter', sans-serif;
-            font-size: 1rem;
-            font-weight: 500;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+        h2 {
             text-align: center;
-            color: #1e2b2f;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            position: relative;
-            overflow: hidden;
+            color: var(--primary-dark);
+            margin-bottom: 25px;
+            font-weight: 600;
         }
-        .tipo-btn i { 
-            font-size: 2.8rem; 
-            color: #2F5D62; 
-            opacity: 0.4; 
-            transition: all 0.3s ease; 
-        }
-        .tipo-btn:hover:not(.selecionado) { 
-            border-color: #2F5D62; 
-            background: #F4EFE8; 
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(47, 93, 98, 0.06);
-        }
-        .tipo-btn.selecionado { 
-            border-color: #C9A227; 
-            background: #C9A227; 
-            color: #fff; 
-            transform: translateY(-3px); 
-            box-shadow: 0 12px 35px rgba(201, 162, 39, 0.35);
-        }
-        .tipo-btn.selecionado i { color: #fff; opacity: 1; }
-        .tipo-btn small { font-weight: 400; opacity: 0.7; font-size: 0.85rem; }
-        .tipo-btn.selecionado small { opacity: 0.9; }
-        
-        .cep-busca-group {
-            display: flex;
-            gap: 12px;
-            align-items: flex-end;
-        }
-        .cep-busca-group .form-group { flex: 1; margin-bottom: 0; }
-        .cep-busca-group .btn { height: 48px; min-width: 110px; flex-shrink: 0; }
-        
-        .endereco-completo {
-            margin-top: 12px;
-            padding: 16px 20px;
-            background: #F4EFE8;
-            border-radius: 12px;
-            border-left: 4px solid #C9A227;
+
+        .form-step {
             display: none;
-            animation: fadeIn 0.3s ease;
         }
-        .endereco-completo.visivel { display: block; }
-        .endereco-completo p { margin: 4px 0; font-size: 0.95rem; }
-        .endereco-completo .label { font-weight: 600; color: #2F5D62; }
-        
+
+        .form-step.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--primary-dark);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary);
+        }
+
         .horarios-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
             gap: 10px;
-            margin-top: 8px;
+            margin-top: 10px;
         }
+
         .horario-btn {
-            padding: 14px 12px;
-            border: 2px solid #e8edee;
-            border-radius: 12px;
-            background: #fafbfb;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
             cursor: pointer;
-            font-family: 'Inter', sans-serif;
+            text-align: center;
             font-size: 0.95rem;
-            font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            text-align: center;
-            color: #1e2b2f;
-            position: relative;
+            transition: all 0.2s;
         }
-        .horario-btn:hover:not(.indisponivel):not(.confirmado):not(.passado) { 
-            border-color: #2F5D62; 
-            background: #F4EFE8; 
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(47, 93, 98, 0.08);
+
+        .horario-btn:hover {
+            background-color: #e2e8e6;
         }
-        .horario-btn.selecionado { 
-            border-color: #C9A227; 
-            background: #C9A227; 
-            color: #fff; 
-            transform: translateY(-2px); 
-            box-shadow: 0 8px 25px rgba(201, 162, 39, 0.3);
+
+        .horario-btn.selecionado {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
         }
-        
-        .servicos-escolha {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 12px;
-            margin-top: 8px;
-        }
-        .servico-btn {
-            padding: 18px 16px;
-            border: 2px solid #e8edee;
-            border-radius: 12px;
-            background: #fafbfb;
-            cursor: pointer;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            text-align: center;
-            color: #1e2b2f;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-        }
-        .servico-btn i { 
-            font-size: 1.8rem; 
-            color: #2F5D62; 
-            opacity: 0.4; 
-            transition: all 0.3s ease; 
-        }
-        .servico-btn:hover:not(.selecionado) { 
-            border-color: #2F5D62; 
-            background: #F4EFE8; 
-            transform: translateY(-3px);
-            box-shadow: 0 4px 15px rgba(47, 93, 98, 0.06);
-        }
-        .servico-btn.selecionado { 
-            border-color: #C9A227; 
-            background: #C9A227; 
-            color: #fff; 
-            transform: translateY(-3px); 
-            box-shadow: 0 8px 25px rgba(201, 162, 39, 0.3);
-        }
-        .servico-btn.selecionado i { color: #fff; opacity: 1; }
-        
-        .resumo-agendamento {
-            background: #F4EFE8;
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 24px;
-            border-left: 4px solid #C9A227;
-        }
-        .resumo-agendamento .linha {
+
+        .btn-container {
             display: flex;
             justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
+            margin-top: 25px;
         }
-        .resumo-agendamento .linha:last-child { border-bottom: none; }
-        .resumo-agendamento .rotulo { font-weight: 500; color: #4a5f64; }
-        .resumo-agendamento .valor { font-weight: 600; color: #2F5D62; text-align: right; }
-        
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 24px;
-            background: #2F5D62;
-            color: #fff;
-            padding: 16px 24px;
-            border-radius: 14px;
-            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
-            z-index: 2000;
-            opacity: 0;
-            transform: translateY(-20px) scale(0.95);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            max-width: 400px;
-            pointer-events: none;
-            backdrop-filter: blur(10px);
-        }
-        .toast.mostrar { opacity: 1; transform: translateY(0) scale(1); }
-        .toast.erro { background: #dc3545; }
-        .toast.sucesso { background: #28a745; }
-        .toast i { margin-right: 10px; }
-        
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255,255,255,0.92);
-            backdrop-filter: blur(6px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            flex-direction: column;
-            gap: 16px;
-        }
-        .loading-overlay.ativo { display: flex; }
-        .loading-overlay .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #e8edee;
-            border-top: 4px solid #2F5D62;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .loading-overlay p { color: #2F5D62; font-weight: 500; }
-        
-        .input-icon {
-            position: relative;
-        }
-        .input-icon i {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #8a9ea3;
+
+        button.btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
             font-size: 1rem;
-            transition: color 0.3s;
-            pointer-events: none;
+            font-weight: 500;
+            transition: background-color 0.3s;
         }
-        .input-icon input {
-            padding-left: 44px;
+
+        button.btn:hover {
+            background-color: var(--primary-dark);
         }
-        
-        @media (max-width: 768px) {
-            body { padding: 10px; }
-            .container { padding: 20px 16px; border-radius: 20px; }
-            .header { flex-direction: column; text-align: center; }
-            .header .back-link { align-self: center; }
-            .form-row { grid-template-columns: 1fr; gap: 0; }
-            .form-actions { flex-direction: column; }
-            .form-actions .btn { width: 100%; text-align: center; }
-            .tipo-atendimento-grid { grid-template-columns: 1fr; }
-            .servicos-escolha { grid-template-columns: 1fr 1fr; }
-            .horarios-grid { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); }
-            .cep-busca-group { flex-direction: column; }
-            .cep-busca-group .btn { width: 100%; }
-            .resumo-agendamento .linha { flex-direction: column; align-items: flex-start; gap: 4px; }
-            .resumo-agendamento .valor { text-align: left; }
-            .passo-indicador .passo { font-size: 0.7rem; padding: 4px 12px; gap: 4px; }
-            .passo-indicador .passo .numero { width: 20px; height: 20px; font-size: 0.6rem; }
-            .header-title { font-size: 1.5rem; }
-            .btn { padding: 12px 24px; font-size: 0.9rem; }
-            .tipo-btn { padding: 20px; }
-            .tipo-btn i { font-size: 2.2rem; }
+
+        button.btn-secondary {
+            background-color: #6c757d;
+        }
+
+        button.btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        .mensagem-alerta {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: var(--primary);
         }
     </style>
 </head>
 <body>
 
-    <!-- LOADING -->
-    <div class="loading-overlay" id="loading-overlay">
-        <div class="spinner"></div>
-        <p>Carregando...</p>
-    </div>
-
-    <!-- TOAST -->
-    <div class="toast" id="toast">
-        <i class="fas fa-info-circle"></i>
-        <span id="toast-mensagem">Mensagem</span>
-    </div>
-
-    <div class="container">
-        <!-- HEADER -->
-        <div class="header">
-            <div>
-                <h1 class="header-title">Levità <span>.</span></h1>
+<div class="container">
+    <h2>Agendamento de Atendimento</h2>
+    
+    <form id="agendamento-form">
+        <!-- Passo 1: Informações Pessoais -->
+        <div class="form-step active" id="step-1">
+            <div class="form-group">
+                <label for="nome">Nome Completo</label>
+                <input type="text" id="nome" required placeholder="Digite seu nome completo">
             </div>
-            <a href="index.html" class="back-link">
-                <i class="fas fa-arrow-left"></i> Voltar ao site
-            </a>
-        </div>
-        
-        <p class="header-subtitle">Agende sua consulta com a <strong>Podóloga Renata Kemp</strong></p>
-
-        <!-- Indicador de Passos -->
-        <div class="passo-indicador">
-            <div class="passo ativo" data-passo="1">
-                <span class="numero">1</span> <i class="fas fa-user"></i> Dados
+            <div class="form-group">
+                <label for="telefone">Telefone / WhatsApp</label>
+                <input type="tel" id="telefone" required placeholder="(00) 00000-0000">
             </div>
-            <div class="passo" data-passo="2">
-                <span class="numero">2</span> <i class="fas fa-map-marker-alt"></i> Atendimento
+            <div class="form-group">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" required placeholder="seu@email.com">
             </div>
-            <div class="passo" data-passo="3">
-                <span class="numero">3</span> <i class="fas fa-stethoscope"></i> Serviço
-            </div>
-            <div class="passo" data-passo="4">
-                <span class="numero">4</span> <i class="fas fa-calendar-alt"></i> Data/Hora
-            </div>
-            <div class="passo" data-passo="5">
-                <span class="numero">5</span> <i class="fas fa-check-circle"></i> Confirmar
+            <div class="btn-container">
+                <div></div>
+                <button type="button" class="btn" onclick="proximoPasso(2)">Avançar</button>
             </div>
         </div>
 
-        <!-- PASSO 1 -->
-        <div class="passo-conteudo ativo" id="passo-1">
-            <h3 class="passo-title"><i class="fas fa-user-circle"></i> Seus dados</h3>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Nome completo <span class="obrigatorio">*</span></label>
-                    <div class="input-icon">
-                        <input type="text" id="nome" placeholder="Digite seu nome completo" />
-                        <i class="fas fa-user"></i>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Telefone <span class="obrigatorio">*</span></label>
-                    <div class="input-icon">
-                        <input type="tel" id="telefone" placeholder="(11) 99999-9999" />
-                        <i class="fas fa-phone"></i>
-                    </div>
-                </div>
+        <!-- Passo 2: Tipo e Serviço -->
+        <div class="form-step" id="step-2">
+            <div class="form-group">
+                <label for="tipo">Tipo de Atendimento</label>
+                <select id="tipo" required>
+                    <option value="">Selecione...</option>
+                    <option value="Consultório">Consultório</option>
+                    <option value="Domiciliar">Domiciliar</option>
+                </select>
             </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>E-mail <span class="obrigatorio">*</span></label>
-                    <div class="input-icon">
-                        <input type="email" id="email" placeholder="Digite seu e-mail" />
-                        <i class="fas fa-envelope"></i>
-                    </div>
-                </div>
-                <div class="form-group"></div>
+            <div class="form-group">
+                <label for="servico">Serviço Desejado</label>
+                <select id="servico" required>
+                    <option value="">Carregando serviços...</option>
+                </select>
             </div>
-            <div class="form-actions">
-                <a href="index.html" class="btn btn-outline">
-                    <i class="fas fa-home"></i> Início
-                </a>
-                <button type="button" class="btn btn-primario" onclick="proximoPasso(2)">
-                    Próximo <i class="fas fa-arrow-right"></i>
-                </button>
+            <div class="btn-container">
+                <button type="button" class="btn btn-secondary" onclick="proximoPasso(1)">Voltar</button>
+                <button type="button" class="btn" onclick="proximoPasso(3)">Avançar</button>
             </div>
         </div>
 
-        <!-- PASSO 2 -->
-        <div class="passo-conteudo" id="passo-2">
-            <h3 class="passo-title"><i class="fas fa-map-marker-alt"></i> Tipo de Atendimento</h3>
-            <p style="color: #4a5f64; margin-bottom: 16px;">Escolha como deseja ser atendido:</p>
-            <div class="tipo-atendimento-grid" id="tipo-atendimento-grid">
-                <button type="button" class="tipo-btn" data-tipo="domiciliar" onclick="selecionarTipo('domiciliar')">
-                    <i class="fas fa-home"></i>
-                    <span>Domiciliar</span>
-                    <small><i class="fas fa-arrow-right"></i> Renata vai até você</small>
-                </button>
-                <button type="button" class="tipo-btn" data-tipo="presencial" onclick="selecionarTipo('presencial')">
-                    <i class="fas fa-building"></i>
-                    <span>Presencial</span>
-                    <small><i class="fas fa-arrow-right"></i> Você vai à clínica</small>
-                </button>
+        <!-- Passo 3: Data e Horário -->
+        <div class="form-step" id="step-3">
+            <div class="form-group">
+                <label for="data">Data do Agendamento</label>
+                <input type="date" id="data" required onchange="carregarHorarios()">
             </div>
-
-            <div id="endereco-domicilio" style="display: none; margin-top: 20px;">
-                <div class="form-group">
-                    <label><i class="fas fa-home" style="color:#2F5D62;"></i> Endereço para atendimento <span class="obrigatorio">*</span></label>
-                    <div class="cep-busca-group">
-                        <div class="form-group">
-                            <div class="input-icon">
-                                <input type="text" id="cep" placeholder="Digite seu CEP (ex: 07000-000)" maxlength="9" />
-                                <i class="fas fa-search-location"></i>
-                            </div>
-                        </div>
-                        <button type="button" class="btn btn-primario" onclick="buscarCEP()">
-                            <i class="fas fa-search"></i> Buscar
-                        </button>
-                    </div>
-                </div>
-                <div class="endereco-completo" id="endereco-completo">
-                    <p><span class="label">Logradouro:</span> <span id="end-logradouro">-</span></p>
-                    <p><span class="label">Bairro:</span> <span id="end-bairro">-</span></p>
-                    <p><span class="label">Cidade:</span> <span id="end-cidade">-</span></p>
-                    <p><span class="label">Estado:</span> <span id="end-estado">-</span></p>
-                </div>
-                <div class="form-row" style="margin-top: 15px;">
-                    <div class="form-group">
-                        <label>Número <span class="obrigatorio">*</span></label>
-                        <div class="input-icon">
-                            <input type="text" id="numero-endereco" placeholder="Número" />
-                            <i class="fas fa-hashtag"></i>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Complemento</label>
-                        <div class="input-icon">
-                            <input type="text" id="complemento-endereco" placeholder="Apto, casa, bloco..." />
-                            <i class="fas fa-pen"></i>
-                        </div>
-                    </div>
+            <div class="form-group">
+                <label>Horários Disponíveis</label>
+                <div id="horarios-grid" class="horarios-grid">
+                    <p style="grid-column: 1 / -1; font-size: 0.9rem; color: #666;">Selecione uma data acima para visualizar os horários.</p>
                 </div>
             </div>
-
-            <div id="endereco-presencial" style="display: none; margin-top: 20px;">
-                <div class="form-group">
-                    <label><i class="fas fa-map-pin" style="color:#2F5D62;"></i> Endereço da Clínica</label>
-                    <div class="input-icon">
-                        <input type="text" id="endereco-clinica" value="Rua da Clínica, 123 - Centro, Guarulhos - SP" disabled />
-                        <i class="fas fa-building"></i>
-                    </div>
-                    <small style="color: #4a5f64; display: block; margin-top: 4px;">
-                        <i class="fas fa-info-circle"></i> Endereço fixo da clínica.
-                    </small>
-                </div>
-            </div>
-
-            <div class="form-actions">
-                <button type="button" class="btn btn-voltar" onclick="passoAnterior(1)">
-                    <i class="fas fa-arrow-left"></i> Voltar
-                </button>
-                <button type="button" class="btn btn-primario" onclick="proximoPasso(3)">
-                    Próximo <i class="fas fa-arrow-right"></i>
-                </button>
+            <div class="btn-container">
+                <button type="button" class="btn btn-secondary" onclick="proximoPasso(2)">Voltar</button>
+                <button type="button" class="btn" onclick="finalizarAgendamento()">Confirmar Agendamento</button>
             </div>
         </div>
+    </form>
+    
+    <div id="mensagem" class="mensagem-alerta"></div>
+</div>
 
-        <!-- PASSO 3 -->
-        <div class="passo-conteudo" id="passo-3">
-            <h3 class="passo-title"><i class="fas fa-stethoscope"></i> Escolha o serviço</h3>
-            <p style="color: #4a5f64; margin-bottom: 16px;">Selecione o tratamento desejado:</p>
-            <div class="servicos-escolha" id="servicos-escolha">
-                <button type="button" class="servico-btn" data-servico="Podologia Clínica" onclick="selecionarServico(this, 'Podologia Clínica')">
-                    <i class="fas fa-user-md"></i> Podologia Clínica
-                </button>
-                <button type="button" class="servico-btn" data-servico="Pé Diabético" onclick="selecionarServico(this, 'Pé Diabético')">
-                    <i class="fas fa-heartbeat"></i> Pé Diabético
-                </button>
-                <button type="button" class="servico-btn" data-servico="Podogeriatria" onclick="selecionarServico(this, 'Podogeriatria')">
-                    <i class="fas fa-user-plus"></i> Podogeriatria
-                </button>
-                <button type="button" class="servico-btn" data-servico="Unha Encravada" onclick="selecionarServico(this, 'Unha Encravada')">
-                    <i class="fas fa-exclamation-triangle"></i> Unha Encravada
-                </button>
-                <button type="button" class="servico-btn" data-servico="Calos e Calosidades" onclick="selecionarServico(this, 'Calos e Calosidades')">
-                    <i class="fas fa-circle"></i> Calos/Calosidades
-                </button>
-                <button type="button" class="servico-btn" data-servico="Verrugas Plantares" onclick="selecionarServico(this, 'Verrugas Plantares')">
-                    <i class="fas fa-biohazard"></i> Verrugas Plantares
-                </button>
-                <button type="button" class="servico-btn" data-servico="Micose / Fungos" onclick="selecionarServico(this, 'Micose / Fungos')">
-                    <i class="fas fa-spa"></i> Micose / Fungos
-                </button>
-                <button type="button" class="servico-btn" data-servico="Órteses / Palmilhas" onclick="selecionarServico(this, 'Órteses / Palmilhas')">
-                    <i class="fas fa-shoe-prints"></i> Órteses / Palmilhas
-                </button>
-                <button type="button" class="servico-btn" data-servico="Consulta de Avaliação" onclick="selecionarServico(this, 'Consulta de Avaliação')">
-                    <i class="fas fa-notes-medical"></i> Avaliação
-                </button>
-            </div>
-            <div class="form-actions">
-                <button type="button" class="btn btn-voltar" onclick="passoAnterior(2)">
-                    <i class="fas fa-arrow-left"></i> Voltar
-                </button>
-                <button type="button" class="btn btn-primario" onclick="proximoPasso(4)">
-                    Próximo <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
-        </div>
+<script>
+    // Substitua pela URL da sua Web App do Google Apps Script
+    const URL_API = 'SUA_URL_DO_WEB_APP_AQUI';
+    
+    let dadosFormulario = {
+        nome: '',
+        telefone: '',
+        email: '',
+        tipo: '',
+        servico: '',
+        data: '',
+        hora: ''
+    };
 
-        <!-- PASSO 4 -->
-        <div class="passo-conteudo" id="passo-4">
-            <h3 class="passo-title"><i class="fas fa-calendar-alt"></i> Escolha data e horário</h3>
-            <div class="form-row">
-                <div class="form-group">
-                    <label><i class="fas fa-calendar-day" style="color:#2F5D62;"></i> Data <span class="obrigatorio">*</span></label>
-                    <div class="input-icon">
-                        <input type="date" id="data-agendamento" onchange="atualizarHorarios()" />
-                        <i class="fas fa-calendar"></i>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label><i class="fas fa-clock" style="color:#2F5D62;"></i> Horários Disponíveis</label>
-                    <div class="horarios-grid" id="horarios-grid">
-                        <p style="color: #4a5f64; font-size: 0.9rem;">Selecione uma data acima para ver os horários.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="form-actions">
-                <button type="button" class="btn btn-voltar" onclick="passoAnterior(3)">
-                    <i class="fas fa-arrow-left"></i> Voltar
-                </button>
-                <button type="button" class="btn btn-primario" onclick="proximoPasso(5)">
-                    Próximo <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
-        </div>
+    function proximoPasso(passo) {
+        if (passo === 2) {
+            dadosFormulario.nome = document.getElementById('nome').value.trim();
+            dadosFormulario.telefone = document.getElementById('telefone').value.trim();
+            dadosFormulario.email = document.getElementById('email').value.trim();
 
-        <!-- PASSO 5 -->
-        <div class="passo-conteudo" id="passo-5">
-            <h3 class="passo-title"><i class="fas fa-check-circle"></i> Confirmar Agendamento</h3>
-            <p style="color: #4a5f64; margin-bottom: 20px;">Confira os dados abaixo antes de finalizar:</p>
-            
-            <div class="resumo-agendamento" id="resumo-dados">
-                <div class="linha">
-                    <span class="rotulo">Nome:</span>
-                    <span class="valor" id="res-nome">-</span>
-                </div>
-                <div class="linha">
-                    <span class="rotulo">Telefone:</span>
-                    <span class="valor" id="res-telefone">-</span>
-                </div>
-                <div class="linha">
-                    <span class="rotulo">E-mail:</span>
-                    <span class="valor" id="res-email">-</span>
-                </div>
-                <div class="linha">
-                    <span class="rotulo">Tipo de Atendimento:</span>
-                    <span class="valor" id="res-tipo">-</span>
-                </div>
-                <div class="linha">
-                    <span class="rotulo">Local / Endereço:</span>
-                    <span class="valor" id="res-endereco">-</span>
-                </div>
-                <div class="linha">
-                    <span class="rotulo">Serviço:</span>
-                    <span class="valor" id="res-servico">-</span>
-                </div>
-                <div class="linha">
-                    <span class="rotulo">Data e Horário:</span>
-                    <span class="valor" id="res-data-hora">-</span>
-                </div>
-            </div>
-
-            <div class="form-actions">
-                <button type="button" class="btn btn-voltar" onclick="passoAnterior(4)">
-                    <i class="fas fa-arrow-left"></i> Voltar
-                </button>
-                <button type="button" class="btn btn-success" id="btn-finalizar" onclick="finalizarAgendamento()">
-                    <i class="fas fa-check"></i> Confirmar Agendamento
-                </button>
-            </div>
-        </div>
-
-    </div>
-
-    <script>
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbyiPk-bI4sXUezIQPzIo-Ga6rtMXrjy2upmYPJ_IgDLuE58Rxbs33Mh7JAR1h7t7ZI/exec';
-
-        let dadosAgendamento = {
-            nome: '',
-            telefone: '',
-            email: '',
-            tipoAtendimento: '',
-            cep: '',
-            logradouro: '',
-            bairro: '',
-            cidade: '',
-            estado: '',
-            numero: '',
-            complemento: '',
-            servico: '',
-            data: '',
-            horario: ''
-        };
-
-        function mostrarToast(mensagem, tipo = 'sucesso') {
-            const toast = document.getElementById('toast');
-            const mensagemSpan = document.getElementById('toast-mensagem');
-            mensagemSpan.textContent = mensagem;
-            toast.className = `toast ${tipo} mostrar`;
-            setTimeout(() => {
-                toast.className = 'toast';
-            }, 4000);
-        }
-
-        function mostrarLoading(ativo, texto = 'Carregando...') {
-            const overlay = document.getElementById('loading-overlay');
-            overlay.querySelector('p').textContent = texto;
-            if (ativo) {
-                overlay.classList.add('ativo');
-            } else {
-                overlay.classList.remove('ativo');
-            }
-        }
-
-        function mudarPassoVisual(passo) {
-            document.querySelectorAll('.passo-conteudo').forEach(el => el.classList.remove('ativo'));
-            document.querySelectorAll('.passo-indicador .passo').forEach(el => {
-                el.classList.remove('ativo');
-                if (parseInt(el.getAttribute('data-passo')) <= passo) {
-                    el.classList.add('ativo');
-                }
-            });
-            document.getElementById(`passo-${passo}`).classList.add('ativo');
-        }
-
-        function proximoPasso(passo) {
-            if (passo === 2) {
-                const nome = document.getElementById('nome').value.trim();
-                const telefone = document.getElementById('telefone').value.trim();
-                const email = document.getElementById('email').value.trim();
-
-                if (!nome || !telefone || !email) {
-                    mostrarToast('Preencha todos os campos obrigatórios.', 'erro');
-                    return;
-                }
-                dadosAgendamento.nome = nome;
-                dadosAgendamento.telefone = telefone;
-                dadosAgendamento.email = email;
-            }
-
-            if (passo === 3) {
-                if (!dadosAgendamento.tipoAtendimento) {
-                    mostrarToast('Selecione o tipo de atendimento.', 'erro');
-                    return;
-                }
-                if (dadosAgendamento.tipoAtendimento === 'domiciliar') {
-                    const numero = document.getElementById('numero-endereco').value.trim();
-                    if (!dadosAgendamento.cep || !numero) {
-                        mostrarToast('Preencha o CEP e o número do endereço.', 'erro');
-                        return;
-                    }
-                    dadosAgendamento.numero = numero;
-                    dadosAgendamento.complemento = document.getElementById('complemento-endereco').value.trim();
-                }
-            }
-
-            if (passo === 4) {
-                if (!dadosAgendamento.servico) {
-                    mostrarToast('Selecione um serviço.', 'erro');
-                    return;
-                }
-            }
-
-            if (passo === 5) {
-                const data = document.getElementById('data-agendamento').value;
-                if (!data || !dadosAgendamento.horario) {
-                    mostrarToast('Selecione a data e o horário.', 'erro');
-                    return;
-                }
-                dadosAgendamento.data = data;
-                preencherResumo();
-            }
-
-            mudarPassoVisual(passo);
-        }
-
-        function passoAnterior(passo) {
-            mudarPassoVisual(passo);
-        }
-
-        function selecionarTipo(tipo) {
-            dadosAgendamento.tipoAtendimento = tipo;
-            document.querySelectorAll('.tipo-btn').forEach(btn => btn.classList.remove('selecionado'));
-            document.querySelector(`[data-tipo="${tipo}"]`).classList.add('selecionado');
-
-            if (tipo === 'domiciliar') {
-                document.getElementById('endereco-domicilio').style.display = 'block';
-                document.getElementById('endereco-presencial').style.display = 'none';
-            } else {
-                document.getElementById('endereco-domicilio').style.display = 'none';
-                document.getElementById('endereco-presencial').style.display = 'block';
-            }
-        }
-
-        function buscarCEP() {
-            const cepInput = document.getElementById('cep').value.replace(/\D/g, '');
-            if (cepInput.length !== 8) {
-                mostrarToast('CEP inválido. Digite 8 dígitos.', 'erro');
+            if (!dadosFormulario.nome || !dadosFormulario.telefone || !dadosFormulario.email) {
+                alert('Preencha todos os campos obrigatórios antes de continuar.');
                 return;
             }
-            mostrarLoading(true, 'Buscando CEP...');
-            fetch(`https://viacep.com.br/ws/${cepInput}/json/`)
-                .then(response => response.json())
-                .then(data => {
-                    mostrarLoading(false);
-                    if (data.erro) {
-                        mostrarToast('CEP não encontrado.', 'erro');
+            carregarServicos();
+        }
+
+        if (passo === 3) {
+            dadosFormulario.tipo = document.getElementById('tipo').value;
+            dadosFormulario.servico = document.getElementById('servico').value;
+
+            if (!dadosFormulario.tipo || !dadosFormulario.servico) {
+                alert('Selecione o tipo de atendimento e o serviço.');
+                return;
+            }
+        }
+
+        document.querySelectorAll('.form-step').forEach(el => el.classList.remove('active'));
+        document.getElementById(`step-${passo}`).classList.add('active');
+    }
+
+    function carregarServicos() {
+        const selectServico = document.getElementById('servico');
+        fetch(`${URL_API}?acao=servicos`)
+            .then(res => res.json())
+            .then(res => {
+                if (res.sucesso && res.servicos) {
+                    selectServico.innerHTML = '<option value="">Selecione o serviço...</option>';
+                    res.servicos.forEach(s => {
+                        const opt = document.createElement('option');
+                        opt.value = s.servico;
+                        opt.textContent = s.servico;
+                        selectServico.appendChild(opt);
+                    });
+                } else {
+                    selectServico.innerHTML = '<option value="">Erro ao carregar serviços</option>';
+                }
+            })
+            .catch(() => {
+                selectServico.innerHTML = '<option value="">Erro de conexão</option>';
+            });
+    }
+
+    function carregarHorarios() {
+        const dataInput = document.getElementById('data').value;
+        const grid = document.getElementById('horarios-grid');
+
+        if (!dataInput) return;
+
+        grid.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Carregando...</div>';
+        dadosFormulario.data = dataInput;
+
+        fetch(`${URL_API}?acao=disponibilidade&data=${dataInput}`)
+            .then(res => res.json())
+            .then(res => {
+                grid.innerHTML = '';
+                if (res.sucesso) {
+                    if (res.horarios.length === 0) {
+                        grid.innerHTML = '<p style="grid-column: 1 / -1; color: #dc3545; font-size: 0.9rem;">Nenhum horário disponível para esta data.</p>';
                         return;
                     }
-                    dadosAgendamento.cep = cepInput;
-                    dadosAgendamento.logradouro = data.logradouro;
-                    dadosAgendamento.bairro = data.bairro;
-                    dadosAgendamento.cidade = data.localidade;
-                    dadosAgendamento.estado = data.uf;
 
-                    document.getElementById('end-logradouro').textContent = data.logradouro;
-                    document.getElementById('end-bairro').textContent = data.bairro;
-                    document.getElementById('end-cidade').textContent = data.localidade;
-                    document.getElementById('end-estado').textContent = data.uf;
-                    document.getElementById('endereco-completo').classList.add('visivel');
-                    mostrarToast('Endereço encontrado com sucesso.');
-                })
-                .catch(() => {
-                    mostrarLoading(false);
-                    mostrarToast('Erro ao buscar o CEP.', 'erro');
-                });
-        }
-
-        function selecionarServico(elemento, servico) {
-            dadosAgendamento.servico = servico;
-            document.querySelectorAll('.servico-btn').forEach(btn => btn.classList.remove('selecionado'));
-            elemento.classList.add('selecionado');
-        }
-
-        function atualizarHorarios() {
-            const grid = document.getElementById('horarios-grid');
-            grid.innerHTML = '';
-            const horariosFixos = ['09:00', '10:30', '13:30', '15:00', '16:30', '18:00'];
-            
-            horariosFixos.forEach(horario => {
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'horario-btn';
-                btn.textContent = horario;
-                btn.onclick = () => {
-                    document.querySelectorAll('.horario-btn').forEach(b => b.classList.remove('selecionado'));
-                    btn.classList.add('selecionado');
-                    dadosAgendamento.horario = horario;
-                };
-                grid.appendChild(btn);
-            });
-        }
-
-        function preencherResumo() {
-            document.getElementById('res-nome').textContent = dadosAgendamento.nome;
-            document.getElementById('res-telefone').textContent = dadosAgendamento.telefone;
-            document.getElementById('res-email').textContent = dadosAgendamento.email;
-            document.getElementById('res-tipo').textContent = dadosAgendamento.tipoAtendimento === 'domiciliar' ? 'Domiciliar' : 'Presencial';
-            
-            if (dadosAgendamento.tipoAtendimento === 'domiciliar') {
-                document.getElementById('res-endereco').textContent = `${dadosAgendamento.logradouro}, ${dadosAgendamento.numero} - ${dadosAgendamento.bairro}, ${dadosAgendamento.cidade} - ${dadosAgendamento.estado}`;
-            } else {
-                document.getElementById('res-endereco').textContent = 'Rua da Clínica, 123 - Centro, Guarulhos - SP';
-            }
-
-            document.getElementById('res-servico').textContent = dadosAgendamento.servico;
-            document.getElementById('res-data-hora').textContent = `${dadosAgendamento.data.split('-').reverse().join('/')} às ${dadosAgendamento.horario}`;
-        }
-
-        function finalizarAgendamento() {
-            const btnFinalizar = document.getElementById('btn-finalizar');
-            btnFinalizar.disabled = true;
-            mostrarLoading(true, 'Salvando agendamento...');
-
-            const formData = new FormData();
-            formData.append('nome', dadosAgendamento.nome);
-            formData.append('telefone', dadosAgendamento.telefone);
-            formData.append('email', dadosAgendamento.email);
-            formData.append('tipoAtendimento', dadosAgendamento.tipoAtendimento);
-            formData.append('endereco', document.getElementById('res-endereco').textContent);
-            formData.append('servico', dadosAgendamento.servico);
-            formData.append('data', dadosAgendamento.data);
-            formData.append('horario', dadosAgendamento.horario);
-
-            fetch(scriptURL, {
-                method: 'POST',
-                body: formData,
-                mode: 'no-cors'
+                    res.horarios.forEach(hora => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'horario-btn';
+                        btn.textContent = hora;
+                        btn.onclick = () => {
+                            document.querySelectorAll('.horario-btn').forEach(b => b.classList.remove('selecionado'));
+                            btn.classList.add('selecionado');
+                            dadosFormulario.hora = hora;
+                        };
+                        grid.appendChild(btn);
+                    });
+                } else {
+                    grid.innerHTML = `<p style="grid-column: 1 / -1; color: #dc3545; font-size: 0.9rem;">${res.erro || 'Erro ao carregar horários.'}</p>`;
+                }
             })
-            .then(() => {
-                mostrarLoading(false);
-                mostrarToast('Agendamento realizado com sucesso.');
+            .catch(() => {
+                grid.innerHTML = '<p style="grid-column: 1 / -1; color: #dc3545; font-size: 0.9rem;">Erro de conexão com o servidor.</p>';
+            });
+    }
+
+    function finalizarAgendamento() {
+        if (!dadosFormulario.data || !dadosFormulario.hora) {
+            alert('Selecione uma data e um horário válido.');
+            return;
+        }
+
+        const msgDiv = document.getElementById('mensagem');
+        msgDiv.style.color = '#5c8374';
+        msgDiv.textContent = 'Realizando agendamento...';
+
+        fetch(URL_API, {
+            method: 'POST',
+            body: JSON.stringify(dadosFormulario),
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8'
+            }
+        })
+        .then(res => res.json())
+        .then(res => {
+            if (res.sucesso) {
+                msgDiv.style.color = 'var(--success-color)';
+                msgDiv.textContent = 'Agendamento realizado com sucesso!';
                 setTimeout(() => {
                     window.location.reload();
                 }, 3000);
-            })
-            .catch(error => {
-                mostrarLoading(false);
-                btnFinalizar.disabled = false;
-                console.error('Erro:', error);
-                mostrarToast('Erro ao salvar o agendamento. Tente novamente.', 'erro');
-            });
-        }
-    </script>
+            } else {
+                msgDiv.style.color = 'var(--error-color)';
+                msgDiv.textContent = res.erro || 'Erro ao realizar agendamento.';
+            }
+        })
+        .catch(() => {
+            msgDiv.style.color = 'var(--error-color)';
+            msgDiv.textContent = 'Erro de comunicação ao enviar os dados.';
+        });
+    }
+</script>
+
 </body>
 </html>
