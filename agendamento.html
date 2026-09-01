@@ -290,45 +290,53 @@
     }
 
     function carregarHorarios() {
-        const dataInput = document.getElementById('data').value;
-        const grid = document.getElementById('horarios-grid');
+    const dataInput = document.getElementById('data').value;
+    const grid = document.getElementById('horarios-grid');
 
-        if (!dataInput) return;
+    if (!dataInput) return;
 
-        grid.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Carregando...</div>';
-        dadosFormulario.data = dataInput;
+    grid.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Carregando...</div>';
+    dadosFormulario.data = dataInput;
 
-        fetch(`${URL_API}?acao=disponibilidade&data=${dataInput}`)
-            .then(res => res.json())
-            .then(res => {
-                grid.innerHTML = '';
-                if (res.sucesso) {
-                    if (res.horarios.length === 0) {
-                        grid.innerHTML = '<p style="grid-column: 1 / -1; color: #dc3545; font-size: 0.9rem;">Nenhum horário disponível para esta data.</p>';
-                        return;
-                    }
+    const urlCompleta = `${URL_API}?acao=disponibilidade&data=${dataInput}`;
+    console.log("Buscando URL:", urlCompleta); // Mostra a URL no console
 
-                    res.horarios.forEach(hora => {
-                        const btn = document.createElement('button');
-                        btn.type = 'button';
-                        btn.className = 'horario-btn';
-                        btn.textContent = hora;
-                        btn.onclick = () => {
-                            document.querySelectorAll('.horario-btn').forEach(b => b.classList.remove('selecionado'));
-                            btn.classList.add('selecionado');
-                            dadosFormulario.hora = hora;
-                        };
-                        grid.appendChild(btn);
-                    });
-                } else {
-                    grid.innerHTML = `<p style="grid-column: 1 / -1; color: #dc3545; font-size: 0.9rem;">${res.erro || 'Erro ao carregar horários.'}</p>`;
+    fetch(urlCompleta)
+        .then(res => res.json())
+        .then(res => {
+            console.log("Resposta completa da API:", res); // Mostra o JSON inteiro retornado pelo Apps Script
+            
+            grid.innerHTML = '';
+            if (res.sucesso) {
+                console.log("Horários disponíveis encontrados:", res.horarios);
+                
+                if (res.horarios.length === 0) {
+                    grid.innerHTML = '<p style="grid-column: 1 / -1; color: #dc3545; font-size: 0.9rem;">Nenhum horário disponível para esta data. (Verifique se o dia da semana está ativo na aba Dias e se há horários ativos na aba Horarios).</p>';
+                    return;
                 }
-            })
-            .catch(() => {
-                grid.innerHTML = '<p style="grid-column: 1 / -1; color: #dc3545; font-size: 0.9rem;">Erro de conexão com o servidor.</p>';
-            });
-    }
 
+                res.horarios.forEach(hora => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'horario-btn';
+                    btn.textContent = hora;
+                    btn.onclick = () => {
+                        document.querySelectorAll('.horario-btn').forEach(b => b.classList.remove('selecionado'));
+                        btn.classList.add('selecionado');
+                        dadosFormulario.hora = hora;
+                    };
+                    grid.appendChild(btn);
+                });
+            } else {
+                console.error("Erro retornado pelo script:", res.erro);
+                grid.innerHTML = `<p style="grid-column: 1 / -1; color: #dc3545; font-size: 0.9rem;">${res.erro || 'Erro ao carregar horários.'}</p>`;
+            }
+        })
+        .catch(err => {
+            console.error("Erro de rede ou fetch:", err);
+            grid.innerHTML = '<p style="grid-column: 1 / -1; color: #dc3545; font-size: 0.9rem;">Erro de conexão com o servidor.</p>';
+        });
+}
     function finalizarAgendamento() {
         if (!dadosFormulario.data || !dadosFormulario.hora) {
             alert('Selecione uma data e um horário válido.');
