@@ -1254,12 +1254,18 @@ const MESES = [
     'Dezembro'
 ];
 
+const CACHE_CONFIG_KEY = 'levita_agendamento_config_v2';
+const CACHE_CONFIG_TTL = 10 * 60 * 1000;
+const API_TIMEOUT = 12000;
+const DEBUG = false;
+
 let CONFIG = {
     dias: [],
     horarios: [],
-    servicos: [],
-    agendamentos: []
+    servicos: []
 };
+
+let disponibilidadeRequisicao = 0;
 
 let agendamento = {
     id: '',
@@ -1286,6 +1292,8 @@ let agendamento = {
    ============================================================ */
 
 function addLog(mensagem, tipo = 'info') {
+
+    if (!DEBUG) return;
 
     const log = document.getElementById('log');
 
@@ -1426,84 +1434,53 @@ function atualizarStatusAPI(ok, texto) {
 
 async function apiGet(acao, parametros = {}) {
 
-    const url =
-        new URL(GOOGLE_APPS_SCRIPT_URL);
-
-    url.searchParams.set(
-        'acao',
-        acao
-    );
+    const url = new URL(GOOGLE_APPS_SCRIPT_URL);
+    url.searchParams.set('acao', acao);
 
     Object.keys(parametros).forEach(function(chave) {
-
-        if (
-            parametros[chave] !== undefined &&
-            parametros[chave] !== null
-        ) {
-
-            url.searchParams.set(
-                chave,
-                parametros[chave]
-            );
-
+        if (parametros[chave] !== undefined && parametros[chave] !== null) {
+            url.searchParams.set(chave, parametros[chave]);
         }
-
     });
 
-    addLog(
-        '📡 GET ' + url.toString(),
-        'info'
-    );
+    addLog('📡 GET [' + acao + '] ' + url.toString(), 'info');
 
-    const response =
-        await fetch(
-            url.toString(),
-            {
-                method: 'GET',
-                cache: 'no-store'
-            }
-        );
+    const controller = new AbortController();
+    const timeoutId = setTimeout(function() {
+        controller.abort();
+    }, API_TIMEOUT);
 
-    addLog(
-        '📡 HTTP ' + response.status,
-        response.ok ? 'sucesso' : 'erro'
-    );
-
-    const texto =
-        await response.text();
-
-    addLog(
-        '📥 Resposta recebida: ' +
-        texto.substring(0, 500),
-        'info'
-    );
-
-    if (!response.ok) {
-
-        throw new Error(
-            'HTTP ' +
-            response.status +
-            ': ' +
-            texto
-        );
-
-    }
-
-    let dados;
+    let response;
+    let texto = '';
 
     try {
-
-        dados = JSON.parse(texto);
-
-    } catch (e) {
-
-        throw new Error(
-            'A API não retornou JSON válido.'
-        );
-
+        response = await fetch(url.toString(), {
+            method: 'GET',
+            cache: 'no-store',
+            signal: controller.signal
+        });
+        texto = await response.text();
+    } catch (erro) {
+        if (erro.name === 'AbortError') {
+            throw new Error('Tempo limite excedido ao consultar [' + acao + '].');
+        }
+        throw erro;
+    } finally {
+        clearTimeout(timeoutId);
     }
 
-    return dados;
+    addLog('📡 [' + acao + '] HTTP ' + response.status, response.ok ? 'sucesso' : 'erro');
+    addLog('📥 [' + acao + '] ' + texto.substring(0, 500), 'info');
+
+    if (!response.ok) {
+        throw new Error('[' + acao + '] HTTP ' + response.status + ': ' + texto.substring(0, 250));
+    }
+
+    try {
+        return JSON.parse(texto);
+    } catch (e) {
+        throw new Error('A API [' + acao + '] não retornou JSON válido.');
+    }
 }
 
 /* ============================================================
@@ -1711,139 +1688,118 @@ function normalizarData(valor) {
    CARREGAR CONFIGURAÇÕES
    ============================================================ */
 
+function obterConfigCache() {
+    try {
+        const bruto = localStorage.getItem(CACHE_CONFIG_KEY);
+        if (!bruto) return null;
+        const cache = JSON.parse(bruto);
+        if (!cache || !cache.timestamp || !cache.dados) return null;
+        if (Date.now() - cache.timestamp > CACHE_CONFIG_TTL) {
+            localStorage.removeItem(CACHE_CONFIG_KEY);
+            return null;
+        }
+        return cache.dados;
+    } catch (e) {
+        return null;
+    }
+}
+
+function salvarConfigCache(dados) {
+    try {
+        localStorage.setItem(CACHE_CONFIG_KEY, JSON.stringify({
+            timestamp: Date.now(),
+            dados: dados
+        }));
+    } catch (e) {}
+}
+
+function aplicarConfiguracoes(dados) {
+    if (!dados || typeof dados !== 'object') {
+        throw new Error('Configuração da agenda inválida.');
+    }
+
+    const dias = dados.dias || dados.dadosDias || [];
+    const horarios = dados.horarios || dados.dadosHorarios || [];
+    const servicos = dados.servicos || dados.dadosServicos || [];
+
+    if (!Array.isArray(dias) || !Array.isArray(horarios) || !Array.isArray(servicos)) {
+        throw new Error('A API retornou uma configuração incompleta.');
+    }
+
+    CONFIG.dias = dias;
+    CONFIG.horarios = horarios;
+    CONFIG.servicos = servicos;
+
+    prepararDias();
+    prepararHorarios();
+    renderizarServicos();
+    configurarData();
+}
+
+async function buscarConfiguracoesAPI() {
+    const resultados = await Promise.all([
+        apiGet('dias'),
+        apiGet('horarios'),
+        apiGet('servicos')
+    ]);
+
+    const nomes = ['dias', 'horarios', 'servicos'];
+    resultados.forEach(function(resposta, indice) {
+        if (resposta && resposta.sucesso === false) {
+            throw new Error(
+                'Falha em [' + nomes[indice] + ']: ' +
+                (resposta.mensagem || resposta.erro || 'Apps Script informou um erro.')
+            );
+        }
+    });
+
+    return {
+        dias: resultados[0].dias || resultados[0].dados || [],
+        horarios: resultados[1].horarios || resultados[1].dados || [],
+        servicos: resultados[2].servicos || resultados[2].dados || []
+    };
+}
+
 async function carregarConfiguracoes() {
+    logEtapa('0', '🚀 INICIANDO CONEXÃO COM GOOGLE PLANILHAS', 'info');
 
-    logEtapa(
-        '0',
-        '🚀 INICIANDO CONEXÃO COM GOOGLE PLANILHAS',
-        'info'
-    );
+    const cache = obterConfigCache();
 
-    addLog(
-        '🔗 Endpoint Apps Script configurado.',
-        'info'
-    );
+    if (cache) {
+        try {
+            aplicarConfiguracoes(cache);
+            atualizarStatusAPI(true, 'Agenda carregada');
+            esconderLoading();
+            addLog('⚡ Configuração carregada do cache local.', 'sucesso');
+        } catch (erroCache) {
+            try { localStorage.removeItem(CACHE_CONFIG_KEY); } catch (e) {}
+        }
+    }
 
-    addLog(
-        '📊 Banco de dados: Google Planilhas',
-        'info'
-    );
-
-    mostrarLoading(
-        'Carregando agenda...'
-    );
+    if (!cache) mostrarLoading('Carregando agenda...');
 
     try {
+        const dados = await buscarConfiguracoesAPI();
+        aplicarConfiguracoes(dados);
+        salvarConfigCache(dados);
 
-        // Carrega toda a base necessária para montar a agenda de uma vez.
-        // A tela não precisa consultar a API novamente ao entrar na etapa 4.
-        const resultados = await Promise.all([
-            apiGet('dias'),
-            apiGet('horarios'),
-            apiGet('servicos'),
-            apiGet('agendamentos')
-        ]);
+        atualizarStatusAPI(true, 'Google Planilhas conectado');
+        addLog('📅 Dias recebidos: ' + CONFIG.dias.length, 'sucesso');
+        addLog('🕐 Horários recebidos: ' + CONFIG.horarios.length, 'sucesso');
+        addLog('💆 Serviços recebidos: ' + CONFIG.servicos.length, 'sucesso');
+        esconderLoading();
+    } catch (erro) {
+        esconderLoading();
 
-        const respostaDias = resultados[0];
-        const respostaHorarios = resultados[1];
-        const respostaServicos = resultados[2];
-        const respostaAgendamentos = resultados[3];
-
-        [respostaDias, respostaHorarios, respostaServicos].forEach(
-            function(resposta) {
-                if (resposta && resposta.sucesso === false) {
-                    throw new Error(
-                        resposta.mensagem ||
-                        resposta.erro ||
-                        'Apps Script informou um erro.'
-                    );
-                }
-            }
-        );
-
-        CONFIG.dias =
-            respostaDias.dias ||
-            respostaDias.dados ||
-            [];
-
-        CONFIG.horarios =
-            respostaHorarios.horarios ||
-            respostaHorarios.dados ||
-            [];
-
-        CONFIG.servicos =
-            respostaServicos.servicos ||
-            respostaServicos.dados ||
-            [];
-
-        CONFIG.agendamentos =
-            respostaAgendamentos.agendamentos ||
-            respostaAgendamentos.dados ||
-            respostaAgendamentos.data ||
-            [];
-
-        if (!Array.isArray(CONFIG.agendamentos)) {
-            CONFIG.agendamentos = [];
+        if (cache) {
+            atualizarStatusAPI(true, 'Agenda disponível offline');
+            addLog('⚠️ Falha ao atualizar a agenda: ' + erro.message, 'warning');
+            return;
         }
 
-        addLog(
-            '📌 Agendamentos recebidos: ' + CONFIG.agendamentos.length,
-            'sucesso'
-        );
-
-        addLog(
-            '📅 Dias recebidos: ' + CONFIG.dias.length,
-            'sucesso'
-        );
-
-        addLog(
-            '🕐 Horários recebidos: ' + CONFIG.horarios.length,
-            'sucesso'
-        );
-
-        addLog(
-            '💆 Serviços recebidos: ' + CONFIG.servicos.length,
-            'sucesso'
-        );
-
-        prepararDias();
-        prepararHorarios();
-        renderizarServicos();
-
-        configurarData();
-
-        atualizarStatusAPI(
-            true,
-            'Google Planilhas conectado'
-        );
-
-        logEtapa(
-            '0',
-            '✅ CONFIGURAÇÃO CARREGADA COM SUCESSO',
-            'sucesso'
-        );
-
-        esconderLoading();
-
-    } catch (erro) {
-
-        esconderLoading();
-
-        atualizarStatusAPI(
-            false,
-            'Erro ao conectar à agenda'
-        );
-
-        addLog(
-            '❌ ERRO AO CARREGAR CONFIGURAÇÕES: ' +
-            erro.message,
-            'erro'
-        );
-
-        mostrarToast(
-            'Não foi possível carregar a agenda. Verifique sua conexão.',
-            'erro'
-        );
+        atualizarStatusAPI(false, 'Erro ao conectar à agenda');
+        addLog('❌ ERRO AO CARREGAR CONFIGURAÇÕES: ' + erro.message, 'erro');
+        mostrarToast('Não foi possível carregar a agenda. Tente novamente.', 'erro');
     }
 }
 
@@ -2556,127 +2512,25 @@ function obterProximosDiasDisponiveis() {
    ============================================================ */
 
 function obterHorariosDisponiveisLocal(dataStr) {
-
-    if (!dataStr) {
-        return [];
-    }
+    if (!dataStr) return [];
 
     const partesData = dataStr.split('-');
-    if (partesData.length !== 3) {
-        return [];
-    }
+    if (partesData.length !== 3) return [];
 
     const data = new Date(
         Number(partesData[0]),
         Number(partesData[1]) - 1,
         Number(partesData[2])
     );
-
     data.setHours(0, 0, 0, 0);
 
-    if (!diaEstaAtivo(data)) {
-        return [];
-    }
+    if (!diaEstaAtivo(data)) return [];
 
     const hoje = new Date();
     hoje.setHours(0, 0, 0, 0);
+    if (data < hoje) return [];
 
-    if (data < hoje) {
-        return [];
-    }
-
-    const horarios = CONFIG.horariosAtivos || [];
-    const bloqueios = [];
-
-    for (let i = 0; i < CONFIG.agendamentos.length; i++) {
-
-        const item = CONFIG.agendamentos[i];
-
-        if (!item || typeof item !== 'object') {
-            continue;
-        }
-
-        const itemData = normalizarData(
-            item.data || item.Data || item.date || ''
-        );
-
-        if (itemData !== dataStr) {
-            continue;
-        }
-
-        const status = normalizarTexto(
-            item.status || item.Status || ''
-        ).toLowerCase();
-
-        if (
-            status === 'cancelado' ||
-            status === 'cancelada' ||
-            status === 'cancelled'
-        ) {
-            continue;
-        }
-
-        const hora = normalizarHora(
-            item.hora || item.Hora || item.horario || item.Horario || ''
-        );
-
-        if (!hora) {
-            continue;
-        }
-
-        const partes = hora.split(':');
-        const inicio =
-            Number(partes[0]) * 60 + Number(partes[1]);
-
-        // Serviço de 60 min + intervalo de 30 min = bloco de 90 min.
-        bloqueios.push({
-            inicio: inicio,
-            fim: inicio + 90
-        });
-    }
-
-    const disponiveis = [];
-
-    for (let i = 0; i < horarios.length; i++) {
-
-        const horario = normalizarHora(horarios[i]);
-        const partes = horario.split(':');
-        const inicio =
-            Number(partes[0]) * 60 + Number(partes[1]);
-        const fim = inicio + 90;
-
-        // Hoje, horários cujo início já passou não podem ser escolhidos.
-        if (dataStr === hojeLocalISO()) {
-            const agora = new Date();
-            const minutosAgora =
-                agora.getHours() * 60 + agora.getMinutes();
-
-            if (inicio <= minutosAgora) {
-                continue;
-            }
-        }
-
-        let conflita = false;
-
-        for (let j = 0; j < bloqueios.length; j++) {
-
-            const bloqueio = bloqueios[j];
-
-            if (
-                inicio < bloqueio.fim &&
-                fim > bloqueio.inicio
-            ) {
-                conflita = true;
-                break;
-            }
-        }
-
-        if (!conflita) {
-            disponiveis.push(horario);
-        }
-    }
-
-    return disponiveis;
+    return (CONFIG.horariosAtivos || []).map(normalizarHora).filter(Boolean);
 }
 
 async function consultarDisponibilidadeOnline(dataStr) {
@@ -2709,128 +2563,102 @@ async function consultarDisponibilidadeOnline(dataStr) {
    RENDERIZAR HORÁRIOS
    ============================================================ */
 
-function gerarHorarios(dataStr) {
-
+async function gerarHorarios(dataStr) {
     const grid = document.getElementById('horarios-grid');
-
     if (!grid) return;
 
     grid.innerHTML = '';
     agendamento.horario = '';
 
     if (!dataStr) {
-        grid.innerHTML =
-            '<p style="grid-column:1/-1;text-align:center;padding:20px;">' +
-            'Selecione um dia.' +
-            '</p>';
+        grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;padding:20px;">Selecione um dia.</p>';
         return;
     }
 
     const partes = dataStr.split('-');
-    const data = new Date(
-        Number(partes[0]),
-        Number(partes[1]) - 1,
-        Number(partes[2])
-    );
-
+    const data = new Date(Number(partes[0]), Number(partes[1]) - 1, Number(partes[2]));
     const diaNome = DIAS_SEMANA[data.getDay()];
 
-    addLog(
-        '📅 Montando agenda local para ' + dataStr + ', ' + diaNome,
-        'info'
-    );
-
     if (!diaEstaAtivo(data)) {
-        grid.innerHTML =
-            '<p style="grid-column:1/-1;text-align:center;padding:20px;color:#dc3545;font-weight:600;">' +
-            '⚠️ Não há atendimento neste dia.' +
-            '</p>';
+        grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;padding:20px;color:#dc3545;font-weight:600;">⚠️ Não há atendimento neste dia.</p>';
         return;
     }
 
-    // A agenda já foi carregada na inicialização.
-    // Nenhuma consulta à API é feita ao abrir ou trocar a data.
-    const horariosDisponiveis = obterHorariosDisponiveisLocal(dataStr);
-    const horarios = CONFIG.horariosAtivos || [];
+    const requisicaoAtual = ++disponibilidadeRequisicao;
 
-    if (!horarios.length) {
-        grid.innerHTML =
-            '<p style="grid-column:1/-1;text-align:center;color:#dc3545;">' +
-            'Nenhum horário ativo foi encontrado na aba Horarios.' +
-            '</p>';
-        return;
-    }
+    grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;padding:20px;"><i class="fas fa-spinner fa-spin"></i> Consultando horários...</p>';
 
-    const hoje = hojeLocalISO();
-    const agora = new Date();
-    let totalDisponiveis = 0;
+    try {
+        const horariosDisponiveis = await consultarDisponibilidadeOnline(dataStr);
+        if (requisicaoAtual !== disponibilidadeRequisicao) return;
 
-    horarios.forEach(function(horario) {
+        const horarios = CONFIG.horariosAtivos || [];
+        grid.innerHTML = '';
 
-        horario = normalizarHora(horario);
-
-        const botao = document.createElement('button');
-        botao.type = 'button';
-        botao.className = 'horario-btn';
-        botao.textContent = horario;
-        botao.dataset.horario = horario;
-
-        let passado = false;
-
-        if (dataStr === hoje) {
-            const partesHora = horario.split(':');
-            const hora = Number(partesHora[0]);
-            const minuto = Number(partesHora[1]);
-
-            passado =
-                hora < agora.getHours() ||
-                (hora === agora.getHours() && minuto <= agora.getMinutes());
+        if (!horarios.length) {
+            grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#dc3545;">Nenhum horário ativo foi encontrado na aba Horarios.</p>';
+            return;
         }
 
-        const disponivel = horariosDisponiveis.includes(horario);
+        const hoje = hojeLocalISO();
+        const agora = new Date();
+        let totalDisponiveis = 0;
 
-        if (passado) {
-            botao.disabled = true;
-            botao.classList.add('passado');
-            botao.title = 'Horário já passou';
-        } else if (!disponivel) {
-            botao.disabled = true;
-            botao.classList.add('ocupado');
-            botao.title = 'Horário indisponível';
-        } else {
-            totalDisponiveis++;
+        horarios.forEach(function(horario) {
+            horario = normalizarHora(horario);
+            const botao = document.createElement('button');
+            botao.type = 'button';
+            botao.className = 'horario-btn';
+            botao.textContent = horario;
+            botao.dataset.horario = horario;
 
-            botao.addEventListener('click', function() {
-                document.querySelectorAll('.horario-btn').forEach(function(btn) {
-                    btn.classList.remove('selecionado');
+            let passado = false;
+            if (dataStr === hoje) {
+                const partesHora = horario.split(':');
+                const hora = Number(partesHora[0]);
+                const minuto = Number(partesHora[1]);
+                passado = hora < agora.getHours() || (hora === agora.getHours() && minuto <= agora.getMinutes());
+            }
+
+            const disponivel = horariosDisponiveis.includes(horario);
+
+            if (passado) {
+                botao.disabled = true;
+                botao.classList.add('passado');
+                botao.title = 'Horário já passou';
+            } else if (!disponivel) {
+                botao.disabled = true;
+                botao.classList.add('ocupado');
+                botao.title = 'Horário indisponível';
+            } else {
+                totalDisponiveis++;
+                botao.addEventListener('click', function() {
+                    document.querySelectorAll('.horario-btn').forEach(function(btn) {
+                        btn.classList.remove('selecionado');
+                    });
+                    this.classList.add('selecionado');
+                    agendamento.horario = this.dataset.horario;
+                    addLog('✅ Horário selecionado: ' + agendamento.horario, 'sucesso');
                 });
+            }
 
-                this.classList.add('selecionado');
-                agendamento.horario = this.dataset.horario;
+            grid.appendChild(botao);
+        });
 
-                addLog(
-                    '✅ Horário selecionado: ' + agendamento.horario,
-                    'sucesso'
-                );
-            });
+        addLog('📊 [' + dataStr + ', ' + diaNome + '] Horários disponíveis: ' + totalDisponiveis + ' de ' + horarios.length, totalDisponiveis ? 'sucesso' : 'warning');
+
+        if (totalDisponiveis === 0) {
+            const mensagem = document.createElement('p');
+            mensagem.style.cssText = 'grid-column:1/-1;text-align:center;padding:20px;color:#dc3545;font-weight:600;';
+            mensagem.textContent = '⚠️ Não há horários disponíveis nesta data.';
+            grid.appendChild(mensagem);
         }
+    } catch (erro) {
+        if (requisicaoAtual !== disponibilidadeRequisicao) return;
 
-        grid.appendChild(botao);
-    });
-
-    addLog(
-        '📊 Horários disponíveis: ' + totalDisponiveis + ' de ' + horarios.length +
-        ' (base local carregada na inicialização)',
-        totalDisponiveis ? 'sucesso' : 'warning'
-    );
-
-    if (totalDisponiveis === 0) {
-        const mensagem = document.createElement('p');
-        mensagem.style.cssText =
-            'grid-column:1/-1;text-align:center;padding:20px;color:#dc3545;font-weight:600;';
-        mensagem.textContent =
-            '⚠️ Não há horários disponíveis nesta data.';
-        grid.appendChild(mensagem);
+        grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;padding:20px;color:#dc3545;font-weight:600;">Não foi possível consultar os horários. Tente novamente.</p>';
+        addLog('❌ Erro ao consultar disponibilidade de ' + dataStr + ': ' + erro.message, 'erro');
+        mostrarToast('Não foi possível carregar os horários desta data.', 'erro');
     }
 }
 
@@ -3253,7 +3081,7 @@ async function validarPasso4() {
             'erro'
         );
 
-        gerarHorarios(data);
+        await gerarHorarios(data);
 
         return false;
     }
@@ -3440,7 +3268,7 @@ async function confirmarAgendamento() {
                 'erro'
             );
 
-            gerarHorarios(
+            await gerarHorarios(
                 agendamento.data
             );
 
@@ -3825,6 +3653,9 @@ document.addEventListener(
             '📊 Banco: Google Planilhas',
             'info'
         );
+
+        const painelLog = document.querySelector('.log-panel');
+        if (painelLog && !DEBUG) painelLog.style.display = 'none';
 
         document
             .querySelectorAll(
