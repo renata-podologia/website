@@ -513,7 +513,7 @@
         }
 
         .log-panel {
-            display: none;
+            display: block;
             margin-top: 35px;
             border-radius: 14px;
             overflow: hidden;
@@ -1222,10 +1222,10 @@
 <script>
 const GOOGLE_APPS_SCRIPT_URL='https://script.google.com/macros/s/AKfycbxwTxWyiIGJ3nHc8EbT0PcfVeYAb3mKsK25TaIr2EVaGq7oTDU3S4ftj12MAnGPohY/exec';
 const API_CEP_URL='https://viacep.com.br/ws/';
-const CACHE_CONFIG_KEY='levita_agendamento_config_v3';
+const CACHE_CONFIG_KEY='levita_agendamento_config_v4';
 const CACHE_CONFIG_TTL=10*60*1000;
 const API_TIMEOUT=15000;
-const DEBUG=false;
+const DEBUG=true;
 
 const DIAS_SEMANA=['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
 const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -1245,7 +1245,7 @@ function addLog(mensagem,tipo='info'){
     log.appendChild(item); log.scrollTop=log.scrollHeight;
     console.log('['+tipo.toUpperCase()+']',mensagem);
 }
-function limparLog(){const log=document.getElementById('log');if(log)log.innerHTML='';}
+function limparLog(){const log=document.getElementById('log');if(log)log.innerHTML='';addLog('🧹 Log limpo.','info');}
 function logObjeto(titulo,objeto){try{addLog(titulo+': '+JSON.stringify(objeto),'info');}catch(e){}}
 function logEtapa(etapa,mensagem,tipo='info'){addLog('ETAPA '+etapa+': '+mensagem,tipo);}
 
@@ -1268,6 +1268,7 @@ function atualizarStatusAPI(ok,texto){
 }
 
 async function apiGet(acao,parametros={}){
+    addLog('🔎 Iniciando requisição: '+acao,'info');
     const url=new URL(GOOGLE_APPS_SCRIPT_URL);
     url.searchParams.set('acao',acao);
     Object.keys(parametros).forEach(chave=>{
@@ -1279,10 +1280,12 @@ async function apiGet(acao,parametros={}){
         addLog('📡 GET '+acao,'info');
         const response=await fetch(url.toString(),{method:'GET',cache:'no-store',signal:controller.signal});
         const texto=await response.text();
+        addLog('📥 HTTP '+response.status+' | '+acao+' | '+texto.substring(0,1200),'info');
         if(!response.ok)throw new Error('HTTP '+response.status+' ao consultar "'+acao+'".');
         let dados;
-        try{dados=JSON.parse(texto);}catch(e){throw new Error('A API não retornou JSON válido para "'+acao+'".');}
+        try{dados=JSON.parse(texto); addLog('🧩 JSON '+acao+' recebido com sucesso.','sucesso');}catch(e){throw new Error('A API não retornou JSON válido para "'+acao+'".');}
         if(dados&&dados.sucesso===false)throw new Error(dados.erro||dados.mensagem||'A API informou um erro.');
+        addLog('📦 Dados '+acao+': '+JSON.stringify(dados).substring(0,2000),'info');
         return dados;
     }catch(erro){
         if(erro&&erro.name==='AbortError')throw new Error('Tempo limite excedido ao consultar a API.');
@@ -1302,6 +1305,7 @@ async function apiPost(acao,dados){
             signal:controller.signal
         });
         const texto=await response.text();
+        addLog('📥 HTTP '+response.status+' | '+acao+' | '+texto.substring(0,1200),'info');
         if(!response.ok)throw new Error('HTTP '+response.status+' ao salvar o agendamento.');
         let resposta;
         try{resposta=JSON.parse(texto);}catch(e){throw new Error('A API não retornou JSON válido após o salvamento.');}
@@ -1344,21 +1348,34 @@ function salvarConfigCache(dados){try{localStorage.setItem(CACHE_CONFIG_KEY,JSON
 function limparConfigCache(){try{localStorage.removeItem(CACHE_CONFIG_KEY);}catch(e){}}
 
 async function carregarConfiguracoes(){
+    addLog('🚀 INICIANDO CARREGAMENTO DA CONFIGURAÇÃO','info');
+    addLog('🔗 API: '+GOOGLE_APPS_SCRIPT_URL,'info');
     mostrarLoading('Carregando agenda...');
     try{
         let resposta=obterConfigCache();
+        if(resposta){ addLog('💾 Configuração carregada do cache local.','warning'); }
         if(!resposta) {
+            addLog('🌐 Consultando endpoint configuracao...','info');
             resposta=await apiGet('configuracao');
             if(!resposta||resposta.sucesso!==true)throw new Error('Resposta inválida da configuração da agenda.');
+            addLog('✅ Endpoint configuracao respondeu.','sucesso');
             salvarConfigCache(resposta);
         }
+        addLog('📅 Dias recebidos: '+JSON.stringify(resposta.dias||[]),'sucesso');
+        addLog('🕐 Horários recebidos: '+JSON.stringify(resposta.horarios||[]),'sucesso');
+        addLog('💆 Serviços recebidos: '+JSON.stringify(resposta.servicos||[]),'sucesso');
         CONFIG.dias=Array.isArray(resposta.dias)?resposta.dias:[];
         CONFIG.horarios=Array.isArray(resposta.horarios)?resposta.horarios:[];
         CONFIG.servicos=Array.isArray(resposta.servicos)?resposta.servicos:[];
         if(!CONFIG.dias.length)throw new Error('A API não retornou os dias de atendimento.');
         if(!CONFIG.horarios.length)throw new Error('A API não retornou os horários de atendimento.');
         if(!CONFIG.servicos.length)throw new Error('A API não retornou os serviços.');
-        prepararDias();prepararHorarios();renderizarServicos();configurarData();
+        addLog('📊 CONFIG.servicos.length = '+CONFIG.servicos.length,'info');
+        prepararDias();prepararHorarios();
+        addLog('🎨 Chamando renderizarServicos()...','info');
+        renderizarServicos();
+        addLog('📅 Chamando configurarData()...','info');
+        configurarData();
         atualizarStatusAPI(true,'Agenda conectada');esconderLoading();
     }catch(erro){
         esconderLoading();atualizarStatusAPI(false,'Erro ao conectar à agenda');
@@ -1402,18 +1419,23 @@ function prepararHorarios(){
 }
 
 function renderizarServicos(){
-    const container=document.getElementById('servicos-escolha');if(!container)return;
+    addLog('💆 renderizarServicos() iniciado.','info');
+    const container=document.getElementById('servicos-escolha');
+    if(!container){addLog('❌ Elemento #servicos-escolha não encontrado no HTML.','erro');return;}
+    addLog('📦 Serviços para renderizar: '+CONFIG.servicos.length,'info');
     container.innerHTML='';
     if(!CONFIG.servicos.length){
         container.innerHTML='<p style="grid-column:1/-1;text-align:center;color:#dc3545;">Nenhum serviço disponível.</p>';return;
     }
-    CONFIG.servicos.forEach(item=>{
+    CONFIG.servicos.forEach((item,index)=>{
         let nome='',descricao='';
         if(item&&typeof item==='object'){
             nome=item.nome||item.Nome||item.servico||item.Servico||'';
             descricao=item.descricao||item.Descrição||'';
         }else nome=String(item);
-        nome=normalizarTexto(nome);if(!nome)return;
+        nome=normalizarTexto(nome);
+        if(!nome){addLog('⚠️ Serviço ['+index+'] ignorado porque o nome ficou vazio.','warning');return;}
+        addLog('✅ Renderizando serviço: '+nome,'sucesso');
         const botao=document.createElement('button');
         botao.type='button';botao.className='servico-btn';botao.dataset.servico=nome;
         botao.innerHTML='<i class="fas fa-shoe-prints"></i>'+escapeHTML(nome)+(descricao?'<span class="servico-descricao">'+escapeHTML(descricao)+'</span>':'');
@@ -1423,6 +1445,7 @@ function renderizarServicos(){
         });
         container.appendChild(botao);
     });
+    addLog('🎉 Serviços renderizados: '+container.querySelectorAll('.servico-btn').length,'sucesso');
 }
 
 function configurarData(){
@@ -1765,6 +1788,7 @@ document.addEventListener('DOMContentLoaded',function(){
             else this.value='('+v.substring(0,2)+') '+v.substring(2,7)+'-'+v.substring(7);
         });
     }
+    addLog('🚀 HTML carregado e DOM pronto.','sucesso');
     carregarConfiguracoes();
 });
 
