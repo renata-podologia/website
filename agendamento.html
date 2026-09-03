@@ -513,6 +513,7 @@
         }
 
         .log-panel {
+            display: none;
             margin-top: 35px;
             border-radius: 14px;
             overflow: hidden;
@@ -1219,2667 +1220,556 @@
 </div>
 
 <script>
-/* ============================================================
-   CONFIGURAÇÃO
-   ============================================================ */
+const GOOGLE_APPS_SCRIPT_URL='https://script.google.com/macros/s/AKfycbxwTxWyiIGJ3nHc8EbT0PcfVeYAb3mKsK25TaIr2EVaGq7oTDU3S4ftj12MAnGPohY/exec';
+const API_CEP_URL='https://viacep.com.br/ws/';
+const CACHE_CONFIG_KEY='levita_agendamento_config_v3';
+const CACHE_CONFIG_TTL=10*60*1000;
+const API_TIMEOUT=15000;
+const DEBUG=false;
 
-const GOOGLE_APPS_SCRIPT_URL =
-    'https://script.google.com/macros/s/AKfycbwLVYEJNGKoOagsn4EzvMlRGyxzrrYdu0sU7ooNIYsfz-kyE1KCaiQDy_tWQ8Fz4vA/exec';
+const DIAS_SEMANA=['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
-const API_CEP_URL =
-    'https://viacep.com.br/ws/';
+let CONFIG={dias:[],horarios:[],servicos:[],diasAtivos:[],horariosAtivos:[]};
+let agendamento={id:'',data:'',horario:'',nome:'',telefone:'',email:'',tipo:'',servico:'',endereco:'',numero:'',complemento:'',cep:'',logradouro:'',bairro:'',cidade:'',uf:'',status:'Pendente'};
+let disponibilidadeRequisicao=0;
 
-const DIAS_SEMANA = [
-    'Domingo',
-    'Segunda-feira',
-    'Terça-feira',
-    'Quarta-feira',
-    'Quinta-feira',
-    'Sexta-feira',
-    'Sábado'
-];
+function addLog(mensagem,tipo='info'){
+    if(!DEBUG){console.log('['+tipo.toUpperCase()+']',mensagem);return;}
+    const log=document.getElementById('log'); if(!log)return;
+    const agora=new Date();
+    const hora=String(agora.getHours()).padStart(2,'0')+':'+String(agora.getMinutes()).padStart(2,'0')+':'+String(agora.getSeconds()).padStart(2,'0');
+    const item=document.createElement('div');
+    item.className='log-item '+tipo;
+    item.textContent='['+hora+'] '+mensagem;
+    log.appendChild(item); log.scrollTop=log.scrollHeight;
+    console.log('['+tipo.toUpperCase()+']',mensagem);
+}
+function limparLog(){const log=document.getElementById('log');if(log)log.innerHTML='';}
+function logObjeto(titulo,objeto){try{addLog(titulo+': '+JSON.stringify(objeto),'info');}catch(e){}}
+function logEtapa(etapa,mensagem,tipo='info'){addLog('ETAPA '+etapa+': '+mensagem,tipo);}
 
-const MESES = [
-    'Janeiro',
-    'Fevereiro',
-    'Março',
-    'Abril',
-    'Maio',
-    'Junho',
-    'Julho',
-    'Agosto',
-    'Setembro',
-    'Outubro',
-    'Novembro',
-    'Dezembro'
-];
-
-const CACHE_CONFIG_KEY = 'levita_agendamento_config_v2';
-const CACHE_CONFIG_TTL = 10 * 60 * 1000;
-const API_TIMEOUT = 12000;
-const DEBUG = false;
-
-let CONFIG = {
-    dias: [],
-    horarios: [],
-    servicos: []
-};
-
-let disponibilidadeRequisicao = 0;
-
-let agendamento = {
-    id: '',
-    data: '',
-    horario: '',
-    nome: '',
-    telefone: '',
-    email: '',
-    tipo: '',
-    servico: '',
-    endereco: '',
-    numero: '',
-    complemento: '',
-    cep: '',
-    logradouro: '',
-    bairro: '',
-    cidade: '',
-    uf: '',
-    status: 'Pendente'
-};
-
-/* ============================================================
-   LOG
-   ============================================================ */
-
-function addLog(mensagem, tipo = 'info') {
-
-    if (!DEBUG) return;
-
-    const log = document.getElementById('log');
-
-    if (!log) return;
-
-    const agora = new Date();
-
-    const hora =
-        String(agora.getHours()).padStart(2, '0') +
-        ':' +
-        String(agora.getMinutes()).padStart(2, '0') +
-        ':' +
-        String(agora.getSeconds()).padStart(2, '0');
-
-    const item = document.createElement('div');
-
-    item.className = 'log-item ' + tipo;
-
-    item.textContent =
-        '[' + hora + '] ' + mensagem;
-
-    log.appendChild(item);
-
-    log.scrollTop = log.scrollHeight;
-
-    console.log(
-        '[' + tipo.toUpperCase() + ']',
-        mensagem
-    );
+function mostrarLoading(texto){
+    const overlay=document.getElementById('loading-overlay');
+    const textoEl=document.getElementById('loading-text');
+    if(textoEl)textoEl.textContent=texto||'Carregando...';
+    if(overlay)overlay.classList.remove('oculto');
+}
+function esconderLoading(){const el=document.getElementById('loading-overlay');if(el)el.classList.add('oculto');}
+function mostrarToast(mensagem,tipo='info'){
+    const toast=document.getElementById('toast');if(!toast)return;
+    toast.textContent=mensagem;toast.className='toast visivel '+tipo;
+    setTimeout(()=>toast.classList.remove('visivel'),4000);
+}
+function atualizarStatusAPI(ok,texto){
+    const el=document.getElementById('api-status');if(!el)return;
+    el.className='api-status '+(ok?'ok':'erro');
+    el.innerHTML='<i class="fas fa-circle"></i><span>'+escapeHTML(texto)+'</span>';
 }
 
-function limparLog() {
-    const log = document.getElementById('log');
-
-    if (log) {
-        log.innerHTML = '';
-    }
-}
-
-function logObjeto(titulo, objeto) {
-
-    try {
-
-        addLog(
-            titulo + ': ' +
-            JSON.stringify(objeto),
-            'info'
-        );
-
-    } catch (e) {
-
-        addLog(
-            titulo + ': [objeto não serializável]',
-            'warning'
-        );
-
-    }
-}
-
-/* ============================================================
-   LOADING
-   ============================================================ */
-
-function mostrarLoading(texto) {
-
-    const overlay =
-        document.getElementById('loading-overlay');
-
-    const textoEl =
-        document.getElementById('loading-text');
-
-    if (textoEl) {
-        textoEl.textContent =
-            texto || 'Carregando...';
-    }
-
-    if (overlay) {
-        overlay.classList.remove('oculto');
-    }
-}
-
-function esconderLoading() {
-
-    const overlay =
-        document.getElementById('loading-overlay');
-
-    if (overlay) {
-        overlay.classList.add('oculto');
-    }
-}
-
-/* ============================================================
-   TOAST
-   ============================================================ */
-
-function mostrarToast(mensagem, tipo = 'info') {
-
-    const toast =
-        document.getElementById('toast');
-
-    if (!toast) return;
-
-    toast.textContent = mensagem;
-
-    toast.className =
-        'toast visivel ' + tipo;
-
-    setTimeout(function() {
-        toast.classList.remove('visivel');
-    }, 4000);
-}
-
-/* ============================================================
-   STATUS DA API
-   ============================================================ */
-
-function atualizarStatusAPI(ok, texto) {
-
-    const status =
-        document.getElementById('api-status');
-
-    if (!status) return;
-
-    status.className =
-        'api-status ' +
-        (ok ? 'ok' : 'erro');
-
-    status.innerHTML =
-        '<i class="fas fa-circle"></i>' +
-        '<span>' +
-        texto +
-        '</span>';
-}
-
-/* ============================================================
-   API GET
-   ============================================================ */
-
-async function apiGet(acao, parametros = {}) {
-
-    const url = new URL(GOOGLE_APPS_SCRIPT_URL);
-    url.searchParams.set('acao', acao);
-
-    Object.keys(parametros).forEach(function(chave) {
-        if (parametros[chave] !== undefined && parametros[chave] !== null) {
-            url.searchParams.set(chave, parametros[chave]);
-        }
+async function apiGet(acao,parametros={}){
+    const url=new URL(GOOGLE_APPS_SCRIPT_URL);
+    url.searchParams.set('acao',acao);
+    Object.keys(parametros).forEach(chave=>{
+        if(parametros[chave]!==undefined&&parametros[chave]!==null)url.searchParams.set(chave,parametros[chave]);
     });
-
-    addLog('📡 GET [' + acao + '] ' + url.toString(), 'info');
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(function() {
-        controller.abort();
-    }, API_TIMEOUT);
-
-    let response;
-    let texto = '';
-
-    try {
-        response = await fetch(url.toString(), {
-            method: 'GET',
-            cache: 'no-store',
-            signal: controller.signal
-        });
-        texto = await response.text();
-    } catch (erro) {
-        if (erro.name === 'AbortError') {
-            throw new Error('Tempo limite excedido ao consultar [' + acao + '].');
-        }
+    const controller=new AbortController();
+    const timeout=setTimeout(()=>controller.abort(),API_TIMEOUT);
+    try{
+        addLog('📡 GET '+acao,'info');
+        const response=await fetch(url.toString(),{method:'GET',cache:'no-store',signal:controller.signal});
+        const texto=await response.text();
+        if(!response.ok)throw new Error('HTTP '+response.status+' ao consultar "'+acao+'".');
+        let dados;
+        try{dados=JSON.parse(texto);}catch(e){throw new Error('A API não retornou JSON válido para "'+acao+'".');}
+        if(dados&&dados.sucesso===false)throw new Error(dados.erro||dados.mensagem||'A API informou um erro.');
+        return dados;
+    }catch(erro){
+        if(erro&&erro.name==='AbortError')throw new Error('Tempo limite excedido ao consultar a API.');
         throw erro;
-    } finally {
-        clearTimeout(timeoutId);
-    }
-
-    addLog('📡 [' + acao + '] HTTP ' + response.status, response.ok ? 'sucesso' : 'erro');
-    addLog('📥 [' + acao + '] ' + texto.substring(0, 500), 'info');
-
-    if (!response.ok) {
-        throw new Error('[' + acao + '] HTTP ' + response.status + ': ' + texto.substring(0, 250));
-    }
-
-    try {
-        return JSON.parse(texto);
-    } catch (e) {
-        throw new Error('A API [' + acao + '] não retornou JSON válido.');
-    }
+    }finally{clearTimeout(timeout);}
 }
 
-/* ============================================================
-   API POST
-   ============================================================ */
-
-async function apiPost(acao, dados) {
-
-    addLog(
-        '📡 POST para Apps Script, ação: ' +
-        acao,
-        'info'
-    );
-
-    const payload = Object.assign(
-        {},
-        dados,
-        {
-            acao: acao
-        }
-    );
-
-    logObjeto(
-        '📤 Dados enviados',
-        payload
-    );
-
-    const response =
-        await fetch(
-            GOOGLE_APPS_SCRIPT_URL,
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type':
-                        'text/plain;charset=utf-8'
-                },
-                body: JSON.stringify(payload)
-            }
-        );
-
-    addLog(
-        '📡 POST HTTP ' +
-        response.status,
-        response.ok ? 'sucesso' : 'erro'
-    );
-
-    const texto =
-        await response.text();
-
-    addLog(
-        '📥 Resposta POST: ' +
-        texto.substring(0, 500),
-        'info'
-    );
-
-    if (!response.ok) {
-
-        throw new Error(
-            'HTTP ' +
-            response.status +
-            ': ' +
-            texto
-        );
-
-    }
-
-    try {
-
-        return JSON.parse(texto);
-
-    } catch (e) {
-
-        throw new Error(
-            'A API não retornou JSON válido após o POST.'
-        );
-
-    }
+async function apiPost(acao,dados){
+    const payload=Object.assign({},dados,{acao:acao});
+    const controller=new AbortController();
+    const timeout=setTimeout(()=>controller.abort(),API_TIMEOUT);
+    try{
+        const response=await fetch(GOOGLE_APPS_SCRIPT_URL,{
+            method:'POST',
+            headers:{'Content-Type':'text/plain;charset=utf-8'},
+            body:JSON.stringify(payload),
+            signal:controller.signal
+        });
+        const texto=await response.text();
+        if(!response.ok)throw new Error('HTTP '+response.status+' ao salvar o agendamento.');
+        let resposta;
+        try{resposta=JSON.parse(texto);}catch(e){throw new Error('A API não retornou JSON válido após o salvamento.');}
+        if(resposta&&resposta.sucesso===false)throw new Error(resposta.erro||resposta.mensagem||'A API recusou o agendamento.');
+        return resposta;
+    }catch(erro){
+        if(erro&&erro.name==='AbortError')throw new Error('Tempo limite excedido ao salvar o agendamento.');
+        throw erro;
+    }finally{clearTimeout(timeout);}
 }
 
-/* ============================================================
-   NORMALIZAÇÃO
-   ============================================================ */
-
-function normalizarTexto(valor) {
-
-    if (
-        valor === null ||
-        valor === undefined
-    ) {
-        return '';
-    }
-
-    return String(valor)
-        .trim();
-
+function normalizarTexto(valor){return String(valor===null||valor===undefined?'':valor).trim();}
+function normalizarTextoComparacao(valor){return normalizarTexto(valor).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();}
+function normalizarAtivo(valor){const t=normalizarTextoComparacao(valor);return t==='sim'||t==='ativo'||t==='true'||t==='1';}
+function normalizarHora(valor){
+    if(valor===null||valor===undefined)return '';
+    const t=String(valor).trim(),m=t.match(/(\d{1,2}):(\d{2})/);
+    if(!m)return t.substring(0,5);
+    return String(m[1]).padStart(2,'0')+':'+m[2];
+}
+function normalizarData(valor){
+    if(valor===null||valor===undefined)return '';
+    const t=String(valor).trim();
+    if(/^\d{4}-\d{2}-\d{2}$/.test(t))return t;
+    const m=t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if(m)return m[3]+'-'+String(m[2]).padStart(2,'0')+'-'+String(m[1]).padStart(2,'0');
+    return t.substring(0,10);
 }
 
-function normalizarAtivo(valor) {
-
-    const texto =
-        normalizarTexto(valor)
-            .toLowerCase();
-
-    return (
-        texto === 'sim' ||
-        texto === 'ativo' ||
-        texto === 'true' ||
-        texto === '1'
-    );
-}
-
-function normalizarHora(valor) {
-
-    if (
-        valor === null ||
-        valor === undefined
-    ) {
-        return '';
-    }
-
-    if (
-        Object.prototype.toString.call(valor) ===
-        '[object Date]'
-    ) {
-
-        return (
-            String(valor.getHours()).padStart(2, '0') +
-            ':' +
-            String(valor.getMinutes()).padStart(2, '0')
-        );
-
-    }
-
-    const texto =
-        String(valor).trim();
-
-    const match =
-        texto.match(/(\d{1,2}):(\d{2})/);
-
-    if (!match) {
-        return texto.substring(0, 5);
-    }
-
-    return (
-        String(match[1]).padStart(2, '0') +
-        ':' +
-        match[2]
-    );
-}
-
-function normalizarData(valor) {
-
-    if (
-        valor === null ||
-        valor === undefined
-    ) {
-        return '';
-    }
-
-    if (
-        Object.prototype.toString.call(valor) ===
-        '[object Date]'
-    ) {
-
-        return (
-            valor.getFullYear() +
-            '-' +
-            String(valor.getMonth() + 1).padStart(2, '0') +
-            '-' +
-            String(valor.getDate()).padStart(2, '0')
-        );
-
-    }
-
-    const texto =
-        String(valor).trim();
-
-    if (/^\d{4}-\d{2}-\d{2}/.test(texto)) {
-
-        return texto.substring(0, 10);
-
-    }
-
-    const br =
-        texto.match(
-            /^(\d{1,2})\/(\d{1,2})\/(\d{4})/
-        );
-
-    if (br) {
-
-        return (
-            br[3] +
-            '-' +
-            String(br[2]).padStart(2, '0') +
-            '-' +
-            String(br[1]).padStart(2, '0')
-        );
-
-    }
-
-    return texto;
-}
-
-/* ============================================================
-   CARREGAR CONFIGURAÇÕES
-   ============================================================ */
-
-function obterConfigCache() {
-    try {
-        const bruto = localStorage.getItem(CACHE_CONFIG_KEY);
-        if (!bruto) return null;
-        const cache = JSON.parse(bruto);
-        if (!cache || !cache.timestamp || !cache.dados) return null;
-        if (Date.now() - cache.timestamp > CACHE_CONFIG_TTL) {
-            localStorage.removeItem(CACHE_CONFIG_KEY);
-            return null;
-        }
+function obterConfigCache(){
+    try{
+        const bruto=localStorage.getItem(CACHE_CONFIG_KEY);if(!bruto)return null;
+        const cache=JSON.parse(bruto);
+        if(!cache||!cache.timestamp||!cache.dados)return null;
+        if(Date.now()-cache.timestamp>CACHE_CONFIG_TTL){localStorage.removeItem(CACHE_CONFIG_KEY);return null;}
         return cache.dados;
-    } catch (e) {
-        return null;
-    }
+    }catch(e){return null;}
 }
+function salvarConfigCache(dados){try{localStorage.setItem(CACHE_CONFIG_KEY,JSON.stringify({timestamp:Date.now(),dados:dados}));}catch(e){}}
+function limparConfigCache(){try{localStorage.removeItem(CACHE_CONFIG_KEY);}catch(e){}}
 
-function salvarConfigCache(dados) {
-    try {
-        localStorage.setItem(CACHE_CONFIG_KEY, JSON.stringify({
-            timestamp: Date.now(),
-            dados: dados
-        }));
-    } catch (e) {}
-}
-
-function aplicarConfiguracoes(dados) {
-    if (!dados || typeof dados !== 'object') {
-        throw new Error('Configuração da agenda inválida.');
-    }
-
-    const dias = dados.dias || dados.dadosDias || [];
-    const horarios = dados.horarios || dados.dadosHorarios || [];
-    const servicos = dados.servicos || dados.dadosServicos || [];
-
-    if (!Array.isArray(dias) || !Array.isArray(horarios) || !Array.isArray(servicos)) {
-        throw new Error('A API retornou uma configuração incompleta.');
-    }
-
-    CONFIG.dias = dias;
-    CONFIG.horarios = horarios;
-    CONFIG.servicos = servicos;
-
-    prepararDias();
-    prepararHorarios();
-    renderizarServicos();
-    configurarData();
-}
-
-async function buscarConfiguracoesAPI() {
-    const resultados = await Promise.all([
-        apiGet('dias'),
-        apiGet('horarios'),
-        apiGet('servicos')
-    ]);
-
-    const nomes = ['dias', 'horarios', 'servicos'];
-    resultados.forEach(function(resposta, indice) {
-        if (resposta && resposta.sucesso === false) {
-            throw new Error(
-                'Falha em [' + nomes[indice] + ']: ' +
-                (resposta.mensagem || resposta.erro || 'Apps Script informou um erro.')
-            );
+async function carregarConfiguracoes(){
+    mostrarLoading('Carregando agenda...');
+    try{
+        let resposta=obterConfigCache();
+        if(!resposta) {
+            resposta=await apiGet('configuracao');
+            if(!resposta||resposta.sucesso!==true)throw new Error('Resposta inválida da configuração da agenda.');
+            salvarConfigCache(resposta);
         }
+        CONFIG.dias=Array.isArray(resposta.dias)?resposta.dias:[];
+        CONFIG.horarios=Array.isArray(resposta.horarios)?resposta.horarios:[];
+        CONFIG.servicos=Array.isArray(resposta.servicos)?resposta.servicos:[];
+        if(!CONFIG.dias.length)throw new Error('A API não retornou os dias de atendimento.');
+        if(!CONFIG.horarios.length)throw new Error('A API não retornou os horários de atendimento.');
+        if(!CONFIG.servicos.length)throw new Error('A API não retornou os serviços.');
+        prepararDias();prepararHorarios();renderizarServicos();configurarData();
+        atualizarStatusAPI(true,'Agenda conectada');esconderLoading();
+    }catch(erro){
+        esconderLoading();atualizarStatusAPI(false,'Erro ao conectar à agenda');
+        addLog('❌ '+(erro.message||String(erro)),'erro');
+        mostrarToast(erro.message||'Não foi possível carregar a agenda.','erro');
+    }
+}
+
+function prepararDias(){
+    CONFIG.diasAtivos=[];
+    CONFIG.dias.forEach(item=>{
+        let nome='',ativo=false;
+        if(item&&typeof item==='object'){
+            nome=item.dia||item.Dia||item.nome||item.nomeDia||'';
+            ativo=normalizarAtivo(item.ativo??item.Ativo??item.status);
+        }else{nome=normalizarTexto(item);ativo=true;}
+        if(ativo&&nome)CONFIG.diasAtivos.push(normalizarDia(nome));
     });
-
-    return {
-        dias: resultados[0].dias || resultados[0].dados || [],
-        horarios: resultados[1].horarios || resultados[1].dados || [],
-        servicos: resultados[2].servicos || resultados[2].dados || []
-    };
+}
+function normalizarDia(nome){
+    const t=normalizarTextoComparacao(nome);
+    const mapa={'segunda':'Segunda-feira','segunda-feira':'Segunda-feira','terca':'Terça-feira','terca-feira':'Terça-feira','quarta':'Quarta-feira','quarta-feira':'Quarta-feira','quinta':'Quinta-feira','quinta-feira':'Quinta-feira','sexta':'Sexta-feira','sexta-feira':'Sexta-feira','sabado':'Sábado','domingo':'Domingo'};
+    return mapa[t]||nome;
+}
+function diaEstaAtivo(data){
+    const nome=DIAS_SEMANA[data.getDay()];
+    return CONFIG.diasAtivos.some(d=>normalizarTextoComparacao(d)===normalizarTextoComparacao(nome));
 }
 
-async function carregarConfiguracoes() {
-    logEtapa('0', '🚀 INICIANDO CONEXÃO COM GOOGLE PLANILHAS', 'info');
-
-    const cache = obterConfigCache();
-
-    if (cache) {
-        try {
-            aplicarConfiguracoes(cache);
-            atualizarStatusAPI(true, 'Agenda carregada');
-            esconderLoading();
-            addLog('⚡ Configuração carregada do cache local.', 'sucesso');
-        } catch (erroCache) {
-            try { localStorage.removeItem(CACHE_CONFIG_KEY); } catch (e) {}
-        }
-    }
-
-    if (!cache) mostrarLoading('Carregando agenda...');
-
-    try {
-        const dados = await buscarConfiguracoesAPI();
-        aplicarConfiguracoes(dados);
-        salvarConfigCache(dados);
-
-        atualizarStatusAPI(true, 'Google Planilhas conectado');
-        addLog('📅 Dias recebidos: ' + CONFIG.dias.length, 'sucesso');
-        addLog('🕐 Horários recebidos: ' + CONFIG.horarios.length, 'sucesso');
-        addLog('💆 Serviços recebidos: ' + CONFIG.servicos.length, 'sucesso');
-        esconderLoading();
-    } catch (erro) {
-        esconderLoading();
-
-        if (cache) {
-            atualizarStatusAPI(true, 'Agenda disponível offline');
-            addLog('⚠️ Falha ao atualizar a agenda: ' + erro.message, 'warning');
-            return;
-        }
-
-        atualizarStatusAPI(false, 'Erro ao conectar à agenda');
-        addLog('❌ ERRO AO CARREGAR CONFIGURAÇÕES: ' + erro.message, 'erro');
-        mostrarToast('Não foi possível carregar a agenda. Tente novamente.', 'erro');
-    }
-}
-
-/* ============================================================
-   DIAS
-   ============================================================ */
-
-function prepararDias() {
-
-    const diasAtivos = [];
-
-    for (
-        let i = 0;
-        i < CONFIG.dias.length;
-        i++
-    ) {
-
-        const item =
-            CONFIG.dias[i];
-
-        let nome = '';
-        let ativo = false;
-
-        if (
-            typeof item === 'object' &&
-            item !== null
-        ) {
-
-            nome =
-                item.dia ||
-                item.Dia ||
-                item.nome ||
-                item.nomeDia ||
-                item.valor ||
-                '';
-
-            ativo =
-                normalizarAtivo(
-                    item.ativo ??
-                    item.Ativo ??
-                    item.status
-                );
-
-        } else {
-
-            nome =
-                normalizarTexto(item);
-
-            ativo = true;
-        }
-
-        if (ativo) {
-
-            diasAtivos.push(
-                normalizarDia(nome)
-            );
-
-        }
-
-    }
-
-    CONFIG.diasAtivos =
-        diasAtivos;
-
-    addLog(
-        '📅 Dias ATIVOS: ' +
-        (
-            diasAtivos.length
-                ? diasAtivos.join(', ')
-                : 'nenhum'
-        ),
-        diasAtivos.length
-            ? 'sucesso'
-            : 'warning'
-    );
-}
-
-function normalizarDia(nome) {
-
-    const texto =
-        normalizarTexto(nome)
-            .toLowerCase();
-
-    const mapa = {
-        'segunda': 'Segunda-feira',
-        'segunda-feira': 'Segunda-feira',
-        'terça': 'Terça-feira',
-        'terca': 'Terça-feira',
-        'terça-feira': 'Terça-feira',
-        'terca-feira': 'Terça-feira',
-        'quarta': 'Quarta-feira',
-        'quarta-feira': 'Quarta-feira',
-        'quinta': 'Quinta-feira',
-        'quinta-feira': 'Quinta-feira',
-        'sexta': 'Sexta-feira',
-        'sexta-feira': 'Sexta-feira',
-        'sábado': 'Sábado',
-        'sabado': 'Sábado',
-        'domingo': 'Domingo'
-    };
-
-    return mapa[texto] || nome;
-}
-
-function diaEstaAtivo(data) {
-
-    const nome =
-        DIAS_SEMANA[
-            data.getDay()
-        ];
-
-    return (
-        CONFIG.diasAtivos &&
-        CONFIG.diasAtivos.includes(nome)
-    );
-}
-
-/* ============================================================
-   HORÁRIOS
-   ============================================================ */
-
-function prepararHorarios() {
-
-    const horariosAtivos = [];
-
-    for (
-        let i = 0;
-        i < CONFIG.horarios.length;
-        i++
-    ) {
-
-        const item =
-            CONFIG.horarios[i];
-
-        let hora = '';
-        let ativo = false;
-
-        if (
-            typeof item === 'object' &&
-            item !== null
-        ) {
-
-            hora =
-                item.hora ||
-                item.Hora ||
-                item.horario ||
-                item.Horario ||
-                item.valor ||
-                '';
-
-            ativo =
-                normalizarAtivo(
-                    item.ativo ??
-                    item.Ativo ??
-                    item.status
-                );
-
-        } else {
-
-            hora =
-                item;
-
-            ativo = true;
-
-        }
-
-        if (ativo) {
-
-            const horaNormalizada =
-                normalizarHora(hora);
-
-            if (horaNormalizada) {
-
-                horariosAtivos.push(
-                    horaNormalizada
-                );
-
-            }
-
-        }
-
-    }
-
-    horariosAtivos.sort();
-
-    CONFIG.horariosAtivos =
-        horariosAtivos;
-
-    addLog(
-        '🕐 Horários ATIVOS: ' +
-        (
-            horariosAtivos.length
-                ? horariosAtivos.join(', ')
-                : 'nenhum'
-        ),
-        horariosAtivos.length
-            ? 'sucesso'
-            : 'warning'
-    );
-}
-
-/* ============================================================
-   SERVIÇOS
-   ============================================================ */
-
-function renderizarServicos() {
-
-    const container =
-        document.getElementById(
-            'servicos-escolha'
-        );
-
-    if (!container) return;
-
-    container.innerHTML = '';
-
-    if (
-        !CONFIG.servicos ||
-        CONFIG.servicos.length === 0
-    ) {
-
-        container.innerHTML =
-            '<p style="grid-column:1/-1;text-align:center;color:#dc3545;">' +
-            'Nenhum serviço disponível.' +
-            '</p>';
-
-        return;
-    }
-
-    for (
-        let i = 0;
-        i < CONFIG.servicos.length;
-        i++
-    ) {
-
-        const item =
-            CONFIG.servicos[i];
-
-        let nome = '';
-        let descricao = '';
-
-        if (
-            typeof item === 'object' &&
-            item !== null
-        ) {
-
-            nome =
-                item.servico ||
-                item.Serviço ||
-                item.Servico ||
-                item.nome ||
-                item.Nome ||
-                item.valor ||
-                '';
-
-            descricao =
-                item.descricao ||
-                item.Descrição ||
-                item.description ||
-                '';
-
-        } else {
-
-            nome =
-                String(item);
-
-        }
-
-        if (!nome) continue;
-
-        const botao =
-            document.createElement('button');
-
-        botao.type = 'button';
-
-        botao.className =
-            'servico-btn';
-
-        botao.dataset.servico =
-            nome;
-
-        botao.innerHTML =
-            '<i class="fas fa-shoe-prints"></i>' +
-            escapeHTML(nome) +
-            (
-                descricao
-                    ? '<span class="servico-descricao">' +
-                      escapeHTML(descricao) +
-                      '</span>'
-                    : ''
-            );
-
-        botao.addEventListener(
-            'click',
-            function() {
-
-                document
-                    .querySelectorAll(
-                        '.servico-btn'
-                    )
-                    .forEach(function(btn) {
-
-                        btn.classList.remove(
-                            'selecionado'
-                        );
-
-                    });
-
-                this.classList.add(
-                    'selecionado'
-                );
-
-                agendamento.servico =
-                    this.dataset.servico;
-
-                addLog(
-                    '💆 Serviço selecionado: ' +
-                    agendamento.servico,
-                    'sucesso'
-                );
-
-            }
-        );
-
-        container.appendChild(
-            botao
-        );
-    }
-
-    addLog(
-        '✅ Serviços renderizados na tela.',
-        'sucesso'
-    );
-}
-
-/* ============================================================
-   DATA
-   ============================================================ */
-
-function configurarData() {
-
-    const selectMes =
-        document.getElementById('mes-agendamento');
-
-    const selectDiaSemana =
-        document.getElementById('dia-semana-agendamento');
-
-    const selectData =
-        document.getElementById('dia-agendamento');
-
-    const dataTexto =
-        document.getElementById('data-selecionada');
-
-    if (!selectMes || !selectDiaSemana || !selectData) return;
-
-    const meses = obterMesesDisponiveis();
-
-    selectMes.innerHTML =
-        '<option value="">Selecione o mês...</option>';
-
-    meses.forEach(function(mes) {
-        const option = document.createElement('option');
-        option.value = mes.valor;
-        option.textContent = mes.nome;
-        selectMes.appendChild(option);
+function prepararHorarios(){
+    const lista=[];
+    CONFIG.horarios.forEach(item=>{
+        let hora='',ativo=false;
+        if(item&&typeof item==='object'){
+            hora=item.hora||item.Hora||item.horario||item.Horario||'';
+            ativo=normalizarAtivo(item.ativo??item.Ativo??item.status);
+        }else{hora=item;ativo=true;}
+        if(ativo){const h=normalizarHora(hora);if(h)lista.push(h);}
     });
+    CONFIG.horariosAtivos=[...new Set(lista)].sort();
+}
 
-    if (!meses.length) {
-        selectMes.innerHTML =
-            '<option value="">Nenhum mês disponível encontrado</option>';
-        selectMes.disabled = true;
-        return;
+function renderizarServicos(){
+    const container=document.getElementById('servicos-escolha');if(!container)return;
+    container.innerHTML='';
+    if(!CONFIG.servicos.length){
+        container.innerHTML='<p style="grid-column:1/-1;text-align:center;color:#dc3545;">Nenhum serviço disponível.</p>';return;
     }
-
-    selectMes.disabled = false;
-
-    function limparDiaSemana() {
-        selectDiaSemana.innerHTML =
-            '<option value="">Selecione o dia da semana...</option>';
-        selectDiaSemana.disabled = true;
-        limparDatas();
-    }
-
-    function limparDatas() {
-        selectData.innerHTML =
-            '<option value="">Selecione a data...</option>';
-        selectData.disabled = true;
-        agendamento.data = '';
-        agendamento.horario = '';
-        if (dataTexto) dataTexto.textContent = '';
-        gerarHorarios('');
-    }
-
-    function carregarDiasDaSemana() {
-        const valorMes = selectMes.value;
-        limparDiaSemana();
-
-        if (!valorMes) return;
-
-        const [ano, mes] = valorMes.split('-').map(Number);
-        const diasEncontrados = obterDiasDaSemanaDoMes(ano, mes);
-
-        if (!diasEncontrados.length) {
-            selectDiaSemana.innerHTML =
-                '<option value="">Nenhum dia disponível neste mês</option>';
-            return;
-        }
-
-        diasEncontrados.forEach(function(dia) {
-            const option = document.createElement('option');
-            option.value = dia.indice;
-            option.textContent = dia.nome;
-            selectDiaSemana.appendChild(option);
+    CONFIG.servicos.forEach(item=>{
+        let nome='',descricao='';
+        if(item&&typeof item==='object'){
+            nome=item.nome||item.Nome||item.servico||item.Servico||'';
+            descricao=item.descricao||item.Descrição||'';
+        }else nome=String(item);
+        nome=normalizarTexto(nome);if(!nome)return;
+        const botao=document.createElement('button');
+        botao.type='button';botao.className='servico-btn';botao.dataset.servico=nome;
+        botao.innerHTML='<i class="fas fa-shoe-prints"></i>'+escapeHTML(nome)+(descricao?'<span class="servico-descricao">'+escapeHTML(descricao)+'</span>':'');
+        botao.addEventListener('click',function(){
+            document.querySelectorAll('.servico-btn').forEach(b=>b.classList.remove('selecionado'));
+            this.classList.add('selecionado');agendamento.servico=this.dataset.servico;
         });
-
-        selectDiaSemana.disabled = false;
-    }
-
-    function carregarDatasDoDiaSemana() {
-        limparDatas();
-
-        const valorMes = selectMes.value;
-        const indiceDia = Number(selectDiaSemana.value);
-
-        if (!valorMes || isNaN(indiceDia)) return;
-
-        const [ano, mes] = valorMes.split('-').map(Number);
-        const datas = obterDatasDisponiveisDoDiaDaSemana(
-            ano,
-            mes,
-            indiceDia
-        );
-
-        if (!datas.length) {
-            selectData.innerHTML =
-                '<option value="">Nenhuma data disponível</option>';
-            return;
-        }
-
-        datas.forEach(function(item) {
-            const option = document.createElement('option');
-            option.value = item.data;
-            option.textContent = item.dataFormatada;
-            selectData.appendChild(option);
-        });
-
-        selectData.disabled = false;
-
-        // Não escolhe automaticamente uma data. O cliente decide qual
-        // ocorrência do dia da semana deseja dentro do mês.
-        selectData.value = '';
-    }
-
-    function aplicarDataSelecionada() {
-        const data = selectData.value;
-
-        agendamento.data = data;
-        agendamento.horario = '';
-
-        if (!data) {
-            if (dataTexto) dataTexto.textContent = '';
-            gerarHorarios('');
-            return;
-        }
-
-        if (dataTexto) {
-            dataTexto.textContent =
-                'Data selecionada: ' + formatarDataExibicao(data);
-        }
-
-        addLog(
-            '📅 Data escolhida: ' + data,
-            'sucesso'
-        );
-
-        gerarHorarios(data);
-    }
-
-    selectMes.addEventListener('change', carregarDiasDaSemana);
-    selectDiaSemana.addEventListener('change', carregarDatasDoDiaSemana);
-    selectData.addEventListener('change', aplicarDataSelecionada);
-
-    // Abre o mês atual se houver pelo menos uma data futura disponível.
-    const hoje = new Date();
-    const mesAtual =
-        hoje.getFullYear() + '-' +
-        String(hoje.getMonth() + 1).padStart(2, '0');
-
-    const mesInicial = meses.find(function(item) {
-        return item.valor === mesAtual;
+        container.appendChild(botao);
     });
+}
 
-    selectMes.value = mesInicial
-        ? mesAtual
-        : meses[0].valor;
+function configurarData(){
+    const selectMes=document.getElementById('mes-agendamento');
+    const selectDiaSemana=document.getElementById('dia-semana-agendamento');
+    const selectData=document.getElementById('dia-agendamento');
+    const dataTexto=document.getElementById('data-selecionada');
+    if(!selectMes||!selectDiaSemana||!selectData)return;
 
+    const meses=obterMesesDisponiveis();
+    selectMes.innerHTML='<option value="">Selecione o mês...</option>';
+    meses.forEach(m=>{
+        const o=document.createElement('option');o.value=m.valor;o.textContent=m.nome;selectMes.appendChild(o);
+    });
+    if(!meses.length){
+        selectMes.innerHTML='<option value="">Nenhum mês disponível</option>';selectMes.disabled=true;return;
+    }
+
+    function limparDatas(){
+        selectData.innerHTML='<option value="">Selecione a data...</option>';
+        selectData.disabled=true;agendamento.data='';agendamento.horario='';
+        if(dataTexto)dataTexto.textContent='';
+        renderizarHorariosVazio('Selecione uma data.');
+    }
+    function carregarDiasDaSemana(){
+        selectDiaSemana.innerHTML='<option value="">Selecione o dia da semana...</option>';
+        selectDiaSemana.disabled=true;limparDatas();
+        if(!selectMes.value)return;
+        const [ano,mes]=selectMes.value.split('-').map(Number);
+        const dias=obterDiasDaSemanaDoMes(ano,mes);
+        if(!dias.length){selectDiaSemana.innerHTML='<option value="">Nenhum dia disponível neste mês</option>';return;}
+        dias.forEach(d=>{
+            const o=document.createElement('option');o.value=d.indice;o.textContent=d.nome;selectDiaSemana.appendChild(o);
+        });
+        selectDiaSemana.disabled=false;
+    }
+    function carregarDatasDoDiaSemana(){
+        limparDatas();if(!selectMes.value||selectDiaSemana.value==='')return;
+        const [ano,mes]=selectMes.value.split('-').map(Number);
+        const datas=obterDatasDisponiveisDoDiaDaSemana(ano,mes,Number(selectDiaSemana.value));
+        if(!datas.length){selectData.innerHTML='<option value="">Nenhuma data disponível</option>';return;}
+        datas.forEach(item=>{
+            const o=document.createElement('option');o.value=item.data;o.textContent=item.dataFormatada;selectData.appendChild(o);
+        });
+        selectData.disabled=false;
+    }
+    async function aplicarDataSelecionada(){
+        const data=selectData.value;agendamento.data=data;agendamento.horario='';
+        if(!data){if(dataTexto)dataTexto.textContent='';renderizarHorariosVazio('Selecione uma data.');return;}
+        if(dataTexto)dataTexto.textContent='Data selecionada: '+formatarDataExibicao(data);
+        await gerarHorarios(data);
+    }
+
+    selectMes.addEventListener('change',carregarDiasDaSemana);
+    selectDiaSemana.addEventListener('change',carregarDatasDoDiaSemana);
+    selectData.addEventListener('change',aplicarDataSelecionada);
+
+    const hoje=new Date();hoje.setHours(0,0,0,0);
+    const atual=hoje.getFullYear()+'-'+String(hoje.getMonth()+1).padStart(2,'0');
+    selectMes.value=meses.some(m=>m.valor===atual)?atual:meses[0].valor;
     carregarDiasDaSemana();
 }
 
-function obterMesesDisponiveis() {
-
-    const meses = [];
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
-
-    // O sistema pode consultar o mês inteiro. O limite abaixo é apenas
-    // visual, para não criar um select infinito. A agenda de cada mês
-    // é analisada integralmente, sem limite de dias dentro do mês.
-    const quantidadeMeses = 24;
-
-    for (let deslocamento = 0; deslocamento < quantidadeMeses; deslocamento++) {
-
-        const data = new Date(
-            hoje.getFullYear(),
-            hoje.getMonth() + deslocamento,
-            1
-        );
-
-        const ano = data.getFullYear();
-        const mes = data.getMonth() + 1;
-
-        if (obterDiasDisponiveisDoMes(ano, mes).length) {
-            meses.push({
-                valor: ano + '-' + String(mes).padStart(2, '0'),
-                nome: MESES[mes - 1] + ' de ' + ano
-            });
-        }
+function obterMesesDisponiveis(){
+    const meses=[],hoje=new Date();hoje.setHours(0,0,0,0);
+    for(let i=0;i<24;i++){
+        const d=new Date(hoje.getFullYear(),hoje.getMonth()+i,1);
+        if(mesPossuiDiaAtivo(d.getFullYear(),d.getMonth()+1))
+            meses.push({valor:d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'),nome:MESES[d.getMonth()]+' de '+d.getFullYear()});
     }
-
     return meses;
 }
-
-function obterDiasDisponiveisDoMes(ano, mes) {
-
-    const encontrados = [];
-    const ultimoDia = new Date(ano, mes, 0).getDate();
-
-    for (let dia = 1; dia <= ultimoDia; dia++) {
-
-        const data = new Date(ano, mes - 1, dia);
-        data.setHours(0, 0, 0, 0);
-
-        if (!dataEhFuturaOuHoje(data)) continue;
-        if (!diaEstaAtivo(data)) continue;
-
-        const iso = criarISOData(data);
-        const horarios = obterHorariosDisponiveisLocal(iso);
-
-        if (!horarios.length) continue;
-
-        encontrados.push({
-            data: iso,
-            dataFormatada: formatarDataExibicao(iso),
-            indiceDia: data.getDay(),
-            dia: DIAS_SEMANA[data.getDay()],
-            horarios: horarios
-        });
+function mesPossuiDiaAtivo(ano,mes){
+    const ultimo=new Date(ano,mes,0).getDate();
+    for(let dia=1;dia<=ultimo;dia++){
+        const d=new Date(ano,mes-1,dia);d.setHours(0,0,0,0);
+        if(dataEhFuturaOuHoje(d)&&diaEstaAtivo(d))return true;
     }
-
-    return encontrados;
+    return false;
 }
-
-function obterDiasDaSemanaDoMes(ano, mes) {
-
-    const dias = [];
-    const vistos = {};
-    const datas = obterDiasDisponiveisDoMes(ano, mes);
-
-    datas.forEach(function(item) {
-        if (vistos[item.indiceDia]) return;
-
-        vistos[item.indiceDia] = true;
-
-        dias.push({
-            indice: item.indiceDia,
-            nome: item.dia
-        });
+function obterDiasDisponiveisDoMes(ano,mes){
+    const lista=[],ultimo=new Date(ano,mes,0).getDate();
+    for(let dia=1;dia<=ultimo;dia++){
+        const d=new Date(ano,mes-1,dia);d.setHours(0,0,0,0);
+        if(!dataEhFuturaOuHoje(d)||!diaEstaAtivo(d))continue;
+        const iso=criarISOData(d);
+        lista.push({data:iso,dataFormatada:formatarDataExibicao(iso),indiceDia:d.getDay(),dia:DIAS_SEMANA[d.getDay()]});
+    }
+    return lista;
+}
+function obterDiasDaSemanaDoMes(ano,mes){
+    const datas=obterDiasDisponiveisDoMes(ano,mes),vistos={},dias=[];
+    datas.forEach(item=>{
+        if(vistos[item.indiceDia])return;
+        vistos[item.indiceDia]=true;dias.push({indice:item.indiceDia,nome:item.dia});
     });
-
-    // Mantém a ordem cronológica em que os dias aparecem no mês.
-    dias.sort(function(a, b) {
-        const primeiraA = datas.find(item => item.indiceDia === a.indice);
-        const primeiraB = datas.find(item => item.indiceDia === b.indice);
-        return primeiraA.data.localeCompare(primeiraB.data);
-    });
-
     return dias;
 }
+function obterDatasDisponiveisDoDiaDaSemana(ano,mes,indice){
+    return obterDiasDisponiveisDoMes(ano,mes).filter(item=>item.indiceDia===indice);
+}
+function dataEhFuturaOuHoje(data){const hoje=new Date();hoje.setHours(0,0,0,0);return data>=hoje;}
+function criarISOData(data){return data.getFullYear()+'-'+String(data.getMonth()+1).padStart(2,'0')+'-'+String(data.getDate()).padStart(2,'0');}
+function hojeLocalISO(){return criarISOData(new Date());}
+function formatarDataExibicao(dataStr){const p=String(dataStr).split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:dataStr;}
 
-function obterDatasDisponiveisDoDiaDaSemana(ano, mes, indiceDia) {
-
-    return obterDiasDisponiveisDoMes(ano, mes)
-        .filter(function(item) {
-            return item.indiceDia === indiceDia;
-        });
+async function consultarDisponibilidadeOnline(dataStr){
+    if(!dataStr)return [];
+    const resposta=await apiGet('disponibilidade',{data:dataStr});
+    return Array.isArray(resposta.horarios)?resposta.horarios.map(normalizarHora):[];
 }
 
-function dataEhFuturaOuHoje(data) {
-
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
-
-    return data >= hoje;
+function renderizarHorariosVazio(mensagem){
+    const grid=document.getElementById('horarios-grid');if(!grid)return;
+    grid.innerHTML='<p style="grid-column:1/-1;text-align:center;padding:20px;">'+escapeHTML(mensagem)+'</p>';
 }
 
-function hojeLocalISO() {
+async function gerarHorarios(dataStr){
+    const grid=document.getElementById('horarios-grid');if(!grid)return;
+    const req=++disponibilidadeRequisicao;agendamento.horario='';
+    if(!dataStr){renderizarHorariosVazio('Selecione uma data.');return;}
+    const p=dataStr.split('-'),data=new Date(Number(p[0]),Number(p[1])-1,Number(p[2]));data.setHours(0,0,0,0);
+    if(!diaEstaAtivo(data)){renderizarHorariosVazio('Não há atendimento neste dia.');return;}
 
-    const hoje = new Date();
-
-    return (
-        hoje.getFullYear() +
-        '-' +
-        String(hoje.getMonth() + 1).padStart(2, '0') +
-        '-' +
-        String(hoje.getDate()).padStart(2, '0')
-    );
-}
-
-function criarISOData(data) {
-
-    return (
-        data.getFullYear() +
-        '-' +
-        String(data.getMonth() + 1).padStart(2, '0') +
-        '-' +
-        String(data.getDate()).padStart(2, '0')
-    );
-}
-
-function formatarDataExibicao(dataStr) {
-
-    const partes = String(dataStr).split('-');
-
-    if (partes.length !== 3) return dataStr;
-
-    return (
-        partes[2] + '/' +
-        partes[1] + '/' +
-        partes[0]
-    );
-}
-
-function obterProximosDiasDisponiveis() {
-
-    const encontrados = [];
-    const vistos = {};
-    const hoje = new Date();
-
-    hoje.setHours(0, 0, 0, 0);
-
-    // Para cada dia ativo da planilha, procura a próxima ocorrência
-    // que ainda tenha pelo menos um horário disponível.
-    for (let i = 0; i < 90; i++) {
-
-        const data = new Date(hoje);
-        data.setDate(data.getDate() + i);
-        data.setHours(0, 0, 0, 0);
-
-        if (!diaEstaAtivo(data)) {
-            continue;
-        }
-
-        const iso = criarISOData(data);
-        const horarios = obterHorariosDisponiveisLocal(iso);
-
-        if (!horarios.length) {
-            continue;
-        }
-
-        const dia = DIAS_SEMANA[data.getDay()];
-
-        // Um único item por dia da semana. Assim o usuário escolhe
-        // Segunda-feira, Terça-feira, etc., e recebe a próxima data.
-        const chave = normalizarTexto(dia);
-
-        if (vistos[chave]) {
-            continue;
-        }
-
-        vistos[chave] = true;
-
-        encontrados.push({
-            dia: dia,
-            data: iso,
-            dataFormatada: formatarDataExibicao(iso),
-            horarios: horarios
-        });
-    }
-
-    // Mantém a ordem definida na aba Dias, e não a ordem aleatória
-    // de descoberta no calendário.
-    const ordemDias = {};
-
-    (CONFIG.diasAtivos || []).forEach(function(dia, indice) {
-        ordemDias[normalizarTexto(dia)] = indice;
-    });
-
-    encontrados.sort(function(a, b) {
-        return (
-            (ordemDias[normalizarTexto(a.dia)] ?? 999) -
-            (ordemDias[normalizarTexto(b.dia)] ?? 999)
-        );
-    });
-
-    return encontrados;
-}
-
-/* ============================================================
-   HORÁRIOS DISPONÍVEIS
-   ============================================================ */
-
-function obterHorariosDisponiveisLocal(dataStr) {
-    if (!dataStr) return [];
-
-    const partesData = dataStr.split('-');
-    if (partesData.length !== 3) return [];
-
-    const data = new Date(
-        Number(partesData[0]),
-        Number(partesData[1]) - 1,
-        Number(partesData[2])
-    );
-    data.setHours(0, 0, 0, 0);
-
-    if (!diaEstaAtivo(data)) return [];
-
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
-    if (data < hoje) return [];
-
-    return (CONFIG.horariosAtivos || []).map(normalizarHora).filter(Boolean);
-}
-
-async function consultarDisponibilidadeOnline(dataStr) {
-
-    if (!dataStr) return [];
-
-    const resposta =
-        await apiGet(
-            'disponibilidade',
-            { data: dataStr }
-        );
-
-    if (
-        resposta &&
-        resposta.sucesso === false
-    ) {
-        throw new Error(
-            resposta.mensagem ||
-            resposta.erro ||
-            'A API recusou a consulta de disponibilidade.'
-        );
-    }
-
-    return Array.isArray(resposta.horarios)
-        ? resposta.horarios.map(normalizarHora)
-        : [];
-}
-
-/* ============================================================
-   RENDERIZAR HORÁRIOS
-   ============================================================ */
-
-async function gerarHorarios(dataStr) {
-    const grid = document.getElementById('horarios-grid');
-    if (!grid) return;
-
-    grid.innerHTML = '';
-    agendamento.horario = '';
-
-    if (!dataStr) {
-        grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;padding:20px;">Selecione um dia.</p>';
-        return;
-    }
-
-    const partes = dataStr.split('-');
-    const data = new Date(Number(partes[0]), Number(partes[1]) - 1, Number(partes[2]));
-    const diaNome = DIAS_SEMANA[data.getDay()];
-
-    if (!diaEstaAtivo(data)) {
-        grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;padding:20px;color:#dc3545;font-weight:600;">⚠️ Não há atendimento neste dia.</p>';
-        return;
-    }
-
-    const requisicaoAtual = ++disponibilidadeRequisicao;
-
-    grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;padding:20px;"><i class="fas fa-spinner fa-spin"></i> Consultando horários...</p>';
-
-    try {
-        const horariosDisponiveis = await consultarDisponibilidadeOnline(dataStr);
-        if (requisicaoAtual !== disponibilidadeRequisicao) return;
-
-        const horarios = CONFIG.horariosAtivos || [];
-        grid.innerHTML = '';
-
-        if (!horarios.length) {
-            grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#dc3545;">Nenhum horário ativo foi encontrado na aba Horarios.</p>';
-            return;
-        }
-
-        const hoje = hojeLocalISO();
-        const agora = new Date();
-        let totalDisponiveis = 0;
-
-        horarios.forEach(function(horario) {
-            horario = normalizarHora(horario);
-            const botao = document.createElement('button');
-            botao.type = 'button';
-            botao.className = 'horario-btn';
-            botao.textContent = horario;
-            botao.dataset.horario = horario;
-
-            let passado = false;
-            if (dataStr === hoje) {
-                const partesHora = horario.split(':');
-                const hora = Number(partesHora[0]);
-                const minuto = Number(partesHora[1]);
-                passado = hora < agora.getHours() || (hora === agora.getHours() && minuto <= agora.getMinutes());
+    grid.innerHTML='<p style="grid-column:1/-1;text-align:center;padding:20px;"><i class="fas fa-spinner fa-spin"></i> Consultando disponibilidade...</p>';
+    try{
+        const disponiveis=await consultarDisponibilidadeOnline(dataStr);
+        if(req!==disponibilidadeRequisicao)return;
+        grid.innerHTML='';
+        const hoje=hojeLocalISO(),agora=new Date();
+        let total=0;
+        (CONFIG.horariosAtivos||[]).forEach(horario=>{
+            horario=normalizarHora(horario);
+            const b=document.createElement('button');b.type='button';b.className='horario-btn';b.textContent=horario;b.dataset.horario=horario;
+            let passado=false;
+            if(dataStr===hoje){
+                const ph=horario.split(':');const h=Number(ph[0]),m=Number(ph[1]);
+                passado=h<agora.getHours()||(h===agora.getHours()&&m<=agora.getMinutes());
             }
-
-            const disponivel = horariosDisponiveis.includes(horario);
-
-            if (passado) {
-                botao.disabled = true;
-                botao.classList.add('passado');
-                botao.title = 'Horário já passou';
-            } else if (!disponivel) {
-                botao.disabled = true;
-                botao.classList.add('ocupado');
-                botao.title = 'Horário indisponível';
-            } else {
-                totalDisponiveis++;
-                botao.addEventListener('click', function() {
-                    document.querySelectorAll('.horario-btn').forEach(function(btn) {
-                        btn.classList.remove('selecionado');
-                    });
-                    this.classList.add('selecionado');
-                    agendamento.horario = this.dataset.horario;
-                    addLog('✅ Horário selecionado: ' + agendamento.horario, 'sucesso');
+            const disponivel=disponiveis.includes(horario);
+            if(passado){b.disabled=true;b.classList.add('passado');b.title='Horário já passou';}
+            else if(!disponivel){b.disabled=true;b.classList.add('ocupado');b.title='Horário indisponível';}
+            else{
+                total++;
+                b.addEventListener('click',function(){
+                    document.querySelectorAll('.horario-btn').forEach(x=>x.classList.remove('selecionado'));
+                    this.classList.add('selecionado');agendamento.horario=this.dataset.horario;
                 });
             }
-
-            grid.appendChild(botao);
+            grid.appendChild(b);
         });
-
-        addLog('📊 [' + dataStr + ', ' + diaNome + '] Horários disponíveis: ' + totalDisponiveis + ' de ' + horarios.length, totalDisponiveis ? 'sucesso' : 'warning');
-
-        if (totalDisponiveis === 0) {
-            const mensagem = document.createElement('p');
-            mensagem.style.cssText = 'grid-column:1/-1;text-align:center;padding:20px;color:#dc3545;font-weight:600;';
-            mensagem.textContent = '⚠️ Não há horários disponíveis nesta data.';
-            grid.appendChild(mensagem);
-        }
-    } catch (erro) {
-        if (requisicaoAtual !== disponibilidadeRequisicao) return;
-
-        grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;padding:20px;color:#dc3545;font-weight:600;">Não foi possível consultar os horários. Tente novamente.</p>';
-        addLog('❌ Erro ao consultar disponibilidade de ' + dataStr + ': ' + erro.message, 'erro');
-        mostrarToast('Não foi possível carregar os horários desta data.', 'erro');
+        if(!total)renderizarHorariosVazio('⚠️ Não há horários disponíveis nesta data.');
+    }catch(erro){
+        if(req!==disponibilidadeRequisicao)return;
+        renderizarHorariosVazio('Não foi possível consultar os horários.');
+        mostrarToast('Não foi possível consultar os horários. Tente novamente.','erro');
     }
 }
 
-/* ============================================================
-   NAVEGAÇÃO
-   ============================================================ */
-
-function irParaPasso(numero) {
-
-    document
-        .querySelectorAll(
-            '.passo-conteudo'
-        )
-        .forEach(
-            function(el) {
-
-                el.classList.remove(
-                    'ativo'
-                );
-
-            }
-        );
-
-    const passo =
-        document.getElementById(
-            'passo-' + numero
-        );
-
-    if (passo) {
-
-        passo.classList.add(
-            'ativo'
-        );
-
-    }
-
-    document
-        .querySelectorAll(
-            '.passo'
-        )
-        .forEach(
-            function(el) {
-
-                el.classList.remove(
-                    'ativo'
-                );
-
-                if (
-                    Number(
-                        el.dataset.passo
-                    ) === numero
-                ) {
-
-                    el.classList.add(
-                        'ativo'
-                    );
-
-                }
-
-            }
-        );
-
-    window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-    });
-
+function irParaPasso(numero){
+    document.querySelectorAll('.passo-conteudo').forEach(el=>el.classList.remove('ativo'));
+    const passo=document.getElementById('passo-'+numero);if(passo)passo.classList.add('ativo');
+    document.querySelectorAll('.passo').forEach(el=>{el.classList.remove('ativo');if(Number(el.dataset.passo)===numero)el.classList.add('ativo');});
+    window.scrollTo({top:0,behavior:'smooth'});
 }
-
-async function proximoPasso(numero) {
-
-    const atual =
-        numero - 1;
-
-    let valido = true;
-
-    if (atual === 1) {
-        valido = validarPasso1();
-    }
-
-    if (atual === 2) {
-        valido = validarPasso2();
-    }
-
-    if (atual === 3) {
-        valido = validarPasso3();
-    }
-
-    if (atual === 4) {
-        valido = await validarPasso4();
-    }
-
-    if (!valido) {
-        return;
-    }
-
-    if (numero === 5) {
-
-        preencherResumo();
-
-    }
-
+async function proximoPasso(numero){
+    const atual=numero-1;let valido=true;
+    if(atual===1)valido=validarPasso1();
+    if(atual===2)valido=validarPasso2();
+    if(atual===3)valido=validarPasso3();
+    if(atual===4)valido=await validarPasso4();
+    if(!valido)return;
+    if(numero===5)preencherResumo();
     irParaPasso(numero);
+}
+function passoAnterior(numero){irParaPasso(numero);}
 
+function validarPasso1(){
+    const nome=document.getElementById('nome').value.trim();
+    const telefone=document.getElementById('telefone').value.trim();
+    const email=document.getElementById('email').value.trim();
+    if(!nome){mostrarToast('Digite seu nome completo.','erro');return false;}
+    if(telefone.replace(/\D/g,'').length<10){mostrarToast('Digite um telefone válido.','erro');return false;}
+    if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){mostrarToast('Digite um e-mail válido.','erro');return false;}
+    Object.assign(agendamento,{nome,telefone,email});return true;
 }
 
-function passoAnterior(numero) {
-
-    irParaPasso(
-        numero
-    );
-
-}
-
-/* ============================================================
-   VALIDAÇÕES
-   ============================================================ */
-
-function validarPasso1() {
-
-    const nome =
-        document.getElementById(
-            'nome'
-        ).value.trim();
-
-    const telefone =
-        document.getElementById(
-            'telefone'
-        ).value.trim();
-
-    const email =
-        document.getElementById(
-            'email'
-        ).value.trim();
-
-    if (!nome) {
-
-        mostrarToast(
-            'Digite seu nome completo.',
-            'erro'
-        );
-
-        return false;
-
+function validarPasso2(){
+    const selecionado=document.querySelector('.tipo-btn.selecionado');
+    if(!selecionado){mostrarToast('Selecione o tipo de atendimento.','erro');return false;}
+    agendamento.tipo=selecionado.dataset.tipo;
+    if(agendamento.tipo==='domicilio'){
+        const cep=document.getElementById('cep').value.replace(/\D/g,'');
+        const numero=document.getElementById('numero-endereco').value.trim();
+        const logradouro=document.getElementById('end-logradouro').textContent.trim();
+        const bairro=document.getElementById('end-bairro').textContent.trim();
+        const cidade=document.getElementById('end-cidade').textContent.trim();
+        const uf=document.getElementById('end-uf').textContent.trim();
+        if(cep.length!==8){mostrarToast('Informe um CEP válido.','erro');return false;}
+        if(!numero){mostrarToast('Informe o número do endereço.','erro');return false;}
+        if(!logradouro||logradouro==='-'){mostrarToast('Consulte o CEP antes de continuar.','erro');return false;}
+        agendamento.cep=cep;agendamento.numero=numero;
+        agendamento.complemento=document.getElementById('complemento-endereco').value.trim();
+        agendamento.logradouro=logradouro;agendamento.bairro=bairro;agendamento.cidade=cidade;agendamento.uf=uf;
+        agendamento.endereco=[logradouro,numero,agendamento.complemento,bairro,cidade,uf,'CEP '+cep].filter(Boolean).join(', ');
+    }else{
+        agendamento.cep='';agendamento.numero='';agendamento.complemento='';agendamento.logradouro='';agendamento.bairro='';agendamento.cidade='';agendamento.uf='';
+        agendamento.endereco='Atendimento presencial na clínica';
     }
-
-    if (
-        telefone.replace(
-            /\D/g,
-            ''
-        ).length < 10
-    ) {
-
-        mostrarToast(
-            'Digite um telefone válido.',
-            'erro'
-        );
-
-        return false;
-
-    }
-
-    if (
-        !email ||
-        !email.includes('@')
-    ) {
-
-        mostrarToast(
-            'Digite um e-mail válido.',
-            'erro'
-        );
-
-        return false;
-
-    }
-
-    agendamento.nome =
-        nome;
-
-    agendamento.telefone =
-        telefone;
-
-    agendamento.email =
-        email;
-
-    addLog(
-        '✅ Dados do cliente validados.',
-        'sucesso'
-    );
-
     return true;
 }
 
-function validarPasso2() {
-
-    const selecionado =
-        document.querySelector(
-            '.tipo-btn.selecionado'
-        );
-
-    if (!selecionado) {
-
-        mostrarToast(
-            'Selecione o tipo de atendimento.',
-            'erro'
-        );
-
-        return false;
-
+function validarPasso3(){
+    if(!agendamento.servico){
+        const b=document.querySelector('.servico-btn.selecionado');
+        if(b)agendamento.servico=b.dataset.servico;
     }
-
-    agendamento.tipo =
-        selecionado.dataset.tipo;
-
-    if (
-        agendamento.tipo ===
-        'domicilio'
-    ) {
-
-        const cep =
-            document.getElementById(
-                'cep'
-            ).value.replace(
-                /\D/g,
-                ''
-            );
-
-        const numero =
-            document.getElementById(
-                'numero-endereco'
-            ).value.trim();
-
-        if (
-            cep.length !== 8
-        ) {
-
-            mostrarToast(
-                'Informe um CEP válido.',
-                'erro'
-            );
-
-            return false;
-
-        }
-
-        if (!numero) {
-
-            mostrarToast(
-                'Informe o número do endereço.',
-                'erro'
-            );
-
-            return false;
-
-        }
-
-        agendamento.cep =
-            cep;
-
-        agendamento.numero =
-            numero;
-
-        agendamento.complemento =
-            document.getElementById(
-                'complemento-endereco'
-            ).value.trim();
-
-        const logradouro =
-            document.getElementById(
-                'end-logradouro'
-            ).textContent;
-
-        const bairro =
-            document.getElementById(
-                'end-bairro'
-            ).textContent;
-
-        const cidade =
-            document.getElementById(
-                'end-cidade'
-            ).textContent;
-
-        const uf =
-            document.getElementById(
-                'end-uf'
-            ).textContent;
-
-        agendamento.logradouro = logradouro;
-        agendamento.bairro = bairro;
-        agendamento.cidade = cidade;
-        agendamento.uf = uf;
-
-        agendamento.endereco =
-            [
-                logradouro,
-                numero,
-                agendamento.complemento,
-                bairro,
-                cidade,
-                uf,
-                'CEP ' + cep
-            ]
-            .filter(Boolean)
-            .join(', ');
-
-    } else {
-
-        agendamento.cep = '';
-        agendamento.numero = '';
-        agendamento.complemento = '';
-        agendamento.logradouro = '';
-        agendamento.bairro = '';
-        agendamento.cidade = '';
-        agendamento.uf = '';
-
-        agendamento.endereco =
-            'Atendimento presencial na clínica';
-
-    }
-
-    addLog(
-        '✅ Tipo de atendimento validado: ' +
-        agendamento.tipo,
-        'sucesso'
-    );
-
+    if(!agendamento.servico){mostrarToast('Selecione um serviço.','erro');return false;}
     return true;
 }
 
-function validarPasso3() {
-
-    if (
-        !agendamento.servico
-    ) {
-
-        const selecionado =
-            document.querySelector(
-                '.servico-btn.selecionado'
-            );
-
-        if (selecionado) {
-
-            agendamento.servico =
-                selecionado.dataset.servico;
-
+async function validarPasso4(){
+    const seletor=document.getElementById('dia-agendamento');
+    const data=seletor?seletor.value:agendamento.data;
+    if(!data){mostrarToast('Selecione uma data.','erro');return false;}
+    if(!agendamento.horario){mostrarToast('Selecione um horário.','erro');return false;}
+    try{
+        const disponiveis=await consultarDisponibilidadeOnline(data);
+        if(!disponiveis.includes(agendamento.horario)){
+            mostrarToast('Este horário não está mais disponível. Atualizando horários.','erro');
+            await gerarHorarios(data);return false;
         }
-
+        agendamento.data=data;return true;
+    }catch(erro){
+        mostrarToast('Não foi possível confirmar a disponibilidade. Tente novamente.','erro');return false;
     }
-
-    if (
-        !agendamento.servico
-    ) {
-
-        mostrarToast(
-            'Selecione um serviço.',
-            'erro'
-        );
-
-        return false;
-
-    }
-
-    addLog(
-        '✅ Serviço validado: ' +
-        agendamento.servico,
-        'sucesso'
-    );
-
-    return true;
 }
 
-async function validarPasso4() {
-
-    const seletorDia =
-        document.getElementById('dia-agendamento');
-
-    const data =
-        seletorDia
-            ? seletorDia.value
-            : agendamento.data;
-
-    if (!data) {
-
-        mostrarToast(
-            'Selecione um dia.',
-            'erro'
-        );
-
-        return false;
-    }
-
-    if (!agendamento.horario) {
-
-        mostrarToast(
-            'Selecione um horário.',
-            'erro'
-        );
-
-        return false;
-    }
-
-    const disponiveis =
-        await consultarDisponibilidadeOnline(
-            data
-        );
-
-    if (
-        !disponiveis.includes(
-            agendamento.horario
-        )
-    ) {
-
-        addLog(
-            '❌ O horário selecionado não está mais disponível.',
-            'erro'
-        );
-
-        mostrarToast(
-            'Este horário não está mais disponível. Atualizando horários.',
-            'erro'
-        );
-
-        await gerarHorarios(data);
-
-        return false;
-    }
-
-    agendamento.data =
-        data;
-
-    addLog(
-        '✅ Data e horário validados pela API.',
-        'sucesso'
-    );
-
-    return true;
+function preencherResumo(){
+    const resumo=document.getElementById('resumo-agendamento');
+    const data=new Date(agendamento.data+'T00:00:00');
+    const dataFormatada=DIAS_SEMANA[data.getDay()]+', '+data.getDate()+' de '+MESES[data.getMonth()]+' de '+data.getFullYear();
+    const tipo=agendamento.tipo==='domicilio'?'Domiciliar':'Presencial';
+    resumo.innerHTML=
+        linhaResumo('Nome',agendamento.nome)+
+        linhaResumo('Telefone',agendamento.telefone)+
+        linhaResumo('E-mail',agendamento.email)+
+        linhaResumo('Tipo',tipo)+
+        linhaResumo('Serviço',agendamento.servico)+
+        linhaResumo('Data',dataFormatada)+
+        linhaResumo('Horário',agendamento.horario)+
+        linhaResumo('Endereço',agendamento.endereco)+
+        linhaResumo('Status','<span class="badge-status">Aguardando confirmação</span>',true);
+}
+function linhaResumo(rotulo,valor,html=false){
+    return '<div class="linha"><span class="rotulo">'+escapeHTML(rotulo)+'</span><span class="valor">'+(html?valor:escapeHTML(String(valor||'')))+'</span></div>';
 }
 
-/* ============================================================
-   RESUMO
-   ============================================================ */
-
-function preencherResumo() {
-
-    const resumo =
-        document.getElementById(
-            'resumo-agendamento'
-        );
-
-    const data =
-        new Date(
-            agendamento.data +
-            'T00:00:00'
-        );
-
-    const dataFormatada =
-        DIAS_SEMANA[
-            data.getDay()
-        ] +
-        ', ' +
-        data.getDate() +
-        ' de ' +
-        MESES[
-            data.getMonth()
-        ] +
-        ' de ' +
-        data.getFullYear();
-
-    const tipo =
-        agendamento.tipo ===
-        'domicilio'
-            ? 'Domiciliar'
-            : 'Presencial';
-
-    resumo.innerHTML =
-
-        linhaResumo(
-            'Nome',
-            agendamento.nome
-        ) +
-
-        linhaResumo(
-            'Telefone',
-            agendamento.telefone
-        ) +
-
-        linhaResumo(
-            'E-mail',
-            agendamento.email
-        ) +
-
-        linhaResumo(
-            'Tipo',
-            tipo
-        ) +
-
-        linhaResumo(
-            'Serviço',
-            agendamento.servico
-        ) +
-
-        linhaResumo(
-            'Data',
-            dataFormatada
-        ) +
-
-        linhaResumo(
-            'Horário',
-            agendamento.horario
-        ) +
-
-        linhaResumo(
-            'Endereço',
-            agendamento.endereco
-        ) +
-
-        linhaResumo(
-            'Status',
-            '<span class="badge-status">Aguardando confirmação</span>',
-            true
-        );
-
-}
-
-function linhaResumo(
-    rotulo,
-    valor,
-    html = false
-) {
-
-    return (
-        '<div class="linha">' +
-            '<span class="rotulo">' +
-                escapeHTML(rotulo) +
-            '</span>' +
-            '<span class="valor">' +
-                (
-                    html
-                        ? valor
-                        : escapeHTML(
-                            String(
-                                valor || ''
-                            )
-                        )
-                ) +
-            '</span>' +
-        '</div>'
-    );
-
-}
-
-/* ============================================================
-   SALVAR AGENDAMENTO NO GOOGLE PLANILHAS
-   ============================================================ */
-
-async function confirmarAgendamento() {
-
-    if (!validarPasso1()) return;
-    if (!validarPasso2()) return;
-    if (!validarPasso3()) return;
-    if (!(await validarPasso4())) return;
-
-    const botao =
-        document.getElementById(
-            'btn-confirmar'
-        );
-
-    botao.disabled = true;
-
-    const textoOriginal =
-        botao.innerHTML;
-
-    botao.innerHTML =
-        '<i class="fas fa-spinner fa-spin"></i> Verificando...';
-
-    logEtapa(
-        '1',
-        '🚀 INICIANDO RESERVA',
-        'info'
-    );
-
-    try {
-
-        addLog(
-            '🔒 Fazendo nova verificação da disponibilidade na planilha...',
-            'info'
-        );
-
-        const disponiveis =
-            await consultarDisponibilidadeOnline(
-                agendamento.data
-            );
-
-        if (
-            !disponiveis.includes(
-                agendamento.horario
-            )
-        ) {
-
-            addLog(
-                '❌ Horário acabou de ser ocupado.',
-                'erro'
-            );
-
-            mostrarToast(
-                'Este horário não está mais disponível.',
-                'erro'
-            );
-
-            await gerarHorarios(
-                agendamento.data
-            );
-
-            return;
+async function confirmarAgendamento(){
+    if(!validarPasso1()||!validarPasso2()||!validarPasso3())return;
+    if(!(await validarPasso4()))return;
+    const botao=document.getElementById('btn-confirmar');if(!botao)return;
+    botao.disabled=true;const original=botao.innerHTML;
+    botao.innerHTML='<i class="fas fa-spinner fa-spin"></i> Salvando...';
+    try{
+        const disponiveis=await consultarDisponibilidadeOnline(agendamento.data);
+        if(!disponiveis.includes(agendamento.horario)){
+            mostrarToast('Este horário não está mais disponível.','erro');
+            await gerarHorarios(agendamento.data);botao.disabled=false;botao.innerHTML=original;return;
         }
-
-        logEtapa(
-            '2',
-            '✅ HORÁRIO DISPONÍVEL',
-            'sucesso'
-        );
-
-        botao.innerHTML =
-            '<i class="fas fa-spinner fa-spin"></i> Salvando...';
-
-        const dadosParaSalvar = {
-
-            data:
-                agendamento.data,
-
-            hora:
-                agendamento.horario,
-
-            nome:
-                agendamento.nome,
-
-            telefone:
-                agendamento.telefone,
-
-            email:
-                agendamento.email,
-
-            tipo:
-                agendamento.tipo ===
-                'domicilio'
-                    ? 'Domiciliar'
-                    : 'Presencial',
-
-            servico:
-                agendamento.servico,
-
-            endereco:
-                agendamento.endereco,
-
-            logradouro:
-                agendamento.logradouro,
-
-            bairro:
-                agendamento.bairro,
-
-            cidade:
-                agendamento.cidade,
-
-            uf:
-                agendamento.uf,
-
-            numero:
-                agendamento.numero,
-
-            complemento:
-                agendamento.complemento,
-
-            cep:
-                agendamento.cep,
-
-            status:
-                'Pendente'
-
+        const dados={
+            data:agendamento.data,hora:agendamento.horario,nome:agendamento.nome,telefone:agendamento.telefone,email:agendamento.email,
+            tipo:agendamento.tipo==='domicilio'?'Domiciliar':'Presencial',servico:agendamento.servico,endereco:agendamento.endereco,
+            logradouro:agendamento.logradouro,bairro:agendamento.bairro,cidade:agendamento.cidade,uf:agendamento.uf,
+            numero:agendamento.numero,complemento:agendamento.complemento,cep:agendamento.cep,status:'Pendente'
         };
-
-        logObjeto(
-            '📤 Enviando agendamento',
-            dadosParaSalvar
-        );
-
-        logEtapa(
-            '3',
-            '💾 SALVANDO NO GOOGLE PLANILHAS',
-            'info'
-        );
-
-        const resposta =
-            await apiPost(
-                'salvarAgendamento',
-                dadosParaSalvar
-            );
-
-        logObjeto(
-            '📥 Resultado do salvamento',
-            resposta
-        );
-
-        if (
-            resposta &&
-            resposta.sucesso === false
-        ) {
-
-            throw new Error(
-                resposta.mensagem ||
-                'Apps Script recusou o agendamento.'
-            );
-
-        }
-
-        let salvo =
-            resposta.dados ||
-            resposta.agendamento ||
-            resposta;
-
-        if (
-            !salvo ||
-            typeof salvo !== 'object'
-        ) {
-
-            salvo =
-                dadosParaSalvar;
-
-        }
-
-        agendamento.id =
-            salvo.id ||
-            salvo.ID ||
-            resposta.id ||
-            '';
-
-        agendamento.status =
-            salvo.status ||
-            salvo.Status ||
-            'Pendente';
-
-        logEtapa(
-            '3',
-            '✅ AGENDAMENTO SALVO NO GOOGLE PLANILHAS',
-            'sucesso'
-        );
-
-        addLog(
-            '🆔 ID retornado: ' +
-            (
-                agendamento.id ||
-                'não informado'
-            ),
-            'sucesso'
-        );
-
-        sessionStorage.setItem(
-            'agendamento_confirmado',
-            JSON.stringify(
-                Object.assign(
-                    {},
-                    dadosParaSalvar,
-                    salvo
-                )
-            )
-        );
-
-        mostrarToast(
-            'Agendamento realizado com sucesso!',
-            'sucesso'
-        );
-
-        logEtapa(
-            '4',
-            '🎉 RESERVA CONCLUÍDA',
-            'sucesso'
-        );
-
-        botao.innerHTML =
-            '<i class="fas fa-check"></i> Reserva realizada';
-
-        setTimeout(
-            function() {
-
-                window.location.href =
-                    'obrigado.html';
-
-            },
-            1200
-        );
-
-    } catch (erro) {
-
-        addLog(
-            '❌ ERRO AO FINALIZAR AGENDAMENTO: ' +
-            erro.message,
-            'erro'
-        );
-
-        logEtapa(
-            '3',
-            '❌ FALHA AO SALVAR',
-            'erro'
-        );
-
-        mostrarToast(
-            'Não foi possível concluir o agendamento. Verifique o log.',
-            'erro'
-        );
-
-        botao.disabled =
-            false;
-
-        botao.innerHTML =
-            textoOriginal;
-
+        const resposta=await apiPost('salvarAgendamento',dados);
+        const salvo=resposta&&(resposta.agendamento||resposta.dados)?(resposta.agendamento||resposta.dados):resposta;
+        agendamento.id=salvo&&(salvo.id||salvo.ID)?(salvo.id||salvo.ID):'';
+        agendamento.status=salvo&&(salvo.status||salvo.Status)?(salvo.status||salvo.Status):'Pendente';
+        limparConfigCache();
+        try{sessionStorage.setItem('agendamento_confirmado',JSON.stringify(Object.assign({},dados,salvo||{})));}catch(e){}
+        mostrarToast('Agendamento realizado com sucesso!','sucesso');
+        botao.innerHTML='<i class="fas fa-check"></i> Reserva realizada';
+        setTimeout(()=>window.location.href='obrigado.html',1200);
+    }catch(erro){
+        mostrarToast(erro.message||'Não foi possível concluir o agendamento.','erro');
+        botao.disabled=false;botao.innerHTML=original;
     }
-
 }
 
-/* ============================================================
-   LOG ETAPAS
-   ============================================================ */
-
-function logEtapa(
-    etapa,
-    mensagem,
-    tipo
-) {
-
-    addLog(
-        'ETAPA ' +
-        etapa +
-        ': ' +
-        mensagem,
-        tipo
-    );
-
+async function buscarCEP(){
+    const input=document.getElementById('cep');if(!input)return;
+    const cep=input.value.replace(/\D/g,'');
+    if(cep.length!==8){mostrarToast('Digite um CEP válido com 8 dígitos.','erro');return;}
+    mostrarLoading('Consultando endereço...');
+    try{
+        const response=await fetch(API_CEP_URL+cep+'/json/');
+        if(!response.ok)throw new Error('HTTP '+response.status);
+        const dados=await response.json();
+        if(dados.erro)throw new Error('CEP não encontrado.');
+        document.getElementById('end-logradouro').textContent=dados.logradouro||'-';
+        document.getElementById('end-bairro').textContent=dados.bairro||'-';
+        document.getElementById('end-cidade').textContent=dados.localidade||'-';
+        document.getElementById('end-uf').textContent=dados.uf||'-';
+        document.getElementById('endereco-completo').classList.add('visivel');
+        mostrarToast('Endereço encontrado.','sucesso');
+    }catch(erro){mostrarToast('CEP não encontrado ou serviço indisponível.','erro');}
+    finally{esconderLoading();}
 }
 
-/* ============================================================
-   BUSCA CEP
-   ============================================================ */
-
-async function buscarCEP() {
-
-    const cep =
-        document.getElementById(
-            'cep'
-        ).value.replace(
-            /\D/g,
-            ''
-        );
-
-    if (
-        cep.length !== 8
-    ) {
-
-        mostrarToast(
-            'Digite um CEP válido com 8 dígitos.',
-            'erro'
-        );
-
-        return;
-
+document.addEventListener('DOMContentLoaded',function(){
+    document.querySelectorAll('.tipo-btn').forEach(botao=>{
+        botao.addEventListener('click',function(){
+            document.querySelectorAll('.tipo-btn').forEach(b=>b.classList.remove('selecionado'));
+            this.classList.add('selecionado');
+            const tipo=this.dataset.tipo;
+            const dom=document.getElementById('endereco-domicilio');
+            const pres=document.getElementById('endereco-presencial');
+            if(dom)dom.style.display=tipo==='domicilio'?'block':'none';
+            if(pres)pres.style.display=tipo==='presencial'?'block':'none';
+            if(tipo==='presencial')agendamento.endereco='Atendimento presencial na clínica';
+        });
+    });
+    const cep=document.getElementById('cep');
+    if(cep){
+        cep.addEventListener('input',function(){
+            let v=this.value.replace(/\D/g,'').substring(0,8);
+            if(v.length>5)v=v.substring(0,5)+'-'+v.substring(5);
+            this.value=v;
+        });
+        cep.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();buscarCEP();}});
     }
-
-    addLog(
-        '🔍 Consultando CEP ' +
-        cep,
-        'info'
-    );
-
-    mostrarLoading(
-        'Consultando endereço...'
-    );
-
-    try {
-
-        const response =
-            await fetch(
-                API_CEP_URL +
-                cep +
-                '/json/'
-            );
-
-        const dados =
-            await response.json();
-
-        esconderLoading();
-
-        if (
-            dados.erro
-        ) {
-
-            addLog(
-                '❌ CEP não encontrado.',
-                'erro'
-            );
-
-            mostrarToast(
-                'CEP não encontrado.',
-                'erro'
-            );
-
-            return;
-
-        }
-
-        document.getElementById(
-            'end-logradouro'
-        ).textContent =
-            dados.logradouro || '-';
-
-        document.getElementById(
-            'end-bairro'
-        ).textContent =
-            dados.bairro || '-';
-
-        document.getElementById(
-            'end-cidade'
-        ).textContent =
-            dados.localidade || '-';
-
-        document.getElementById(
-            'end-uf'
-        ).textContent =
-            dados.uf || '-';
-
-        document.getElementById(
-            'endereco-completo'
-        ).classList.add(
-            'visivel'
-        );
-
-        addLog(
-            '✅ Endereço encontrado: ' +
-            (
-                dados.logradouro ||
-                ''
-            ) +
-            ', ' +
-            (
-                dados.localidade ||
-                ''
-            ) +
-            '/' +
-            (
-                dados.uf ||
-                ''
-            ),
-            'sucesso'
-        );
-
-    } catch (erro) {
-
-        esconderLoading();
-
-        addLog(
-            '❌ Erro ao consultar CEP: ' +
-            erro.message,
-            'erro'
-        );
-
-        mostrarToast(
-            'Erro ao consultar CEP.',
-            'erro'
-        );
-
+    const telefone=document.getElementById('telefone');
+    if(telefone){
+        telefone.addEventListener('input',function(){
+            let v=this.value.replace(/\D/g,'').substring(0,11);
+            if(v.length<=2)this.value=v?'('+v:'';
+            else if(v.length<=7)this.value='('+v.substring(0,2)+') '+v.substring(2);
+            else this.value='('+v.substring(0,2)+') '+v.substring(2,7)+'-'+v.substring(7);
+        });
     }
+    carregarConfiguracoes();
+});
 
-}
-
-/* ============================================================
-   EVENTOS
-   ============================================================ */
-
-document.addEventListener(
-    'DOMContentLoaded',
-    function() {
-
-        addLog(
-            '🚀 HTML carregado.',
-            'sucesso'
-        );
-
-        addLog(
-            '🔗 API: Google Apps Script',
-            'info'
-        );
-
-        addLog(
-            '📊 Banco: Google Planilhas',
-            'info'
-        );
-
-        const painelLog = document.querySelector('.log-panel');
-        if (painelLog && !DEBUG) painelLog.style.display = 'none';
-
-        document
-            .querySelectorAll(
-                '.tipo-btn'
-            )
-            .forEach(
-                function(botao) {
-
-                    botao.addEventListener(
-                        'click',
-                        function() {
-
-                            document
-                                .querySelectorAll(
-                                    '.tipo-btn'
-                                )
-                                .forEach(
-                                    function(btn) {
-
-                                        btn.classList.remove(
-                                            'selecionado'
-                                        );
-
-                                    }
-                                );
-
-                            this.classList.add(
-                                'selecionado'
-                            );
-
-                            const tipo =
-                                this.dataset.tipo;
-
-                            document.getElementById(
-                                'endereco-domicilio'
-                            ).style.display =
-                                tipo === 'domicilio'
-                                    ? 'block'
-                                    : 'none';
-
-                            document.getElementById(
-                                'endereco-presencial'
-                            ).style.display =
-                                tipo === 'presencial'
-                                    ? 'block'
-                                    : 'none';
-
-                            addLog(
-                                '📌 Tipo selecionado: ' +
-                                tipo,
-                                'info'
-                            );
-
-                        }
-                    );
-
-                }
-            );
-
-        const cepInput =
-            document.getElementById(
-                'cep'
-            );
-
-        if (cepInput) {
-
-            cepInput.addEventListener(
-                'input',
-                function() {
-
-                    let valor =
-                        this.value.replace(
-                            /\D/g,
-                            ''
-                        );
-
-                    if (
-                        valor.length > 8
-                    ) {
-
-                        valor =
-                            valor.substring(
-                                0,
-                                8
-                            );
-
-                    }
-
-                    if (
-                        valor.length > 5
-                    ) {
-
-                        valor =
-                            valor.substring(
-                                0,
-                                5
-                            ) +
-                            '-' +
-                            valor.substring(
-                                5
-                            );
-
-                    }
-
-                    this.value =
-                        valor;
-
-                }
-            );
-
-        }
-
-        const telefoneInput =
-            document.getElementById(
-                'telefone'
-            );
-
-        if (telefoneInput) {
-
-            telefoneInput.addEventListener(
-                'input',
-                function() {
-
-                    let valor =
-                        this.value.replace(
-                            /\D/g,
-                            ''
-                        );
-
-                    if (
-                        valor.length > 11
-                    ) {
-
-                        valor =
-                            valor.substring(
-                                0,
-                                11
-                            );
-
-                    }
-
-                    if (
-                        valor.length <= 2
-                    ) {
-
-                        this.value =
-                            valor
-                                ? '(' +
-                                  valor
-                                : '';
-
-                    } else if (
-                        valor.length <= 7
-                    ) {
-
-                        this.value =
-                            '(' +
-                            valor.substring(
-                                0,
-                                2
-                            ) +
-                            ') ' +
-                            valor.substring(
-                                2
-                            );
-
-                    } else {
-
-                        this.value =
-                            '(' +
-                            valor.substring(
-                                0,
-                                2
-                            ) +
-                            ') ' +
-                            valor.substring(
-                                2,
-                                7
-                            ) +
-                            '-' +
-                            valor.substring(
-                                7
-                            );
-
-                    }
-
-                }
-            );
-
-        }
-
-        carregarConfiguracoes();
-
-    }
-);
-
-/* ============================================================
-   ESCAPE HTML
-   ============================================================ */
-
-function escapeHTML(valor) {
-
-    return String(valor || '')
-        .replace(
-            /&/g,
-            '&amp;'
-        )
-        .replace(
-            /</g,
-            '&lt;'
-        )
-        .replace(
-            />/g,
-            '&gt;'
-        )
-        .replace(
-            /"/g,
-            '&quot;'
-        )
-        .replace(
-            /'/g,
-            '&#039;'
-        );
-
+function escapeHTML(valor){
+    return String(valor||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
 }
 </script>
 
