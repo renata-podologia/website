@@ -1171,12 +1171,86 @@
         // ============================================
         // AÇÕES DOS AGENDAMENTOS
         // ============================================
-        function mudarStatus(id, novoStatus) {
-            mostrarToast('A leitura já vem do Google Planilhas. Para alterar status com segurança, é necessário habilitar uma API administrativa autenticada.', 'info');
+        async function enviarAcaoAdministrativa(payload) {
+            var senha = window.prompt('Digite a senha administrativa para confirmar esta ação:');
+            if (senha === null) return null;
+            if (!senha.trim()) {
+                mostrarToast('A senha administrativa não pode ficar vazia.', 'erro');
+                return null;
+            }
+
+            payload.tokenAdmin = senha;
+            var response;
+            try {
+                response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    cache: 'no-store',
+                    redirect: 'follow',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload)
+                });
+            } catch (error) {
+                throw new Error('Não foi possível conectar à API administrativa. Verifique se a nova versão do Apps Script foi implantada como aplicativo da web.');
+            } finally {
+                // A senha não é armazenada no navegador.
+                payload.tokenAdmin = '';
+                senha = '';
+            }
+
+            var texto = await response.text();
+            var resultado;
+            try {
+                resultado = JSON.parse(texto);
+            } catch (error) {
+                throw new Error('A API não retornou uma resposta válida. Confirme a implantação do Apps Script.');
+            }
+            if (!resultado || resultado.sucesso !== true) {
+                throw new Error((resultado && (resultado.erro || resultado.mensagem)) || 'A API não concluiu a ação.');
+            }
+            return resultado;
         }
 
-        function deletarAgendamento(id) {
-            mostrarToast('A exclusão direta está desabilitada para proteger a planilha. Configure autenticação administrativa antes de habilitar esta ação.', 'info');
+        async function mudarStatus(id, novoStatus) {
+            var nomesStatus = {
+                pendente: 'Pendente',
+                confirmado: 'Confirmado',
+                cancelado: 'Cancelado',
+                atendido: 'Atendido'
+            };
+            if (!nomesStatus[novoStatus]) {
+                mostrarToast('Status solicitado inválido.', 'erro');
+                return;
+            }
+            try {
+                var resultado = await enviarAcaoAdministrativa({
+                    acao: 'adminAtualizarStatus',
+                    id: String(id),
+                    status: novoStatus
+                });
+                if (!resultado) return;
+                mostrarToast('Agendamento atualizado para ' + nomesStatus[novoStatus] + '.', 'sucesso');
+                await carregarAgendamentos();
+            } catch (error) {
+                mostrarToast(error.message || 'Não foi possível atualizar o agendamento.', 'erro');
+            }
+        }
+
+        async function deletarAgendamento(id) {
+            var agendamento = todosAgendamentos.find(function(a) { return String(a.id) === String(id); });
+            var nome = agendamento ? ' de ' + agendamento.nome : '';
+            if (!window.confirm('Tem certeza de que deseja excluir o agendamento' + nome + '? Esta ação não pode ser desfeita.')) return;
+            try {
+                var resultado = await enviarAcaoAdministrativa({
+                    acao: 'adminExcluirAgendamento',
+                    id: String(id)
+                });
+                if (!resultado) return;
+                mostrarToast('Agendamento excluído da planilha.', 'sucesso');
+                await carregarAgendamentos();
+            } catch (error) {
+                mostrarToast(error.message || 'Não foi possível excluir o agendamento.', 'erro');
+            }
         }
 
         function exportarCSV() {
