@@ -664,48 +664,37 @@
         <!-- TAB: CONFIGURAÇÕES -->
         <div class="tab-content" id="tab-configuracoes">
             <div class="config-card" style="border-left:4px solid #C9A227;">
-                <h3><i class="fas fa-info-circle" style="color:#C9A227;"></i> Configurações sem Supabase</h3>
-                <p class="sub">O painel de agendamentos já consulta o Google Planilhas. A API publicada atualmente não possui operações para gravar horários, serviços ou dias de funcionamento. Para evitar alterações que pareçam salvas mas não cheguem ao site, estes controles ficam desativados até a criação dessas operações no Apps Script.</p>
+                <h3><i class="fas fa-sliders-h" style="color:#C9A227;"></i> Gerenciar configurações</h3>
+                <p class="sub">Inclua, altere ou exclua dias de funcionamento, horários e serviços. As mudanças são gravadas nas abas correspondentes do Google Planilhas.</p>
             </div>
-            <!-- Horários -->
             <div class="config-card">
-                <h3><i class="fas fa-clock" style="color: #C9A227;"></i> Horários Disponíveis</h3>
+                <h3><i class="fas fa-calendar-day" style="color:#C9A227;"></i> Dias de funcionamento</h3>
                 <div class="form-row">
-                    <div class="form-group">
-                        <label>Adicionar Horário</label>
-                        <input type="time" id="novo-horario" value="08:00" />
+                    <div class="form-group"><label>Novo dia</label>
+                        <select id="novo-dia"><option value="Segunda-feira">Segunda-feira</option><option value="Terça-feira">Terça-feira</option><option value="Quarta-feira">Quarta-feira</option><option value="Quinta-feira">Quinta-feira</option><option value="Sexta-feira">Sexta-feira</option><option value="Sábado">Sábado</option><option value="Domingo">Domingo</option></select>
                     </div>
-                    <div class="form-group" style="display: flex; align-items: flex-end;">
-                        <button class="btn btn-success" onclick="adicionarHorario()"><i class="fas fa-plus"></i> Adicionar</button>
-                    </div>
+                    <div class="form-group"><label>Status</label><select id="novo-dia-ativo"><option value="Sim">Ativo</option><option value="Não">Inativo</option></select></div>
+                    <div class="form-group" style="display:flex;align-items:flex-end"><button class="btn btn-success" onclick="adicionarDia()"><i class="fas fa-plus"></i> Adicionar dia</button></div>
                 </div>
-                <div class="items-grid" id="horarios-lista"><div class="vazio"><i class="fas fa-spinner fa-spin"></i> Carregando...</div></div>
+                <div id="dias-lista"><div class="vazio">Carregando dias...</div></div>
             </div>
-
-            <!-- Serviços -->
             <div class="config-card">
-                <h3><i class="fas fa-stethoscope" style="color: #C9A227;"></i> Serviços</h3>
+                <h3><i class="fas fa-clock" style="color:#C9A227;"></i> Horários disponíveis</h3>
                 <div class="form-row">
-                    <div class="form-group">
-                        <label>Nome do Serviço</label>
-                        <input type="text" id="novo-servico" placeholder="Ex: Podologia Clínica" />
-                    </div>
-                    <div class="form-group">
-                        <label>Descrição</label>
-                        <input type="text" id="nova-descricao" placeholder="Breve descrição" />
-                    </div>
-                    <div class="form-group" style="display: flex; align-items: flex-end;">
-                        <button class="btn btn-success" onclick="adicionarServico()"><i class="fas fa-plus"></i> Adicionar</button>
-                    </div>
+                    <div class="form-group"><label>Novo horário</label><input type="time" id="novo-horario" value="08:00" /></div>
+                    <div class="form-group"><label>Status</label><select id="novo-horario-ativo"><option value="Sim">Ativo</option><option value="Não">Inativo</option></select></div>
+                    <div class="form-group" style="display:flex;align-items:flex-end"><button class="btn btn-success" onclick="adicionarHorario()"><i class="fas fa-plus"></i> Adicionar horário</button></div>
                 </div>
-                <div class="items-grid" id="servicos-lista"><div class="vazio"><i class="fas fa-spinner fa-spin"></i> Carregando...</div></div>
+                <div class="items-grid" id="horarios-lista"><div class="vazio">Carregando horários...</div></div>
             </div>
-
-            <!-- Dias -->
             <div class="config-card">
-                <h3><i class="fas fa-calendar-day" style="color: #C9A227;"></i> Dias de Funcionamento</h3>
-                <p class="sub">Ative ou desative os dias de atendimento.</p>
-                <div id="dias-lista"><div class="vazio"><i class="fas fa-spinner fa-spin"></i> Carregando...</div></div>
+                <h3><i class="fas fa-stethoscope" style="color:#C9A227;"></i> Serviços</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>Nome do serviço</label><input type="text" id="novo-servico" placeholder="Ex.: Podologia clínica" /></div>
+                    <div class="form-group"><label>Descrição</label><input type="text" id="nova-descricao" placeholder="Breve descrição" /></div>
+                    <div class="form-group" style="display:flex;align-items:flex-end"><button class="btn btn-success" onclick="adicionarServico()"><i class="fas fa-plus"></i> Adicionar serviço</button></div>
+                </div>
+                <div class="items-grid" id="servicos-lista"><div class="vazio">Carregando serviços...</div></div>
             </div>
         </div>
     </div>
@@ -715,12 +704,13 @@
         // ============================================
         var GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxafkZpyHjDTf6Qy9B6G2mZpZHiQPLrocqL63Vfjk6IZBD3GKDItiTpxEH5EdKVS_w/exec';
 
-        // Esta versão usa exclusivamente o Google Apps Script para agendamentos.
-        // O Apps Script atual não oferece endpoints de configuração de horários,
-        // serviços ou dias; essas áreas são mantidas apenas como aviso informativo.
+        // O Google Apps Script é a fonte oficial dos agendamentos e configurações.
         var todosAgendamentos = [];
         var horarios = [];
         var servicos = [];
+        var diasConfiguracao = [];
+        var horariosConfiguracao = [];
+        var servicosConfiguracao = [];
 // ============================================
         // TOAST
         // ============================================
@@ -1391,53 +1381,117 @@
         }
 
         // ============================================
-        // CONFIGURAÇÕES
-        // Sem endpoints de configuração no Apps Script atual.
-        // Não gravar dados localmente nem simular persistência.
+        // CONFIGURAÇÕES: Dias, Horários e Serviços
+        // As operações são salvas no Google Planilhas via Apps Script.
         // ============================================
-        function avisoConfiguracaoIndisponivel() {
-            mostrarToast(
-                'Esta configuração ainda não está disponível na API do Google Planilhas. Nenhuma alteração foi salva.',
-                'erro'
-            );
-        }
-
-        function carregarHorarios() {
-            document.getElementById('horarios-lista').innerHTML =
-                '<div class="vazio"><i class="fas fa-info-circle"></i> A API atual não disponibiliza horários configuráveis.</div>';
-            var campo = document.getElementById('novo-horario');
-            var botao = campo && campo.parentElement && campo.parentElement.nextElementSibling
-                ? campo.parentElement.nextElementSibling.querySelector('button') : null;
-            if (campo) campo.disabled = true;
-            if (botao) botao.disabled = true;
-        }
-
-        function renderizarHorarios() { carregarHorarios(); }
-        function adicionarHorario() { avisoConfiguracaoIndisponivel(); }
-        function removerHorario() { avisoConfiguracaoIndisponivel(); }
-
-        function carregarServicos() {
-            document.getElementById('servicos-lista').innerHTML =
-                '<div class="vazio"><i class="fas fa-info-circle"></i> A API atual não disponibiliza cadastro de serviços.</div>';
-            ['novo-servico', 'nova-descricao'].forEach(function(id) {
-                var el = document.getElementById(id);
-                if (el) el.disabled = true;
+        function escaparHTML(valor) {
+            return String(valor == null ? '' : valor).replace(/[&<>"']/g, function(c) {
+                return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
             });
-            var card = document.getElementById('servicos-lista').closest('.config-card');
-            if (card) card.querySelectorAll('button').forEach(function(btn) { btn.disabled = true; });
         }
 
-        function renderizarServicos() { carregarServicos(); }
-        function adicionarServico() { avisoConfiguracaoIndisponivel(); }
-        function removerServico() { avisoConfiguracaoIndisponivel(); }
-
-        function carregarDias() {
-            document.getElementById('dias-lista').innerHTML =
-                '<div class="vazio"><i class="fas fa-info-circle"></i> A API atual não disponibiliza configuração de dias de funcionamento.</div>';
+        async function salvarConfiguracao(tipo, operacao, item) {
+            var payload = Object.assign({ acao: 'adminGerenciarConfiguracao', tipo: tipo, operacao: operacao }, item || {});
+            var resultado = await enviarAcaoAdministrativa(payload);
+            mostrarToast(resultado.mensagem || 'Configuração salva com sucesso.', 'sucesso');
+            await Promise.all([carregarDias(), carregarHorarios(), carregarServicos()]);
+            return resultado;
         }
 
-        function renderizarDias() { carregarDias(); }
-        function toggleDia() { avisoConfiguracaoIndisponivel(); }
+        async function carregarDias() {
+            var alvo = document.getElementById('dias-lista');
+            try {
+                var r = await fetch(GOOGLE_APPS_SCRIPT_URL + '?acao=dias&_=' + Date.now(), {cache:'no-store'});
+                var dados = await r.json();
+                if (!dados.sucesso) throw new Error(dados.erro || 'Não foi possível carregar os dias.');
+                var lista = dados.dias || []; diasConfiguracao = lista;
+                if (!lista.length) { alvo.innerHTML = '<div class="vazio">Nenhum dia cadastrado.</div>'; return; }
+                alvo.innerHTML = '<div class="tabela-container"><table class="tabela"><thead><tr><th>Dia</th><th>Status</th><th>Ações</th></tr></thead><tbody>' + lista.map(function(x) {
+                    var ativo = /^(sim|true|ativo|1|yes)$/i.test(String(x.ativo || '').trim());
+                    return '<tr><td>' + escaparHTML(x.dia) + '</td><td>' + (ativo ? 'Ativo' : 'Inativo') + '</td><td><div class="actions"><button class="btn btn-sm btn-warning" onclick="editarDia(' + Number(x.linha) + ')"><i class="fas fa-edit"></i> Alterar</button> <button class="btn btn-sm btn-danger" onclick="excluirConfiguracao(\'dias\',' + Number(x.linha) + ')"><i class="fas fa-trash"></i> Excluir</button></div></td></tr>';
+                }).join('') + '</tbody></table></div>';
+            } catch (e) { alvo.innerHTML = '<div class="vazio">' + escaparHTML(e.message || 'Erro ao carregar dias.') + '</div>'; }
+        }
+
+        async function carregarHorarios() {
+            var alvo = document.getElementById('horarios-lista');
+            try {
+                var r = await fetch(GOOGLE_APPS_SCRIPT_URL + '?acao=horarios&_=' + Date.now(), {cache:'no-store'});
+                var dados = await r.json();
+                if (!dados.sucesso) throw new Error(dados.erro || 'Não foi possível carregar os horários.');
+                var lista = dados.horarios || []; horariosConfiguracao = lista;
+                if (!lista.length) { alvo.innerHTML = '<div class="vazio">Nenhum horário cadastrado.</div>'; return; }
+                alvo.innerHTML = lista.map(function(x) {
+                    var ativo = /^(sim|true|ativo|1|yes)$/i.test(String(x.ativo || '').trim());
+                    return '<div class="item-card"><div class="info">' + escaparHTML(x.hora) + '<small>' + (ativo ? 'Ativo' : 'Inativo') + '</small></div><div class="actions"><button class="btn btn-sm btn-warning" onclick="editarHorario(' + Number(x.linha) + ')"><i class="fas fa-edit"></i></button><button class="btn btn-sm btn-danger" onclick="excluirConfiguracao(\'horarios\',' + Number(x.linha) + ')"><i class="fas fa-trash"></i></button></div></div>';
+                }).join('');
+            } catch (e) { alvo.innerHTML = '<div class="vazio">' + escaparHTML(e.message || 'Erro ao carregar horários.') + '</div>'; }
+        }
+
+        async function carregarServicos() {
+            var alvo = document.getElementById('servicos-lista');
+            try {
+                var r = await fetch(GOOGLE_APPS_SCRIPT_URL + '?acao=servicos&_=' + Date.now(), {cache:'no-store'});
+                var dados = await r.json();
+                if (!dados.sucesso) throw new Error(dados.erro || 'Não foi possível carregar os serviços.');
+                var lista = dados.servicos || []; servicosConfiguracao = lista;
+                if (!lista.length) { alvo.innerHTML = '<div class="vazio">Nenhum serviço cadastrado.</div>'; return; }
+                alvo.innerHTML = lista.map(function(x) {
+                    return '<div class="item-card"><div class="info">' + escaparHTML(x.nome) + '<small>' + escaparHTML(x.descricao || 'Sem descrição') + '</small></div><div class="actions"><button class="btn btn-sm btn-warning" onclick="editarServico(' + Number(x.linha) + ')"><i class="fas fa-edit"></i></button><button class="btn btn-sm btn-danger" onclick="excluirConfiguracao(\'servicos\',' + Number(x.linha) + ')"><i class="fas fa-trash"></i></button></div></div>';
+                }).join('');
+            } catch (e) { alvo.innerHTML = '<div class="vazio">' + escaparHTML(e.message || 'Erro ao carregar serviços.') + '</div>'; }
+        }
+
+        async function adicionarDia() {
+            try { await salvarConfiguracao('dias', 'incluir', { dia: document.getElementById('novo-dia').value, ativo: document.getElementById('novo-dia-ativo').value }); }
+            catch (e) { mostrarToast(e.message || 'Não foi possível adicionar o dia.', 'erro'); }
+        }
+        async function editarDia(linha) {
+            var item = diasConfiguracao.find(function(x) { return Number(x.linha) === Number(linha); }); if (!item) return;
+            var novoDia = window.prompt('Nome do dia da semana:', item.dia); if (novoDia === null) return;
+            var ativo = /^(sim|true|ativo|1|yes)$/i.test(String(item.ativo || '').trim());
+            var novoStatus = window.prompt('Status: digite Ativo ou Inativo', ativo ? 'Ativo' : 'Inativo'); if (novoStatus === null) return;
+            try { await salvarConfiguracao('dias', 'alterar', { linha: linha, dia: novoDia, ativo: /^(ativo|sim|true|1)$/i.test(novoStatus.trim()) ? 'Sim' : 'Não' }); }
+            catch (e) { mostrarToast(e.message || 'Não foi possível alterar o dia.', 'erro'); }
+        }
+        async function adicionarHorario() {
+            var hora = document.getElementById('novo-horario').value;
+            if (!hora) { mostrarToast('Informe um horário.', 'erro'); return; }
+            try { await salvarConfiguracao('horarios', 'incluir', { hora: hora, ativo: document.getElementById('novo-horario-ativo').value }); }
+            catch (e) { mostrarToast(e.message || 'Não foi possível adicionar o horário.', 'erro'); }
+        }
+        async function editarHorario(linha) {
+            var item = horariosConfiguracao.find(function(x) { return Number(x.linha) === Number(linha); }); if (!item) return;
+            var novaHora = window.prompt('Horário (HH:MM):', item.hora); if (novaHora === null) return;
+            var ativo = /^(sim|true|ativo|1|yes)$/i.test(String(item.ativo || '').trim());
+            var novoStatus = window.prompt('Status: digite Ativo ou Inativo', ativo ? 'Ativo' : 'Inativo'); if (novoStatus === null) return;
+            try { await salvarConfiguracao('horarios', 'alterar', { linha: linha, hora: novaHora, ativo: /^(ativo|sim|true|1)$/i.test(novoStatus.trim()) ? 'Sim' : 'Não' }); }
+            catch (e) { mostrarToast(e.message || 'Não foi possível alterar o horário.', 'erro'); }
+        }
+        async function adicionarServico() {
+            var nome = document.getElementById('novo-servico').value.trim();
+            var descricao = document.getElementById('nova-descricao').value.trim();
+            if (!nome) { mostrarToast('Informe o nome do serviço.', 'erro'); return; }
+            try {
+                await salvarConfiguracao('servicos', 'incluir', { nome: nome, descricao: descricao });
+                document.getElementById('novo-servico').value = ''; document.getElementById('nova-descricao').value = '';
+            } catch (e) { mostrarToast(e.message || 'Não foi possível adicionar o serviço.', 'erro'); }
+        }
+        async function editarServico(linha) {
+            var item = servicosConfiguracao.find(function(x) { return Number(x.linha) === Number(linha); }); if (!item) return;
+            var novoNome = window.prompt('Nome do serviço:', item.nome); if (novoNome === null) return;
+            var novaDescricao = window.prompt('Descrição do serviço:', item.descricao || ''); if (novaDescricao === null) return;
+            try { await salvarConfiguracao('servicos', 'alterar', { linha: linha, nome: novoNome, descricao: novaDescricao }); }
+            catch (e) { mostrarToast(e.message || 'Não foi possível alterar o serviço.', 'erro'); }
+        }
+        async function excluirConfiguracao(tipo, linha) {
+            var fontes = { dias: diasConfiguracao, horarios: horariosConfiguracao, servicos: servicosConfiguracao };
+            var item = (fontes[tipo] || []).find(function(x) { return Number(x.linha) === Number(linha); });
+            var descricao = item ? (item.dia || item.hora || item.nome) : 'este registro';
+            if (!window.confirm('Deseja realmente excluir "' + descricao + '"?')) return;
+            try { await salvarConfiguracao(tipo, 'excluir', { linha: linha }); }
+            catch (e) { mostrarToast(e.message || 'Não foi possível excluir o registro.', 'erro'); }
+        }
 
         // ============================================
         // INICIALIZAÇÃO
