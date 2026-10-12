@@ -473,9 +473,34 @@
             .stats { grid-template-columns: 1fr 1fr; }
             .filtros select, .filtros input { width: 100%; }
         }
+
+        /* Tela de autenticação do painel */
+        .login-overlay { position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px; background: #F7F8FA; }
+        .login-card { width: 100%; max-width: 420px; padding: 32px; background: #fff; border-radius: 22px; box-shadow: 0 12px 40px rgba(0,0,0,.12); border: 1px solid rgba(168,195,160,.25); }
+        .login-card h1 { font-family: 'Poppins', sans-serif; color: #2F5D62; font-size: 1.5rem; margin-bottom: 8px; }
+        .login-card p { color: #4a5f64; margin-bottom: 22px; font-size: .92rem; }
+        .login-card label { display:block; font-weight:600; margin-bottom:8px; }
+        .login-card input { width:100%; padding:13px 14px; border:1px solid #cbd5d7; border-radius:10px; font:inherit; margin-bottom:14px; }
+        .login-card input:focus { outline:2px solid #2F5D62; border-color:#2F5D62; }
+        .login-card .btn { width:100%; }
+        #login-erro { min-height:22px; color:#dc3545; font-size:.88rem; margin:10px 0 0; }
+        body:not(.autenticado) > .container, body:not(.autenticado) > #loading-overlay { display:none !important; }
+        body.autenticado .login-overlay { display:none; }
     </style>
 </head>
 <body>
+
+
+    <section class="login-overlay" id="login-overlay" aria-label="Acesso administrativo">
+        <form class="login-card" id="login-form">
+            <h1><i class="fas fa-lock" style="color:#C9A227"></i> Acesso administrativo</h1>
+            <p>Digite a senha administrativa para abrir o painel da Levità Podologia.</p>
+            <label for="login-senha">Senha</label>
+            <input id="login-senha" type="password" autocomplete="current-password" required autofocus placeholder="Digite sua senha" />
+            <button class="btn btn-primario" id="login-botao" type="submit"><i class="fas fa-unlock"></i> Entrar</button>
+            <div id="login-erro" role="alert" aria-live="polite"></div>
+        </form>
+    </section>
 
     <!-- LOADING -->
     <div class="loading-overlay" id="loading-overlay">
@@ -705,6 +730,7 @@
         var GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxafkZpyHjDTf6Qy9B6G2mZpZHiQPLrocqL63Vfjk6IZBD3GKDItiTpxEH5EdKVS_w/exec';
 
         // O Google Apps Script é a fonte oficial dos agendamentos e configurações.
+        var tokenAdminSessao = ''; // Mantido apenas em memória enquanto esta página estiver aberta.
         var todosAgendamentos = [];
         var horarios = [];
         var servicos = [];
@@ -835,6 +861,7 @@
             try {
                 var url = new URL(GOOGLE_APPS_SCRIPT_URL);
                 url.searchParams.set('acao', 'agendamentos');
+                url.searchParams.set('tokenAdmin', tokenAdminSessao);
                 url.searchParams.set('_', String(Date.now()));
 
                 var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
@@ -1149,14 +1176,11 @@
         // AÇÕES DOS AGENDAMENTOS
         // ============================================
         async function enviarAcaoAdministrativa(payload) {
-            var senha = window.prompt('Digite a senha administrativa para confirmar esta ação:');
-            if (senha === null) return null;
-            if (!senha.trim()) {
-                mostrarToast('A senha administrativa não pode ficar vazia.', 'erro');
-                return null;
+            if (!tokenAdminSessao) {
+                encerrarSessaoAdmin();
+                throw new Error('Sua sessão expirou. Entre novamente.');
             }
-
-            payload.tokenAdmin = senha;
+            payload.tokenAdmin = tokenAdminSessao;
             var response;
             try {
                 response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
@@ -1172,7 +1196,6 @@
             } finally {
                 // A senha não é armazenada no navegador.
                 payload.tokenAdmin = '';
-                senha = '';
             }
 
             var texto = await response.text();
@@ -1401,7 +1424,7 @@
         async function carregarDias() {
             var alvo = document.getElementById('dias-lista');
             try {
-                var r = await fetch(GOOGLE_APPS_SCRIPT_URL + '?acao=dias&_=' + Date.now(), {cache:'no-store'});
+                var r = await fetch(GOOGLE_APPS_SCRIPT_URL + '?acao=dias&tokenAdmin=' + encodeURIComponent(tokenAdminSessao) + '&_=' + Date.now(), {cache:'no-store'});
                 var dados = await r.json();
                 if (!dados.sucesso) throw new Error(dados.erro || 'Não foi possível carregar os dias.');
                 var lista = dados.dias || []; diasConfiguracao = lista;
@@ -1416,7 +1439,7 @@
         async function carregarHorarios() {
             var alvo = document.getElementById('horarios-lista');
             try {
-                var r = await fetch(GOOGLE_APPS_SCRIPT_URL + '?acao=horarios&_=' + Date.now(), {cache:'no-store'});
+                var r = await fetch(GOOGLE_APPS_SCRIPT_URL + '?acao=horarios&tokenAdmin=' + encodeURIComponent(tokenAdminSessao) + '&_=' + Date.now(), {cache:'no-store'});
                 var dados = await r.json();
                 if (!dados.sucesso) throw new Error(dados.erro || 'Não foi possível carregar os horários.');
                 var lista = dados.horarios || []; horariosConfiguracao = lista;
@@ -1431,7 +1454,7 @@
         async function carregarServicos() {
             var alvo = document.getElementById('servicos-lista');
             try {
-                var r = await fetch(GOOGLE_APPS_SCRIPT_URL + '?acao=servicos&_=' + Date.now(), {cache:'no-store'});
+                var r = await fetch(GOOGLE_APPS_SCRIPT_URL + '?acao=servicos&tokenAdmin=' + encodeURIComponent(tokenAdminSessao) + '&_=' + Date.now(), {cache:'no-store'});
                 var dados = await r.json();
                 if (!dados.sucesso) throw new Error(dados.erro || 'Não foi possível carregar os serviços.');
                 var lista = dados.servicos || []; servicosConfiguracao = lista;
@@ -1496,8 +1519,56 @@
         // ============================================
         // INICIALIZAÇÃO
         // ============================================
+        async function autenticarAdmin(senha) {
+            var resposta = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+                method: 'POST', mode: 'cors', cache: 'no-store', redirect: 'follow',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ acao: 'adminValidarToken', tokenAdmin: senha })
+            });
+            var texto = await resposta.text();
+            var dados;
+            try { dados = JSON.parse(texto); } catch (e) { throw new Error('A API não retornou JSON válido. Atualize a implantação do Apps Script.'); }
+            if (!resposta.ok || !dados || dados.sucesso !== true) {
+                throw new Error((dados && (dados.erro || dados.mensagem)) || 'Senha incorreta.');
+            }
+            return true;
+        }
+
+        function encerrarSessaoAdmin() {
+            tokenAdminSessao = '';
+            document.body.classList.remove('autenticado');
+            var campo = document.getElementById('login-senha');
+            if (campo) { campo.value = ''; campo.focus(); }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
-            carregarAgendamentos();
+            document.getElementById('login-form').addEventListener('submit', async function(event) {
+                event.preventDefault();
+                var campo = document.getElementById('login-senha');
+                var botao = document.getElementById('login-botao');
+                var erro = document.getElementById('login-erro');
+                var senha = campo.value;
+                if (!senha) { erro.textContent = 'Digite a senha para continuar.'; return; }
+                botao.disabled = true;
+                botao.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando...';
+                erro.textContent = '';
+                try {
+                    await autenticarAdmin(senha);
+                    tokenAdminSessao = senha;
+                    senha = '';
+                    document.body.classList.add('autenticado');
+                    campo.value = '';
+                    carregarAgendamentos();
+                } catch (e) {
+                    senha = '';
+                    campo.value = '';
+                    erro.textContent = e.message || 'Não foi possível validar a senha.';
+                } finally {
+                    botao.disabled = false;
+                    botao.innerHTML = '<i class="fas fa-unlock"></i> Entrar';
+                }
+            });
+            document.body.classList.remove('autenticado');
         });
     </script>
 </body>
