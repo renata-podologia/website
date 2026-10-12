@@ -663,6 +663,10 @@
 
         <!-- TAB: CONFIGURAÇÕES -->
         <div class="tab-content" id="tab-configuracoes">
+            <div class="config-card" style="border-left:4px solid #C9A227;">
+                <h3><i class="fas fa-info-circle" style="color:#C9A227;"></i> Configurações sem Supabase</h3>
+                <p class="sub">O painel de agendamentos já consulta o Google Planilhas. A API publicada atualmente não possui operações para gravar horários, serviços ou dias de funcionamento. Para evitar alterações que pareçam salvas mas não cheguem ao site, estes controles ficam desativados até a criação dessas operações no Apps Script.</p>
+            </div>
             <!-- Horários -->
             <div class="config-card">
                 <h3><i class="fas fa-clock" style="color: #C9A227;"></i> Horários Disponíveis</h3>
@@ -705,36 +709,19 @@
             </div>
         </div>
     </div>
-
-    <!-- SUPABASE -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <script>
+<script>
         // ============================================
         // GOOGLE APPS SCRIPT: fonte oficial dos agendamentos
         // ============================================
-        var GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwguRbIxtC3QUNEc8gT4p9mX2beXgo3qY_7J-kWrZK4ZyPgYZgTkIHoJxI09fS6AA/exec';
+        var GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxwTxWyiIGJ3nHc8EbT0PcfVeYAb3mKsK25TaIr2EVaGq7oTDU3S4ftj12MAnGPohY/exec';
 
-        // SUPABASE continua sendo usado apenas pelas telas de configuração
-        var SUPABASE_URL = 'https://euktsrczpxejezkeyqoh.supabase.co';
-        var SUPABASE_ANON_KEY = 'sb_publishable_vH11tBYAWHlKNoCeQG-oMQ_r1fOxcRf';
-        
-        var supabaseClient;
-        try {
-            if (typeof supabase !== 'undefined') {
-                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            } else if (typeof supabaseJs !== 'undefined') {
-                supabaseClient = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            }
-        } catch(e) {
-            console.error('Erro ao criar cliente Supabase:', e);
-        }
-
+        // Esta versão usa exclusivamente o Google Apps Script para agendamentos.
+        // O Apps Script atual não oferece endpoints de configuração de horários,
+        // serviços ou dias; essas áreas são mantidas apenas como aviso informativo.
         var todosAgendamentos = [];
         var horarios = [];
         var servicos = [];
-
-        // ============================================
+// ============================================
         // TOAST
         // ============================================
         function mostrarToast(mensagem, tipo) {
@@ -1404,290 +1391,53 @@
         }
 
         // ============================================
-        // CONFIGURAÇÕES - HORÁRIOS
+        // CONFIGURAÇÕES
+        // Sem endpoints de configuração no Apps Script atual.
+        // Não gravar dados localmente nem simular persistência.
         // ============================================
+        function avisoConfiguracaoIndisponivel() {
+            mostrarToast(
+                'Esta configuração ainda não está disponível na API do Google Planilhas. Nenhuma alteração foi salva.',
+                'erro'
+            );
+        }
+
         function carregarHorarios() {
-            if (!supabaseClient) return;
-            
-            supabaseClient
-                .from('config_horarios')
-                .select('*')
-                .order('horario', { ascending: true })
-                .then(function(response) {
-                    if (response.error) throw response.error;
-                    horarios = response.data || [];
-                    renderizarHorarios();
-                })
-                .catch(function(error) {
-                    console.error('Erro ao carregar horários:', error);
-                });
+            document.getElementById('horarios-lista').innerHTML =
+                '<div class="vazio"><i class="fas fa-info-circle"></i> A API atual não disponibiliza horários configuráveis.</div>';
+            var campo = document.getElementById('novo-horario');
+            var botao = campo && campo.parentElement && campo.parentElement.nextElementSibling
+                ? campo.parentElement.nextElementSibling.querySelector('button') : null;
+            if (campo) campo.disabled = true;
+            if (botao) botao.disabled = true;
         }
 
-        function renderizarHorarios() {
-            var container = document.getElementById('horarios-lista');
-            if (!horarios || horarios.length === 0) {
-                container.innerHTML = '<div class="vazio"><i class="fas fa-clock"></i> Nenhum horário cadastrado.</div>';
-                return;
-            }
-            
-            var html = '';
-            for (var i = 0; i < horarios.length; i++) {
-                var h = horarios[i];
-                html += 
-                    '<div class="item-card">' +
-                    '<div class="info">' + h.horario + '</div>' +
-                    '<button class="btn btn-sm btn-danger" onclick="removerHorario(' + h.id + ')"><i class="fas fa-trash"></i></button>' +
-                    '</div>';
-            }
-            container.innerHTML = html;
-        }
+        function renderizarHorarios() { carregarHorarios(); }
+        function adicionarHorario() { avisoConfiguracaoIndisponivel(); }
+        function removerHorario() { avisoConfiguracaoIndisponivel(); }
 
-        function adicionarHorario() {
-            var horario = document.getElementById('novo-horario').value;
-            if (!horario) { mostrarToast('Selecione um horário.', 'erro'); return; }
-            
-            for (var i = 0; i < horarios.length; i++) {
-                if (horarios[i].horario === horario) {
-                    mostrarToast('Este horário já está cadastrado.', 'erro');
-                    return;
-                }
-            }
-            
-            mostrarLoading('Salvando...');
-            supabaseClient
-                .from('config_horarios')
-                .insert([{ horario: horario }])
-                .then(function(response) {
-                    esconderLoading();
-                    if (response.error) throw response.error;
-                    mostrarToast('Horário adicionado!', 'sucesso');
-                    document.getElementById('novo-horario').value = '';
-                    carregarHorarios();
-                })
-                .catch(function(error) {
-                    esconderLoading();
-                    console.error('Erro:', error);
-                    mostrarToast('Erro ao adicionar horário.', 'erro');
-                });
-        }
-
-        function removerHorario(id) {
-            if (!confirm('Remover este horário?')) return;
-            
-            mostrarLoading('Removendo...');
-            supabaseClient
-                .from('config_horarios')
-                .delete()
-                .eq('id', id)
-                .then(function(response) {
-                    esconderLoading();
-                    if (response.error) throw response.error;
-                    mostrarToast('Horário removido!', 'sucesso');
-                    carregarHorarios();
-                })
-                .catch(function(error) {
-                    esconderLoading();
-                    console.error('Erro:', error);
-                    mostrarToast('Erro ao remover horário.', 'erro');
-                });
-        }
-
-        // ============================================
-        // CONFIGURAÇÕES - SERVIÇOS
-        // ============================================
         function carregarServicos() {
-            if (!supabaseClient) return;
-            
-            supabaseClient
-                .from('config_servicos')
-                .select('*')
-                .order('nome', { ascending: true })
-                .then(function(response) {
-                    if (response.error) throw response.error;
-                    servicos = response.data || [];
-                    renderizarServicos();
-                })
-                .catch(function(error) {
-                    console.error('Erro ao carregar serviços:', error);
-                });
+            document.getElementById('servicos-lista').innerHTML =
+                '<div class="vazio"><i class="fas fa-info-circle"></i> A API atual não disponibiliza cadastro de serviços.</div>';
+            ['novo-servico', 'nova-descricao'].forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el) el.disabled = true;
+            });
+            var card = document.getElementById('servicos-lista').closest('.config-card');
+            if (card) card.querySelectorAll('button').forEach(function(btn) { btn.disabled = true; });
         }
 
-        function renderizarServicos() {
-            var container = document.getElementById('servicos-lista');
-            if (!servicos || servicos.length === 0) {
-                container.innerHTML = '<div class="vazio"><i class="fas fa-stethoscope"></i> Nenhum serviço cadastrado.</div>';
-                return;
-            }
-            
-            var html = '';
-            for (var i = 0; i < servicos.length; i++) {
-                var s = servicos[i];
-                html += 
-                    '<div class="item-card">' +
-                    '<div class="info">' + s.nome + '<small>' + (s.descricao || '') + '</small></div>' +
-                    '<button class="btn btn-sm btn-danger" onclick="removerServico(' + s.id + ')"><i class="fas fa-trash"></i></button>' +
-                    '</div>';
-            }
-            container.innerHTML = html;
-        }
-
-        function adicionarServico() {
-            var nome = document.getElementById('novo-servico').value.trim();
-            var descricao = document.getElementById('nova-descricao').value.trim();
-            
-            if (!nome) { mostrarToast('Digite o nome do serviço.', 'erro'); return; }
-            
-            for (var i = 0; i < servicos.length; i++) {
-                if (servicos[i].nome.toLowerCase() === nome.toLowerCase()) {
-                    mostrarToast('Este serviço já está cadastrado.', 'erro');
-                    return;
-                }
-            }
-            
-            mostrarLoading('Salvando...');
-            supabaseClient
-                .from('config_servicos')
-                .insert([{ nome: nome, descricao: descricao || null }])
-                .then(function(response) {
-                    esconderLoading();
-                    if (response.error) throw response.error;
-                    mostrarToast('Serviço adicionado!', 'sucesso');
-                    document.getElementById('novo-servico').value = '';
-                    document.getElementById('nova-descricao').value = '';
-                    carregarServicos();
-                })
-                .catch(function(error) {
-                    esconderLoading();
-                    console.error('Erro:', error);
-                    mostrarToast('Erro ao adicionar serviço.', 'erro');
-                });
-        }
-
-        function removerServico(id) {
-            if (!confirm('Remover este serviço?')) return;
-            
-            mostrarLoading('Removendo...');
-            supabaseClient
-                .from('config_servicos')
-                .delete()
-                .eq('id', id)
-                .then(function(response) {
-                    esconderLoading();
-                    if (response.error) throw response.error;
-                    mostrarToast('Serviço removido!', 'sucesso');
-                    carregarServicos();
-                })
-                .catch(function(error) {
-                    esconderLoading();
-                    console.error('Erro:', error);
-                    mostrarToast('Erro ao remover serviço.', 'erro');
-                });
-        }
-
-        // ============================================
-        // CONFIGURAÇÕES - DIAS
-        // ============================================
-        var diasSemana = [
-            { id: 1, nome: 'Domingo', valor: 'domingo', ativo: false },
-            { id: 2, nome: 'Segunda', valor: 'segunda', ativo: true },
-            { id: 3, nome: 'Terça', valor: 'terca', ativo: true },
-            { id: 4, nome: 'Quarta', valor: 'quarta', ativo: true },
-            { id: 5, nome: 'Quinta', valor: 'quinta', ativo: true },
-            { id: 6, nome: 'Sexta', valor: 'sexta', ativo: true },
-            { id: 7, nome: 'Sábado', valor: 'sabado', ativo: false }
-        ];
+        function renderizarServicos() { carregarServicos(); }
+        function adicionarServico() { avisoConfiguracaoIndisponivel(); }
+        function removerServico() { avisoConfiguracaoIndisponivel(); }
 
         function carregarDias() {
-            if (!supabaseClient) return;
-            
-            supabaseClient
-                .from('config_dias')
-                .select('*')
-                .then(function(response) {
-                    if (response.error) throw response.error;
-                    var dados = response.data || [];
-                    
-                    if (dados.length > 0) {
-                        for (var i = 0; i < diasSemana.length; i++) {
-                            for (var j = 0; j < dados.length; j++) {
-                                if (diasSemana[i].valor === dados[j].dia) {
-                                    diasSemana[i].ativo = dados[j].ativo;
-                                    diasSemana[i].id = dados[j].id;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    renderizarDias();
-                })
-                .catch(function(error) {
-                    console.error('Erro ao carregar dias:', error);
-                    renderizarDias();
-                });
+            document.getElementById('dias-lista').innerHTML =
+                '<div class="vazio"><i class="fas fa-info-circle"></i> A API atual não disponibiliza configuração de dias de funcionamento.</div>';
         }
 
-        function renderizarDias() {
-            var container = document.getElementById('dias-lista');
-            var html = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;">';
-            
-            for (var i = 0; i < diasSemana.length; i++) {
-                var d = diasSemana[i];
-                html += 
-                    '<div class="item-card" style="justify-content: space-between;">' +
-                    '<span style="font-weight: 500;">' + d.nome + '</span>' +
-                    '<div class="toggle ' + (d.ativo ? 'ativo' : '') + '" onclick="toggleDia(' + i + ')" title="' + (d.ativo ? 'Desativar' : 'Ativar') + '">' +
-                    '<div class="slider"></div>' +
-                    '</div>' +
-                    '</div>';
-            }
-            html += '</div>';
-            container.innerHTML = html;
-        }
-
-        function toggleDia(index) {
-            var dia = diasSemana[index];
-            dia.ativo = !dia.ativo;
-            
-            renderizarDias();
-            
-            mostrarLoading('Salvando...');
-            
-            var dados = {
-                dia: dia.valor,
-                ativo: dia.ativo,
-                nome: dia.nome
-            };
-            
-            supabaseClient
-                .from('config_dias')
-                .select('id')
-                .eq('dia', dia.valor)
-                .then(function(response) {
-                    if (response.error) throw response.error;
-                    
-                    var existing = response.data || [];
-                    if (existing.length > 0) {
-                        return supabaseClient
-                            .from('config_dias')
-                            .update({ ativo: dia.ativo })
-                            .eq('id', existing[0].id);
-                    } else {
-                        return supabaseClient
-                            .from('config_dias')
-                            .insert([dados]);
-                    }
-                })
-                .then(function(response) {
-                    esconderLoading();
-                    if (response && response.error) throw response.error;
-                    mostrarToast('Dia atualizado!', 'sucesso');
-                })
-                .catch(function(error) {
-                    esconderLoading();
-                    console.error('Erro:', error);
-                    mostrarToast('Erro ao salvar configuração.', 'erro');
-                });
-        }
+        function renderizarDias() { carregarDias(); }
+        function toggleDia() { avisoConfiguracaoIndisponivel(); }
 
         // ============================================
         // INICIALIZAÇÃO
