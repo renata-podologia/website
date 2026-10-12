@@ -290,6 +290,25 @@
             box-shadow: 0 0 0 3px rgba(47, 93, 98, .10);
         }
 
+        .agenda-layout { align-items: start; }
+        .calendario {
+            border: 1px solid #d7e0e2; border-radius: 14px; padding: 14px;
+            background: #fff; max-width: 440px;
+        }
+        .calendario-topo { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:16px; color:#2F5D62; }
+        .cal-nav { width:36px; height:36px; border:1px solid #d7e0e2; border-radius:9px; background:#fff; color:#2F5D62; cursor:pointer; }
+        .cal-nav:disabled { opacity:.35; cursor:not-allowed; }
+        .calendario-semana, .calendario-dias { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:5px; }
+        .calendario-semana { margin-bottom:7px; text-align:center; color:#718287; font-size:.78rem; font-weight:700; }
+        .calendario-dias button, .cal-dia-vazio { min-width:0; aspect-ratio:1; }
+        .calendario-dias button { border:1px solid transparent; border-radius:9px; background:#f3f6f6; color:#2F5D62; font:inherit; font-weight:600; cursor:pointer; }
+        .calendario-dias button.disponivel:hover, .calendario-dias button.selecionado { background:#2F5D62; color:#fff; border-color:#2F5D62; }
+        .calendario-dias button.hoje { box-shadow:inset 0 0 0 1px #C9A227; }
+        .calendario-dias button:disabled { background:#f7f8f8; color:#b3bfc1; cursor:not-allowed; opacity:.7; }
+        .calendario-ajuda { margin:12px 0 0; color:#718287; font-size:.78rem; line-height:1.45; }
+        .cal-dia-vazio { display:block; }
+        @media(max-width:768px) { .calendario { max-width:none; } }
+
         .horarios-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
@@ -1037,110 +1056,34 @@
             Escolha data e horário
         </h3>
 
-        <div class="form-row">
+        <div class="form-row agenda-layout">
 
             <div class="form-group">
-
-                <label>
-                    <i class="fas fa-calendar-alt"></i>
-                    Mês <span class="obrigatorio">*</span>
-                </label>
-
-                <div class="input-icon">
-
-                    <select id="mes-agendamento">
-                        <option value="">Carregando meses disponíveis...</option>
-                    </select>
-
-                    <i class="fas fa-calendar-alt"></i>
-
+                <label><i class="fas fa-calendar-alt"></i> Data do atendimento <span class="obrigatorio">*</span></label>
+                <div class="calendario" id="calendario-agendamento" aria-label="Calendário de agendamento">
+                    <div class="calendario-topo">
+                        <button type="button" id="mes-anterior" class="cal-nav" aria-label="Mês anterior"><i class="fas fa-chevron-left"></i></button>
+                        <strong id="mes-calendario">Carregando agenda...</strong>
+                        <button type="button" id="mes-proximo" class="cal-nav" aria-label="Próximo mês"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <div class="calendario-semana" aria-hidden="true">
+                        <span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span>
+                    </div>
+                    <div class="calendario-dias" id="calendario-dias"></div>
+                    <p class="calendario-ajuda">Os dias habilitados seguem os dias de atendimento configurados na agenda.</p>
                 </div>
-
+                <small id="data-selecionada" style="display:block;margin-top:8px;color:#666;"></small>
             </div>
 
             <div class="form-group">
-
-                <label>
-                    <i class="fas fa-calendar-day"></i>
-                    Dia da semana <span class="obrigatorio">*</span>
-                </label>
-
-                <div class="input-icon">
-
-                    <select id="dia-semana-agendamento" disabled>
-                        <option value="">Selecione o mês primeiro...</option>
-                    </select>
-
-                    <i class="fas fa-calendar-day"></i>
-
+                <label><i class="fas fa-clock"></i> Horários disponíveis <span class="obrigatorio">*</span></label>
+                <div class="horarios-grid" id="horarios-grid">
+                    <p style="grid-column:1/-1;text-align:center;padding:20px;">Selecione uma data no calendário.</p>
                 </div>
-
-            </div>
-
-        </div>
-
-        <div class="form-row">
-
-            <div class="form-group">
-
-                <label>
-                    <i class="fas fa-calendar-check"></i>
-                    Data do atendimento <span class="obrigatorio">*</span>
-                </label>
-
-                <div class="input-icon">
-
-                    <select id="dia-agendamento" disabled>
-                        <option value="">Selecione o dia da semana primeiro...</option>
-                    </select>
-
-                    <i class="fas fa-calendar-check"></i>
-
-                </div>
-
-                <small
-                    id="data-selecionada"
-                    style="display:block;margin-top:8px;color:#666;">
-                </small>
-
-            </div>
-
-            <div class="form-group">
-
-                <label>
-                    <i class="fas fa-clock"></i>
-                    Horário <span class="obrigatorio">*</span>
-                </label>
-
-                <div
-                    class="horarios-grid"
-                    id="horarios-grid">
-
-                    <p style="grid-column:1/-1;text-align:center;padding:20px;">
-                        Carregando horários...
-                    </p>
-
-                </div>
-
                 <div class="legenda-horarios">
-
-                    <span class="item">
-                        <span class="bola disponivel"></span>
-                        Disponível
-                    </span>
-
-                    <span class="item">
-                        <span class="bola confirmado"></span>
-                        Ocupado
-                    </span>
-
-                    <span class="item">
-                        <span class="bola passado"></span>
-                        Já passou
-                    </span>
-
+                    <span class="item"><span class="bola disponivel"></span> Disponível</span>
+                    <span class="item"><span class="bola passado"></span> Indisponível ou já passou</span>
                 </div>
-
             </div>
 
         </div>
@@ -1747,99 +1690,86 @@ function obterDatasDoDia(ano,mes,indice) {
 }
 
 function configurarData() {
-    const mesEl=document.getElementById('mes-agendamento');
-    const diaSemanaEl=document.getElementById('dia-semana-agendamento');
-    const dataEl=document.getElementById('dia-agendamento');
+    const diasEl=document.getElementById('calendario-dias');
+    const mesEl=document.getElementById('mes-calendario');
+    const anterior=document.getElementById('mes-anterior');
+    const proximo=document.getElementById('mes-proximo');
     const textoEl=document.getElementById('data-selecionada');
-
-    if(!mesEl||!diaSemanaEl||!dataEl) {
-        addLog('❌ Elementos de data não encontrados no HTML.','erro');
+    if(!diasEl||!mesEl||!anterior||!proximo) {
+        addLog('Elementos do calendário não encontrados.','erro');
         return;
     }
 
-    const meses=obterMesesDisponiveis();
+    const hoje=dataHoje();
+    let anoVisivel=hoje.getFullYear();
+    let mesVisivel=hoje.getMonth();
+    const limiteMes=new Date(hoje.getFullYear(),hoje.getMonth()+23,1);
 
-    mesEl.innerHTML='<option value="">Selecione o mês...</option>';
-    meses.forEach(m=>{
-        const o=document.createElement('option');
-        o.value=m.valor;
-        o.textContent=m.nome;
-        mesEl.appendChild(o);
-    });
-
-    function limparDatas() {
-        dataEl.innerHTML='<option value="">Selecione a data...</option>';
-        dataEl.disabled=true;
+    function limparSelecao(mensagem='Selecione uma data no calendário.') {
         agendamento.data='';
         agendamento.horario='';
+        requestDisponibilidade++;
         if(textoEl)textoEl.textContent='';
-        renderizarHorarios('Selecione uma data.');
+        renderizarHorarios(mensagem);
     }
 
-    function atualizarDias() {
-        limparDatas();
-        diaSemanaEl.innerHTML='<option value="">Selecione o dia da semana...</option>';
+    function renderizarCalendario() {
+        const primeiro=new Date(anoVisivel,mesVisivel,1);
+        const ultimoDia=new Date(anoVisivel,mesVisivel+1,0).getDate();
+        mesEl.textContent=MESES[mesVisivel]+' de '+anoVisivel;
+        anterior.disabled=(anoVisivel===hoje.getFullYear()&&mesVisivel===hoje.getMonth());
+        proximo.disabled=new Date(anoVisivel,mesVisivel,1)>=limiteMes;
+        diasEl.innerHTML='';
 
-        if(!mesEl.value)return;
-
-        const [ano,mes]=mesEl.value.split('-').map(Number);
-        const dias=obterDiasSemanaDoMes(ano,mes);
-
-        dias.forEach(d=>{
-            const o=document.createElement('option');
-            o.value=d.indice;
-            o.textContent=d.nome;
-            diaSemanaEl.appendChild(o);
-        });
-
-        diaSemanaEl.disabled=dias.length===0;
-        addLog('📅 '+dias.length+' dias da semana disponíveis no mês.');
-    }
-
-    function atualizarDatas() {
-        limparDatas();
-        if(!mesEl.value||diaSemanaEl.value==='')return;
-
-        const [ano,mes]=mesEl.value.split('-').map(Number);
-        const datas=obterDatasDoDia(ano,mes,Number(diaSemanaEl.value));
-
-        datas.forEach(d=>{
-            const o=document.createElement('option');
-            o.value=d.data;
-            o.textContent=d.dataFormatada;
-            dataEl.appendChild(o);
-        });
-
-        dataEl.disabled=datas.length===0;
-        addLog('📅 '+datas.length+' datas disponíveis para '+diaSemanaEl.options[diaSemanaEl.selectedIndex].text+'.');
-    }
-
-    async function selecionarData() {
-        agendamento.data=dataEl.value;
-        agendamento.horario='';
-
-        if(!agendamento.data) {
-            if(textoEl)textoEl.textContent='';
-            renderizarHorarios('Selecione uma data.');
-            return;
+        for(let i=0;i<primeiro.getDay();i++) {
+            const vazio=document.createElement('span');
+            vazio.className='cal-dia-vazio';
+            vazio.setAttribute('aria-hidden','true');
+            diasEl.appendChild(vazio);
         }
 
-        if(textoEl)textoEl.textContent='Data selecionada: '+formatarData(agendamento.data);
-
-        addLog('📅 DATA SELECIONADA: '+agendamento.data,'sucesso');
-        await carregarDisponibilidade(agendamento.data);
+        for(let dia=1;dia<=ultimoDia;dia++) {
+            const data=new Date(anoVisivel,mesVisivel,dia);
+            data.setHours(0,0,0,0);
+            const iso=dataISO(data);
+            const habilitada=data>=hoje&&diaAtivo(data);
+            const botao=document.createElement('button');
+            botao.type='button';
+            botao.textContent=String(dia);
+            botao.disabled=!habilitada;
+            botao.setAttribute('aria-label',dia+' de '+MESES[mesVisivel]+' de '+anoVisivel+(habilitada?', data disponível para consulta':', data indisponível'));
+            if(habilitada)botao.classList.add('disponivel');
+            if(iso===dataISO(hoje))botao.classList.add('hoje');
+            if(iso===agendamento.data)botao.classList.add('selecionado');
+            if(habilitada)botao.addEventListener('click',async()=>{
+                agendamento.data=iso;
+                agendamento.horario='';
+                renderizarCalendario();
+                if(textoEl)textoEl.textContent='Data selecionada: '+formatarData(iso);
+                addLog('Data selecionada: '+iso,'sucesso');
+                await carregarDisponibilidade(iso);
+            });
+            diasEl.appendChild(botao);
+        }
     }
 
-    mesEl.addEventListener('change',atualizarDias);
-    diaSemanaEl.addEventListener('change',atualizarDatas);
-    dataEl.addEventListener('change',selecionarData);
+    anterior.addEventListener('click',()=>{
+        if(anterior.disabled)return;
+        mesVisivel--;
+        if(mesVisivel<0){mesVisivel=11;anoVisivel--;}
+        limparSelecao();
+        renderizarCalendario();
+    });
+    proximo.addEventListener('click',()=>{
+        if(proximo.disabled)return;
+        mesVisivel++;
+        if(mesVisivel>11){mesVisivel=0;anoVisivel++;}
+        limparSelecao();
+        renderizarCalendario();
+    });
 
-    if(meses.length) {
-        const hoje=new Date();
-        const valor=hoje.getFullYear()+'-'+String(hoje.getMonth()+1).padStart(2,'0');
-        mesEl.value=meses.some(m=>m.valor===valor)?valor:meses[0].valor;
-        atualizarDias();
-    }
+    renderizarCalendario();
+    addLog('Calendário carregado com os dias de atendimento ativos da planilha.','sucesso');
 }
 
 /* ============================================================
@@ -1878,39 +1808,28 @@ async function carregarDisponibilidade(data) {
         grid.innerHTML='';
         let exibidos=0;
 
-        CONFIG.horariosAtivos.forEach(hora=>{
+        const agora=new Date();
+        disponiveis.forEach(hora=>{
+            if(!CONFIG.horariosAtivos.includes(hora))return;
+            let passado=false;
+            if(data===dataISO(agora)) {
+                const [h,m]=hora.split(':').map(Number);
+                passado=h<agora.getHours()||(h===agora.getHours()&&m<=agora.getMinutes());
+            }
+            if(passado)return;
             const botao=document.createElement('button');
             botao.type='button';
             botao.className='horario-btn';
             botao.textContent=hora;
             botao.dataset.horario=hora;
-
-            let passado=false;
-
-            if(data===dataISO(new Date())) {
-                const [h,m]=hora.split(':').map(Number);
-                const agora=new Date();
-                passado=h<agora.getHours()||(h===agora.getHours()&&m<=agora.getMinutes());
-            }
-
-            if(passado) {
-                botao.disabled=true;
-                botao.classList.add('passado');
-                botao.title='Horário já passou';
-            } else if(!disponiveis.includes(hora)) {
-                botao.disabled=true;
-                botao.classList.add('ocupado');
-                botao.title='Horário indisponível';
-            } else {
-                exibidos++;
-                botao.addEventListener('click',()=>{
-                    document.querySelectorAll('.horario-btn').forEach(b=>b.classList.remove('selecionado'));
-                    botao.classList.add('selecionado');
-                    agendamento.horario=hora;
-                    addLog('✅ Horário selecionado: '+hora,'sucesso');
-                });
-            }
-
+            botao.setAttribute('aria-label','Selecionar horário '+hora);
+            exibidos++;
+            botao.addEventListener('click',()=>{
+                document.querySelectorAll('.horario-btn').forEach(b=>b.classList.remove('selecionado'));
+                botao.classList.add('selecionado');
+                agendamento.horario=hora;
+                addLog('Horário selecionado: '+hora,'sucesso');
+            });
             grid.appendChild(botao);
         });
 
@@ -1920,7 +1839,7 @@ async function carregarDisponibilidade(data) {
         if(!exibidos) {
             const p=document.createElement('p');
             p.style.cssText='grid-column:1/-1;text-align:center;padding:20px;';
-            p.textContent='⚠️ Não há horários disponíveis nesta data.';
+            p.textContent='Não há horários disponíveis nesta data. Escolha outro dia no calendário.';
             grid.appendChild(p);
         }
 
