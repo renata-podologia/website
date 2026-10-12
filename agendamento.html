@@ -530,66 +530,6 @@
         .toast.sucesso {
             background: #198754;
         }
-
-        .log-panel {
-            margin-top: 35px;
-            border-radius: 14px;
-            overflow: hidden;
-            border: 1px solid #dbe3e5;
-            background: #11191b;
-            color: #dce8e9;
-        }
-
-        .log-header {
-            padding: 12px 15px;
-            background: #1d292c;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .log-header strong {
-            color: white;
-        }
-
-        .log-clear {
-            border: 0;
-            background: #394b4f;
-            color: white;
-            padding: 6px 10px;
-            border-radius: 7px;
-            cursor: pointer;
-        }
-
-        #log {
-            max-height: 300px;
-            overflow-y: auto;
-            padding: 12px 15px;
-            font-family: Consolas, monospace;
-            font-size: 12px;
-            line-height: 1.6;
-        }
-
-        .log-item {
-            padding: 2px 0;
-        }
-
-        .log-item.sucesso {
-            color: #7ee2a8;
-        }
-
-        .log-item.erro {
-            color: #ff8989;
-        }
-
-        .log-item.warning {
-            color: #ffd166;
-        }
-
-        .log-item.info {
-            color: #b9dfe5;
-        }
-
         .api-status {
             display: inline-flex;
             align-items: center;
@@ -647,42 +587,6 @@
             }
         }
     </style>
-
-<style>
-/* Console de diagnóstico visível */
-.log-panel{
-    display:block !important;
-    margin-top:24px;
-    border:1px solid rgba(0,128,128,.25);
-    border-radius:12px;
-    overflow:hidden;
-    background:#0f172a;
-}
-.log-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:12px 16px;
-    color:#fff;
-    background:#134e4a;
-}
-#log{
-    display:block !important;
-    min-height:120px;
-    max-height:360px;
-    overflow-y:auto;
-    padding:12px 16px;
-    font-family:Consolas,Monaco,monospace;
-    font-size:12px;
-    line-height:1.55;
-    color:#d1fae5;
-    white-space:pre-wrap;
-}
-#log .log-item{margin:2px 0;}
-#log .log-item.erro{color:#fecaca;}
-#log .log-item.sucesso{color:#bbf7d0;}
-#log .log-item.info{color:#d1fae5;}
-</style>
 
 </head>
 
@@ -834,7 +738,7 @@
 
             <button
                 type="button"
-                class="tipo-btn"
+                class="tipo-btn selecionado"
                 data-tipo="domicilio">
 
                 <i class="fas fa-home"></i>
@@ -848,25 +752,9 @@
 
             </button>
 
-            <button
-                type="button"
-                class="tipo-btn"
-                data-tipo="presencial">
-
-                <i class="fas fa-building"></i>
-
-                <span>Presencial</span>
-
-                <small>
-                    <i class="fas fa-arrow-right"></i>
-                    Você vai à clínica
-                </small>
-
-            </button>
-
         </div>
 
-        <div id="endereco-domicilio" style="display:none;margin-top:20px;">
+        <div id="endereco-domicilio" style="display:block;margin-top:20px;">
 
             <div class="form-group">
 
@@ -955,24 +843,7 @@
             </div>
 
         </div>
-
-        <div id="endereco-presencial"
-             style="display:none;margin-top:20px;">
-
-            <div class="info-reserva">
-
-                <i class="fas fa-building"></i>
-
-                <div>
-                    <strong>Atendimento presencial</strong>
-                    <p style="margin:4px 0 0;">
-                        O atendimento será realizado na clínica.
-                    </p>
-                </div>
-
-            </div>
-
-        </div>
+</div>
 
         <div class="form-actions">
 
@@ -1170,38 +1041,12 @@
         </div>
 
     </div>
-
-    <!-- LOG -->
-    <div class="log-panel">
-
-        <div class="log-header">
-
-            <strong>
-                <i class="fas fa-terminal"></i>
-                Log de diagnóstico da agenda
-            </strong>
-
-            <button
-                type="button"
-                class="log-clear"
-                onclick="limparLog()">
-
-                Limpar
-
-            </button>
-
-        </div>
-
-        <div id="log"></div>
-
-    </div>
-
 </div>
 
 <script>
 /* ============================================================
    LEVITÀ PODÓLOGIA | AGENDAMENTO
-   API: LEVITA-18-OTIMIZADA-2026-09-03
+   API: LEVITA-ADMIN-22-2026-10-12
    ============================================================ */
 
 const GOOGLE_APPS_SCRIPT_URL =
@@ -1217,44 +1062,14 @@ const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Ag
 let CONFIG = { dias: [], horarios: [], servicos: [], diasAtivos: [], horariosAtivos: [] };
 let agendamento = {
     id:'', data:'', horario:'', nome:'', telefone:'', email:'',
-    tipo:'', servico:'', endereco:'', numero:'', complemento:'',
+    tipo:'domicilio', servico:'', endereco:'', numero:'', complemento:'',
     cep:'', logradouro:'', bairro:'', cidade:'', uf:'', status:'Pendente'
 };
 let requestDisponibilidade = 0;
 
-/* ============================================================
-   CONSOLE VISÍVEL NA PRÓPRIA PÁGINA
-   ============================================================ */
-function addLog(mensagem, tipo='info') {
-    const log = document.getElementById('log');
-    const agora = new Date();
-    const hora = [agora.getHours(), agora.getMinutes(), agora.getSeconds()]
-        .map(v => String(v).padStart(2,'0')).join(':');
-
-    if (log) {
-        const linha = document.createElement('div');
-        linha.className = 'log-item ' + tipo;
-        linha.textContent = '[' + hora + '] ' + mensagem;
-        log.appendChild(linha);
-        log.scrollTop = log.scrollHeight;
-    }
-    console.log('[' + hora + ']', mensagem);
-}
-
-function limparLog() {
-    const log = document.getElementById('log');
-    if (log) log.innerHTML = '';
-    addLog('🧹 Console limpo.');
-}
-
-function logJSON(titulo, objeto) {
-    try {
-        const texto = JSON.stringify(objeto);
-        addLog(titulo + ': ' + texto);
-    } catch (e) {
-        addLog(titulo + ': [objeto não serializável]', 'erro');
-    }
-}
+function addLog() {}
+function limparLog() {}
+function logJSON() {}
 
 function escapeHTML(valor) {
     return String(valor ?? '')
@@ -1899,10 +1714,7 @@ function validarPasso1() {
 
 function validarPasso2() {
     const tipo=document.querySelector('.tipo-btn.selecionado');
-
-    if(!tipo){mostrarToast('Selecione o tipo de atendimento.','erro');return false;}
-
-    agendamento.tipo=tipo.dataset.tipo;
+    agendamento.tipo='domicilio';
 
     if(agendamento.tipo==='domicilio') {
         const cep=document.getElementById('cep')?.value.replace(/\D/g,'')||'';
@@ -1921,11 +1733,6 @@ function validarPasso2() {
             complemento:document.getElementById('complemento-endereco')?.value.trim()||'',
             logradouro,bairro,cidade,uf,
             endereco:[logradouro,numero,document.getElementById('complemento-endereco')?.value.trim(),bairro,cidade,uf,'CEP '+cep].filter(Boolean).join(', ')
-        });
-    } else {
-        Object.assign(agendamento,{
-            cep:'',numero:'',complemento:'',logradouro:'',bairro:'',cidade:'',uf:'',
-            endereco:'Atendimento presencial na clínica'
         });
     }
 
@@ -1972,7 +1779,7 @@ function preencherResumo() {
 
     const d=new Date(agendamento.data+'T00:00:00');
     const dataTexto=DIAS_SEMANA[d.getDay()]+', '+d.getDate()+' de '+MESES[d.getMonth()]+' de '+d.getFullYear();
-    const tipo=agendamento.tipo==='domicilio'?'Domiciliar':'Presencial';
+    const tipo='Domiciliar';
 
     resumo.innerHTML=
         linhaResumo('Nome',agendamento.nome)+
@@ -1993,6 +1800,42 @@ function linhaResumo(rotulo,valor) {
 /* ============================================================
    CONFIRMAÇÃO
    ============================================================ */
+function soltarConfetes() {
+    const canvas = document.createElement('canvas');
+    canvas.setAttribute('aria-hidden', 'true');
+    Object.assign(canvas.style, {position:'fixed', inset:'0', width:'100%', height:'100%', pointerEvents:'none', zIndex:'99999'});
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) { setTimeout(() => canvas.remove(), 100); return; }
+    const escala = window.devicePixelRatio || 1;
+    canvas.width = window.innerWidth * escala;
+    canvas.height = window.innerHeight * escala;
+    ctx.scale(escala, escala);
+    const cores = ['#c8a96a', '#e7c879', '#8fc9b5', '#f3a6b8', '#8db8e8', '#ffffff'];
+    const particulas = Array.from({length: 180}, () => ({
+        x: Math.random() * window.innerWidth,
+        y: -20 - Math.random() * window.innerHeight * 0.5,
+        vx: (Math.random() - 0.5) * 5,
+        vy: 2 + Math.random() * 5,
+        giro: Math.random() * Math.PI,
+        vg: (Math.random() - 0.5) * 0.2,
+        tamanho: 4 + Math.random() * 6,
+        cor: cores[Math.floor(Math.random() * cores.length)]
+    }));
+    const inicio = performance.now();
+    function quadro(agora) {
+        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+        particulas.forEach(p => {
+            p.x += p.vx; p.y += p.vy; p.vy += 0.035; p.giro += p.vg;
+            ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.giro); ctx.fillStyle = p.cor;
+            ctx.fillRect(-p.tamanho / 2, -p.tamanho / 2, p.tamanho, p.tamanho * 0.65); ctx.restore();
+        });
+        if (agora - inicio < 2400) requestAnimationFrame(quadro);
+        else canvas.remove();
+    }
+    requestAnimationFrame(quadro);
+}
+
 async function confirmarAgendamento() {
     if(!validarPasso1()||!validarPasso2()||!validarPasso3())return;
     if(!(await validarPasso4()))return;
@@ -2019,7 +1862,7 @@ async function confirmarAgendamento() {
             nome:agendamento.nome,
             telefone:agendamento.telefone,
             email:agendamento.email,
-            tipo:agendamento.tipo==='domicilio'?'Domiciliar':'Presencial',
+            tipo:'Domiciliar',
             servico:agendamento.servico,
             endereco:agendamento.endereco,
             logradouro:agendamento.logradouro,
@@ -2039,10 +1882,8 @@ async function confirmarAgendamento() {
         mostrarToast('Agendamento realizado com sucesso!','sucesso');
         botao.innerHTML='<i class="fas fa-check"></i> Reserva realizada';
 
-        setTimeout(()=>{
-            if(window.location.pathname.endsWith('obrigado.html'))return;
-            window.location.href='obrigado.html';
-        },1200);
+        soltarConfetes();
+        setTimeout(()=>{ window.location.href='index.html'; }, 2800);
 
     } catch(e) {
         addLog('💥 FALHA AO SALVAR: '+(e.message||e),'erro');
@@ -2099,13 +1940,9 @@ document.addEventListener('DOMContentLoaded',()=>{
             document.querySelectorAll('.tipo-btn').forEach(b=>b.classList.remove('selecionado'));
             botao.classList.add('selecionado');
 
-            const tipo=botao.dataset.tipo;
+            const tipo='domicilio';
             const dom=document.getElementById('endereco-domicilio');
-            const pres=document.getElementById('endereco-presencial');
-
-            if(dom)dom.style.display=tipo==='domicilio'?'block':'none';
-            if(pres)pres.style.display=tipo==='presencial'?'block':'none';
-
+            if(dom)dom.style.display='block';
             agendamento.tipo=tipo;
             addLog('📍 Tipo selecionado: '+tipo);
         });
