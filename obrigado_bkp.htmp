@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <title>Agendamento Confirmado - Levità Podologia</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; font-size: 16px; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f9fbf9 0%, #edf3ec 100%);
+            color: #1e2b2f;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        .container {
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+            background: #FFFFFF;
+            border-radius: 24px;
+            padding: 50px 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(168, 195, 160, 0.15);
+            text-align: center;
+            animation: fadeInUp 0.6s ease;
+            position: relative;
+            z-index: 10;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .icone {
+            font-size: 5rem;
+            color: #28a745;
+            margin-bottom: 16px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .header h1 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 2rem;
+            color: #2F5D62;
+            margin-bottom: 4px;
+        }
+        .header h1 span { color: #C9A227; }
+        .header p {
+            color: #4a5f64;
+            font-size: 1.05rem;
+        }
+        
+        .info-box {
+            background: #F4EFE8;
+            border-radius: 16px;
+            padding: 24px;
+            margin: 24px 0;
+            text-align: left;
+            border-left: 4px solid #C9A227;
+        }
+        .info-box .linha {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .info-box .linha:last-child { border-bottom: none; }
+        .info-box .rotulo { 
+            font-weight: 500; 
+            color: #4a5f64; 
+            font-size: 0.95rem;
+        }
+        .info-box .valor { 
+            font-weight: 600; 
+            color: #2F5D62;
+            text-align: right;
+            font-size: 0.95rem;
+        }
+        .protocolo { 
+            display: inline-block; 
+            padding: 6px 20px; 
+            background: #2F5D62; 
+            color: #fff; 
+            border-radius: 30px; 
+            font-size: 0.9rem; 
+            font-weight: 600; 
+            letter-spacing: 1px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 30px;
+            background: #d4edda;
+            color: #155724;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 14px 34px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            text-align: center;
+            text-decoration: none;
+        }
+        .btn-primario {
+            background: #2F5D62;
+            color: #fff;
+            box-shadow: 0 8px 20px rgba(47, 93, 98, 0.25);
+        }
+        .btn-primario:hover {
+            background: #1c3e42;
+            transform: translateY(-3px);
+            box-shadow: 0 12px 28px rgba(47, 93, 98, 0.35);
+        }
+        .btn-outline {
+            background: transparent;
+            color: #2F5D62;
+            border: 2px solid #2F5D62;
+        }
+        .btn-outline:hover {
+            background: #2F5D62;
+            color: #fff;
+            transform: translateY(-3px);
+        }
+        .btn-whatsapp {
+            background: #25D366;
+            color: #fff;
+            box-shadow: 0 8px 20px rgba(37, 211, 102, 0.3);
+        }
+        .btn-whatsapp:hover {
+            background: #1da851;
+            transform: translateY(-3px);
+        }
+        
+        .botoes {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 24px;
+        }
+        .botoes .btn { flex: 1; min-width: 150px; }
+        
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e8edee;
+            font-size: 0.85rem;
+            color: #8a9ea3;
+        }
+        .footer a { color: #2F5D62; text-decoration: none; }
+        .footer a:hover { text-decoration: underline; }
+        
+        .info-extra {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 16px 0;
+            font-size: 0.9rem;
+            color: #4a5f64;
+        }
+        .info-extra i { color: #2F5D62; margin-right: 8px; }
+        
+        /* ============================================
+           CONFETES
+           ============================================ */
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            overflow: hidden;
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            top: -10px;
+            animation: confettiFall linear forwards;
+        }
+        
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(0) rotate(0deg) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(110vh) rotate(720deg) scale(0.5);
+                opacity: 0;
+            }
+        }
+        
+        /* Cores dos confetes */
+        .confetti:nth-child(1) { background: #ff6b6b; }
+        .confetti:nth-child(2) { background: #feca57; }
+        .confetti:nth-child(3) { background: #48dbfb; }
+        .confetti:nth-child(4) { background: #1dd1a1; }
+        .confetti:nth-child(5) { background: #5f27cd; }
+        .confetti:nth-child(6) { background: #ff9ff3; }
+        .confetti:nth-child(7) { background: #54a0ff; }
+        .confetti:nth-child(8) { background: #ff6348; }
+        .confetti:nth-child(9) { background: #7bed9f; }
+        .confetti:nth-child(10) { background: #e056a0; }
+        .confetti:nth-child(11) { background: #f8a5c2; }
+        .confetti:nth-child(12) { background: #74b9ff; }
+        .confetti:nth-child(13) { background: #ffda79; }
+        .confetti:nth-child(14) { background: #a29bfe; }
+        .confetti:nth-child(15) { background: #fd79a8; }
+        
+        /* Responsivo */
+        @media (max-width: 480px) {
+            .container { padding: 30px 20px; }
+            .header h1 { font-size: 1.5rem; }
+            .botoes .btn { min-width: 100%; }
+            .info-box .linha { flex-direction: column; align-items: flex-start; gap: 2px; }
+            .info-box .valor { text-align: left; }
+            .icone { font-size: 3.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================
+         CONTAINER DE CONFETES
+         ============================================ -->
+    <div class="confetti-container" id="confetti-container"></div>
+
+    <!-- ============================================
+         CONTEÚDO PRINCIPAL
+         ============================================ -->
+    <div class="container">
+        <!-- Ícone de Sucesso -->
+        <div class="icone"><i class="fas fa-check-circle"></i></div>
+        
+        <!-- Header -->
+        <div class="header">
+            <h1>Levita<span>.</span></h1>
+            <p>✅ Agendamento Confirmado!</p>
+        </div>
+        
+        <p style="color: #4a5f64; margin: 8px 0 16px; font-size: 1.05rem;">
+            Sua consulta foi agendada com sucesso! 🎉
+        </p>
+        
+        <!-- Protocolo -->
+        <div style="margin: 16px 0;">
+            <span class="protocolo" id="protocolo">#00000</span>
+        </div>
+        
+        <!-- Detalhes do Agendamento -->
+        <div id="detalhes-agendamento" class="info-box">
+            <!-- Preenchido via JavaScript -->
+        </div>
+        
+        <!-- Informações Adicionais -->
+        <div class="info-extra">
+            <p><i class="fas fa-envelope"></i> Um e-mail de confirmação foi enviado para você.</p>
+            <p><i class="fas fa-calendar-alt"></i> O evento foi adicionado ao seu Google Calendar.</p>
+            <p><i class="fas fa-clock"></i> Lembrete: Chegue com 10 minutos de antecedência.</p>
+        </div>
+        
+        <!-- Botões -->
+        <div class="botoes">
+            <a href="index.html" class="btn btn-primario">
+                <i class="fas fa-home"></i> Voltar ao site
+            </a>
+            <a href="#" class="btn btn-whatsapp" id="btn-whatsapp" target="_blank">
+                <i class="fab fa-whatsapp"></i> Falar com Renata
+            </a>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>Levitação Podologia - Podóloga Renata Kemp</strong></p>
+            <p>📱 (11) 97830-3833 | 📧 contato@levitapodologia.com.br</p>
+            <p style="margin-top: 8px; font-size: 0.75rem;">
+                ⏰ Em caso de imprevistos, entre em contato com 24h de antecedência.
+            </p>
+            <p style="margin-top: 8px; font-size: 0.7rem; color: #aaa;">
+                <i class="fas fa-lock"></i> Seus dados estão seguros e protegidos.
+            </p>
+        </div>
+    </div>
+
+    <!-- ============================================
+         SCRIPT PRINCIPAL
+         ============================================ -->
+    <script>
+        // ============================================
+        // FUNÇÃO DE LOG (APENAS CONSOLE)
+        // ============================================
+        function log(mensagem, tipo) {
+            tipo = tipo || 'info';
+            var timestamp = new Date().toLocaleTimeString('pt-BR');
+            var prefixo = '[' + timestamp + ']';
+            
+            switch(tipo) {
+                case 'sucesso':
+                    console.log('%c' + prefixo + ' ✅ ' + mensagem, 'color: #00ff88; font-weight: bold;');
+                    break;
+                case 'erro':
+                    console.log('%c' + prefixo + ' ❌ ' + mensagem, 'color: #ff4444; font-weight: bold;');
+                    break;
+                case 'warning':
+                    console.log('%c' + prefixo + ' ⚠️ ' + mensagem, 'color: #ffaa00; font-weight: bold;');
+                    break;
+                case 'info':
+                    console.log('%c' + prefixo + ' ℹ️ ' + mensagem, 'color: #00aaff;');
+                    break;
+                default:
+                    console.log(prefixo + ' ' + mensagem);
+            }
+        }
+
+        // ============================================
+        // FUNÇÃO PARA LOG DE ETAPAS
+        // ============================================
+        function logEtapa(etapa, descricao, status) {
+            status = status || 'info';
+            var cor = status === 'sucesso' ? '#00ff88' : 
+                     status === 'erro' ? '#ff4444' : 
+                     status === 'warning' ? '#ffaa00' : '#00aaff';
+            
+            console.log('%c═══════════════════════════════════════════', 'color: #888;');
+            console.log('%c📌 ETAPA ' + etapa + ': ' + descricao, 'color: ' + cor + '; font-weight: bold; font-size: 14px;');
+            console.log('%c═══════════════════════════════════════════', 'color: #888;');
+        }
+
+        // ============================================
+        // FUNÇÃO PARA GERAR CONFETES
+        // ============================================
+        function lancarConfetes() {
+            logEtapa('🎊', 'LANÇANDO CONFETES', 'sucesso');
+            
+            var container = document.getElementById('confetti-container');
+            var cores = [
+                '#ff6b6b', '#feca57', '#48dbfb', '#1dd1a1', '#5f27cd',
+                '#ff9ff3', '#54a0ff', '#ff6348', '#7bed9f', '#e056a0',
+                '#f8a5c2', '#74b9ff', '#ffda79', '#a29bfe', '#fd79a8',
+                '#00b894', '#00cec9', '#0984e3', '#6c5ce7', '#fd79a8'
+            ];
+            
+            // Número de confetes
+            var quantidade = 150;
+            
+            for (var i = 0; i < quantidade; i++) {
+                var confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                
+                // Posição horizontal aleatória
+                var left = Math.random() * 100;
+                confetti.style.left = left + '%';
+                
+                // Cor aleatória
+                var cor = cores[Math.floor(Math.random() * cores.length)];
+                confetti.style.background = cor;
+                
+                // Tamanho aleatório
+                var size = Math.random() * 8 + 4;
+                confetti.style.width = size + 'px';
+                confetti.style.height = size + 'px';
+                
+                // Forma aleatória (quadrado ou círculo)
+                if (Math.random() > 0.5) {
+                    confetti.style.borderRadius = '50%';
+                }
+                
+                // Duração da animação aleatória
+                var duracao = Math.random() * 2 + 2;
+                confetti.style.animationDuration = duracao + 's';
+                
+                // Atraso aleatório
+                var atraso = Math.random() * 1.5;
+                confetti.style.animationDelay = atraso + 's';
+                
+                // Rotação inicial aleatória
+                confetti.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)';
+                
+                container.appendChild(confetti);
+            }
+            
+            log('🎊 ' + quantidade + ' confetes lançados!', 'sucesso');
+            
+            // Remover confetes após a animação
+            setTimeout(function() {
+                container.innerHTML = '';
+                log('🧹 Confetes removidos', 'info');
+            }, 5000);
+        }
+
+        // ============================================
+        // CARREGAR DADOS DO AGENDAMENTO
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            logEtapa('1', '🚀 PÁGINA DE OBRIGADO CARREGADA', 'info');
+            log('📄 Inicializando página de confirmação...', 'info');
+            
+            // Recupera os dados do sessionStorage
+            var dadosStr = sessionStorage.getItem('agendamento_confirmado');
+            
+            if (!dadosStr) {
+                log('⚠️ Nenhum dado de agendamento encontrado', 'warning');
+                log('🔄 Redirecionando para a página inicial...', 'info');
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            try {
+                var dados = JSON.parse(dadosStr);
+                log('✅ Dados do agendamento recuperados com sucesso!', 'sucesso');
+                log('📋 Dados:', 'info');
+                log('   👤 Nome: ' + dados.nome, 'info');
+                log('   📧 E-mail: ' + dados.email, 'info');
+                log('   🏥 Serviço: ' + dados.servico, 'info');
+                log('   📅 Data: ' + dados.data + ' às ' + dados.horario, 'info');
+                log('   🆔 ID: ' + dados.id, 'info');
+                
+                exibirDetalhes(dados);
+                logEtapa('2', '✅ DADOS EXIBIDOS NA TELA', 'sucesso');
+                
+            } catch(e) {
+                log('❌ Erro ao processar dados: ' + e.message, 'erro');
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // Configurar botão WhatsApp
+            var btnWhatsApp = document.getElementById('btn-whatsapp');
+            if (btnWhatsApp) {
+                var mensagem = 'Olá! Vim pelo site e gostaria de tirar uma dúvida sobre meu agendamento.';
+                btnWhatsApp.href = 'https://wa.me/5511978303833?text=' + encodeURIComponent(mensagem);
+                log('📱 Botão WhatsApp configurado', 'info');
+            }
+            
+            // ============================================
+            // 🎊 LANÇAR CONFETES
+            // ============================================
+            // Pequeno atraso para a página carregar primeiro
+            setTimeout(function() {
+                lancarConfetes();
+            }, 500);
+            
+            logEtapa('3', '🎊 CONFETES LANÇADOS', 'sucesso');
+            log('✅ Página de obrigado completamente carregada!', 'sucesso');
+            console.log('%c═══════════════════════════════════════════', 'color: #888;');
+            console.log('%c🎉 AGRADECEMOS PELA PREFERÊNCIA!', 'color: #C9A227; font-weight: bold; font-size: 16px;');
+            console.log('%c═══════════════════════════════════════════', 'color: #888;');
+        });
+        
+        // ============================================
+        // FUNÇÃO PARA EXIBIR DETALHES
+        // ============================================
+        function exibirDetalhes(dados) {
+            var container = document.getElementById('detalhes-agendamento');
+            
+            if (!container) {
+                log('❌ Container de detalhes não encontrado', 'erro');
+                return;
+            }
+            
+            var dataObj = new Date(dados.data + 'T00:00:00');
+            var dataFormatada = dataObj.toLocaleDateString('pt-BR', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+            var tipoLabel = dados.tipo === 'domicilio' ? '🏠 Domiciliar' : '🏢 Presencial';
+            var statusLabel = dados.status.charAt(0).toUpperCase() + dados.status.slice(1);
+            
+            // Protocolo (ID com 5 dígitos)
+            var protocolo = '#' + String(dados.id).padStart(5, '0');
+            document.getElementById('protocolo').textContent = protocolo;
+            log('🔑 Protocolo gerado: ' + protocolo, 'info');
+            
+            // Preencher HTML
+            container.innerHTML = 
+                '<div class="linha"><span class="rotulo">👤 Nome</span><span class="valor">' + dados.nome + '</span></div>' +
+                '<div class="linha"><span class="rotulo">📱 Telefone</span><span class="valor">' + dados.telefone + '</span></div>' +
+                '<div class="linha"><span class="rotulo">📧 E-mail</span><span class="valor">' + (dados.email || 'Não informado') + '</span></div>' +
+                '<div class="linha"><span class="rotulo">📋 Serviço</span><span class="valor"><strong>' + dados.servico + '</strong></span></div>' +
+                '<div class="linha"><span class="rotulo">📍 Tipo</span><span class="valor">' + tipoLabel + '</span></div>' +
+                '<div class="linha"><span class="rotulo">📅 Data</span><span class="valor">' + dataFormatada + '</span></div>' +
+                '<div class="linha"><span class="rotulo">⏰ Horário</span><span class="valor">' + dados.horario + '</span></div>' +
+                '<div class="linha"><span class="rotulo">📌 Status</span><span class="valor"><span class="status-badge">' + statusLabel + '</span></span></div>';
+            
+            log('📋 Detalhes exibidos na tela', 'sucesso');
+        }
+        
+        // ============================================
+        // RECARREGAR CONFETES (CASO O USUÁRIO CLIQUE EM ALGUM LUGAR)
+        // ============================================
+        document.addEventListener('click', function() {
+            // Se o usuário clicar, podemos lançar mais confetes (opcional)
+            // lancarConfetes();
+        });
+    </script>
+</body>
+</html>
