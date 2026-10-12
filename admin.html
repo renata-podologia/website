@@ -860,12 +860,39 @@
                 url.searchParams.set('acao', 'agendamentos');
                 url.searchParams.set('_', String(Date.now()));
 
-                var response = await fetch(url.toString(), { method: 'GET', cache: 'no-store' });
-                if (!response.ok) throw new Error('HTTP ' + response.status);
-                var resultado = await response.json();
-                if (resultado.sucesso === false) throw new Error(resultado.erro || 'A API recusou a consulta.');
+                var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+                var timeoutId = controller ? setTimeout(function() { controller.abort(); }, 20000) : null;
+                var response;
+                try {
+                    response = await fetch(url.toString(), {
+                        method: 'GET',
+                        cache: 'no-store',
+                        redirect: 'follow',
+                        signal: controller ? controller.signal : undefined
+                    });
+                } finally {
+                    if (timeoutId) clearTimeout(timeoutId);
+                }
+                if (!response.ok) throw new Error('A API respondeu com HTTP ' + response.status + '.');
 
-                var registros = Array.isArray(resultado.agendamentos) ? resultado.agendamentos : [];
+                var corpo = await response.text();
+                var resultado;
+                try {
+                    resultado = JSON.parse(corpo);
+                } catch (parseError) {
+                    var trecho = corpo.replace(/\s+/g, ' ').slice(0, 180);
+                    throw new Error('A API não retornou JSON. Verifique se a implantação do Apps Script está ativa e acessível. Resposta: ' + (trecho || '(vazia)'));
+                }
+                if (!resultado || resultado.sucesso === false) {
+                    throw new Error((resultado && (resultado.erro || resultado.mensagem)) || 'A API recusou a consulta.');
+                }
+                if (!Array.isArray(resultado.agendamentos)) {
+                    throw new Error('A API respondeu, mas não retornou a lista "agendamentos". Publique a versão correta do Apps Script.');
+                }
+
+                var registros = resultado.agendamentos;
+                var areaErroAnterior = document.getElementById('agendamentos-erro');
+                if (areaErroAnterior) areaErroAnterior.remove();
                 todosAgendamentos = registros.map(function(a) {
                     var status = String(a.status || 'pendente').trim().toLowerCase();
                     var tipo = String(a.tipo || '').trim().toLowerCase();
@@ -900,7 +927,22 @@
                 gerarRelatorio();
             } catch (error) {
                 console.error('Erro ao carregar agendamentos do Google Planilhas:', error);
-                mostrarToast('Não foi possível ler a aba Agendamentos do Google Planilhas. Verifique a implantação e as permissões da API.', 'erro');
+                var detalhe = error && error.name === 'AbortError'
+                    ? 'A consulta demorou mais de 20 segundos e foi cancelada.'
+                    : (error && error.message ? error.message : 'Falha de comunicação desconhecida.');
+                var mensagemErro = 'Erro ao carregar agendamentos: ' + detalhe;
+                mostrarToast(mensagemErro, 'erro');
+                var areaErro = document.getElementById('agendamentos-erro');
+                if (!areaErro) {
+                    areaErro = document.createElement('div');
+                    areaErro.id = 'agendamentos-erro';
+                    areaErro.style.cssText = 'margin:12px 0;padding:12px 16px;border-radius:10px;background:#fff1f0;border:1px solid #f1b8b5;color:#842029;font-size:.9rem;overflow-wrap:anywhere;';
+                    var tabela = document.getElementById('tab-agendamentos');
+                    if (tabela) tabela.insertBefore(areaErro, tabela.firstChild);
+                }
+                if (areaErro) {
+                    areaErro.textContent = mensagemErro + ' Teste a API abrindo o endereço do Apps Script com ?acao=teste e depois ?acao=agendamentos.';
+                }
             } finally {
                 esconderLoading();
             }
