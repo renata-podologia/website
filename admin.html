@@ -711,8 +711,11 @@
 
     <script>
         // ============================================
-        // CONFIGURAÇÃO SUPABASE
+        // GOOGLE APPS SCRIPT: fonte oficial dos agendamentos
         // ============================================
+        var GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxwTxWyiIGJ3nHc8EbT0PcfVeYAb3mKsK25TaIr2EVaGq7oTDU3S4ftj12MAnGPohY/exec';
+
+        // SUPABASE continua sendo usado apenas pelas telas de configuração
         var SUPABASE_URL = 'https://euktsrczpxejezkeyqoh.supabase.co';
         var SUPABASE_ANON_KEY = 'sb_publishable_vH11tBYAWHlKNoCeQG-oMQ_r1fOxcRf';
         
@@ -850,31 +853,69 @@
         // ============================================
         // CARREGAR AGENDAMENTOS
         // ============================================
-        function carregarAgendamentos() {
-            if (!supabaseClient) { mostrarToast('Erro de conexão.', 'erro'); return; }
-            
-            mostrarLoading('Carregando agendamentos...');
-            supabaseClient
-                .from('agendamentos')
-                .select('*')
-                .order('data', { ascending: false })
-                .then(function(response) {
-                    esconderLoading();
-                    if (response.error) throw response.error;
-                    todosAgendamentos = response.data || [];
-                    atualizarStats();
-                    filtrarAgendamentos();
-                    renderizarPendentes();
-                    renderizarConfirmados();
-                    renderizarAtendidos();
-                    gerarRelatorio();
-                })
-                .catch(function(error) {
-                    esconderLoading();
-                    console.error('Erro:', error);
-                    mostrarToast('Erro ao carregar agendamentos.', 'erro');
+        async function carregarAgendamentos() {
+            mostrarLoading('Carregando agendamentos do Google Planilhas...');
+            try {
+                var url = new URL(GOOGLE_APPS_SCRIPT_URL);
+                url.searchParams.set('acao', 'agendamentos');
+                url.searchParams.set('_', String(Date.now()));
+
+                var response = await fetch(url.toString(), { method: 'GET', cache: 'no-store' });
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                var resultado = await response.json();
+                if (resultado.sucesso === false) throw new Error(resultado.erro || 'A API recusou a consulta.');
+
+                var registros = Array.isArray(resultado.agendamentos) ? resultado.agendamentos : [];
+                todosAgendamentos = registros.map(function(a) {
+                    var status = String(a.status || 'pendente').trim().toLowerCase();
+                    var tipo = String(a.tipo || '').trim().toLowerCase();
+                    return {
+                        id: a.id,
+                        data: normalizarDataPainel(a.data),
+                        horario: String(a.hora || a.horario || '').trim(),
+                        nome: String(a.nome || ''),
+                        telefone: String(a.telefone || ''),
+                        email: String(a.email || ''),
+                        tipo: tipo,
+                        servico: String(a.servico || ''),
+                        cep: String(a.cep || ''),
+                        logradouro: String(a.logradouro || ''),
+                        numero: String(a.numero || ''),
+                        complemento: String(a.complemento || ''),
+                        bairro: String(a.bairro || ''),
+                        cidade: String(a.cidade || ''),
+                        uf: String(a.uf || ''),
+                        endereco: String(a.endereco || ''),
+                        status: status
+                    };
+                }).sort(function(a, b) {
+                    return (b.data + ' ' + b.horario).localeCompare(a.data + ' ' + a.horario);
                 });
+
+                atualizarStats();
+                filtrarAgendamentos();
+                renderizarPendentes();
+                renderizarConfirmados();
+                renderizarAtendidos();
+                gerarRelatorio();
+            } catch (error) {
+                console.error('Erro ao carregar agendamentos do Google Planilhas:', error);
+                mostrarToast('Não foi possível ler a aba Agendamentos do Google Planilhas. Verifique a implantação e as permissões da API.', 'erro');
+            } finally {
+                esconderLoading();
+            }
         }
+
+        function normalizarDataPainel(valor) {
+            if (!valor) return '';
+            var texto = String(valor).trim();
+            if (/^\d{4}-\d{2}-\d{2}$/.test(texto)) return texto;
+            var br = texto.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+            if (br) return br[3] + '-' + br[2] + '-' + br[1];
+            return texto.substring(0, 10);
+        }
+
+
 
         // ============================================
         // STATS
@@ -1089,45 +1130,11 @@
         // AÇÕES DOS AGENDAMENTOS
         // ============================================
         function mudarStatus(id, novoStatus) {
-            if (!confirm('Alterar status para ' + novoStatus + '?')) return;
-            
-            mostrarLoading('Atualizando...');
-            supabaseClient
-                .from('agendamentos')
-                .update({ status: novoStatus })
-                .eq('id', id)
-                .then(function(response) {
-                    esconderLoading();
-                    if (response.error) throw response.error;
-                    mostrarToast('Status atualizado para ' + novoStatus + '!', 'sucesso');
-                    carregarAgendamentos();
-                })
-                .catch(function(error) {
-                    esconderLoading();
-                    console.error('Erro:', error);
-                    mostrarToast('Erro ao atualizar status.', 'erro');
-                });
+            mostrarToast('A leitura já vem do Google Planilhas. Para alterar status com segurança, é necessário habilitar uma API administrativa autenticada.', 'info');
         }
 
         function deletarAgendamento(id) {
-            if (!confirm('Tem certeza que deseja excluir este agendamento?')) return;
-            
-            mostrarLoading('Excluindo...');
-            supabaseClient
-                .from('agendamentos')
-                .delete()
-                .eq('id', id)
-                .then(function(response) {
-                    esconderLoading();
-                    if (response.error) throw response.error;
-                    mostrarToast('Agendamento excluído!', 'sucesso');
-                    carregarAgendamentos();
-                })
-                .catch(function(error) {
-                    esconderLoading();
-                    console.error('Erro:', error);
-                    mostrarToast('Erro ao excluir.', 'erro');
-                });
+            mostrarToast('A exclusão direta está desabilitada para proteger a planilha. Configure autenticação administrativa antes de habilitar esta ação.', 'info');
         }
 
         function exportarCSV() {
